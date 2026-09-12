@@ -39,15 +39,15 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
-        // 1. CONFIGURE SEU FIREBASE AQUI (Cole os dados do console do Firebase)
+        // 1. Configuração do Firebase com os seus dados reais
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY_AQUI",
-            authDomain: "SEU_PROJETO.firebaseapp.com",
-            databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com",
-            projectId: "SEU_PROJETO",
-            storageBucket: "SEU_PROJETO.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abc123def456"
+            apiKey: "AIzaSyDm3HCp_dc6C1an3qdiYKrNHAjvjnhSe3U",
+            authDomain: "nosso-gps.firebaseapp.com",
+            databaseURL: "https://nosso-gps-default-rtdb.firebaseio.com",
+            projectId: "nosso-gps",
+            storageBucket: "nosso-gps.firebasestorage.app",
+            messagingSenderId: "311157140126",
+            appId: "1:311157140126:web:01a483db11a6d9b24fe98f"
         };
         
         firebase.initializeApp(firebaseConfig);
@@ -73,7 +73,7 @@
                 const lng = posicao.coords.longitude;
                 const meuNome = selectUsuario.value;
 
-                // Atualizar meu marcador no meu próprio mapa
+                // Atualizar meu marcador no mapa
                 if (!meuMarcador) {
                     meuMarcador = L.marker([lat, lng]).addTo(map).bindPopup("Você").openPopup();
                     map.setView([lat, lng], 15);
@@ -81,7 +81,7 @@
                     meuMarcador.setLatLng([lat, lng]);
                 }
 
-                // Salva no banco sob a chave "pessoa1" ou "pessoa2"
+                // Salvar no Firebase
                 db.ref('casal/' + meuNome).set({ lat: lat, lng: lng });
             }, (erro) => console.error(erro), { enableHighAccuracy: true });
         }
@@ -103,11 +103,10 @@
         }
 
         selectUsuario.addEventListener('change', () => {
-            db.ref('casal/' + obterParceiro()).off(); // Para de escutar o antigo
-            escutarParceiro(); // Começa a escutar o novo parceiro
+            db.ref('casal/' + obterParceiro()).off();
+            escutarParceiro();
         });
 
-        // Iniciar escuta do parceiro
         escutarParceiro();
     </script>
 </body>
