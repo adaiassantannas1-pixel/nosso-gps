@@ -3,43 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mapa do Casal em Tempo Real</title>
+    <title>GPS Casal - Live Tracking</title>
 
-    <!-- CSS do Leaflet (Mapa) -->
+    <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; height: 100vh; }
-        header { background-color: #ff4b5c; color: white; padding: 10px; text-align: center; }
-        #map { flex: 1; width: 100%; }
-        .controles { padding: 10px; background: #fff; text-align: center; border-bottom: 1px solid #ccc; }
-        select { padding: 5px; font-size: 16px; margin-left: 5px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #0f172a; }
+
+        /* Estilo do Mapa */
+        #map { flex: 1; width: 100%; z-index: 1; }
+
+        /* Painel Flutuante Superior (Header UI) */
+        .glass-header {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px);
+            padding: 10px 20px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex; align-items: center; gap: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            color: white; width: 90%; max-width: 450px; justify-content: space-between;
+        }
+
+        .user-select {
+            background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 12px; border-radius: 15px; font-weight: 600; font-size: 0.85rem; outline: none; cursor: pointer;
+        }
+        .user-select option { background: #0f172a; color: #fff; }
+
+        .status-badge {
+            display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600; color: #4ade80;
+        }
+        .pulse-dot {
+            width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 10px #4ade80;
+            animation: pulse-ring 1.5s infinite;
+        }
+
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
+        }
+
+        /* Marcadores Customizados no Mapa */
+        .custom-avatar-marker {
+            position: relative; width: 48px; height: 48px; border-radius: 50%;
+            border: 3px solid #ff4b5c; background-size: cover; background-position: center;
+            box-shadow: 0 4px 15px rgba(255, 75, 92, 0.5); transition: transform 0.3s ease;
+        }
+        .custom-avatar-marker.parceiro {
+            border-color: #3b82f6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
+        }
+        .marker-label {
+            position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.9); color: white; padding: 2px 8px; border-radius: 10px;
+            font-size: 0.65rem; font-weight: 700; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        /* Botões de Controle Inferiores */
+        .controls-bar {
+            position: absolute; bottom: 20px; right: 20px; z-index: 1000;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .btn-round {
+            width: 45px; height: 45px; border-radius: 50%; background: rgba(15, 23, 42, 0.85);
+            border: 1px solid rgba(255,255,255,0.15); color: white; backdrop-filter: blur(8px);
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+            cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .btn-round:hover { transform: scale(1.08); background: #ff4b5c; }
+
+        /* Card de Informações e Estatísticas */
+        .stats-card {
+            position: absolute; bottom: 20px; left: 20px; z-index: 1000;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); color: white;
+            padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.8rem; display: flex; gap: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        .stat-item { text-align: center; }
+        .stat-value { font-weight: 700; font-size: 1rem; color: #ff4b5c; }
     </style>
 </head>
 <body>
 
-    <header>
-        <h1>GPS do Casal 👩‍❤️‍👨</h1>
-    </header>
-
-    <div class="controles">
-        <label for="usuario">Quem é você?</label>
-        <select id="usuario">
-            <option value="pessoa1">Pessoa 1</option>
-            <option value="pessoa2">Pessoa 2</option>
-        </select>
+    <!-- Header Flutuante -->
+    <div class="glass-header">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-heart-pulse" style="color: #ff4b5c;"></i>
+            <span style="font-weight:700; font-size:0.9rem;">GPS Casal</span>
+        </div>
+        <div>
+            <select id="usuario" class="user-select">
+                <option value="pessoa1">Pessoa 1 💖</option>
+                <option value="pessoa2">Pessoa 2 💙</option>
+            </select>
+        </div>
+        <div class="status-badge">
+            <div class="pulse-dot"></div> Live
+        </div>
     </div>
 
+    <!-- Container do Mapa -->
     <div id="map"></div>
 
-    <!-- Scripts do Leaflet e Firebase -->
+    <!-- Botões de Ação Rápida -->
+    <div class="controls-bar">
+        <button class="btn-round" id="btn-recenter" title="Centralizar em mim"><i class="fa-solid fa-crosshairs"></i></button>
+        <button class="btn-round" id="btn-toggle-theme" title="Mudar Estilo do Mapa"><i class="fa-solid fa-layer-group"></i></button>
+    </div>
+
+    <!-- Dashboard/Estatísticas em tempo real -->
+    <div class="stats-card">
+        <div class="stat-item">
+            <div class="stat-value" id="distancia-casal">0.0 km</div>
+            <div style="color: #94a3b8;">Distância</div>
+        </div>
+        <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
+        <div class="stat-item">
+            <div class="stat-value" id="total-paradas" style="color:#3b82f6;">0</div>
+            <div style="color: #94a3b8;">Paradas</div>
+        </div>
+    </div>
+
+    <!-- Scripts Leaflet e Firebase -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
-        // 1. Configuração do Firebase com os seus dados reais
+        // 1. Configuração do Firebase com suas chaves reais
         const firebaseConfig = {
             apiKey: "AIzaSyDm3HCp_dc6C1an3qdiYKrNHAjvjnhSe3U",
             authDomain: "nosso-gps.firebaseapp.com",
@@ -49,61 +143,143 @@
             messagingSenderId: "311157140126",
             appId: "1:311157140126:web:01a483db11a6d9b24fe98f"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 2. Criar o Mapa
-        const map = L.map('map').setView([-14.2350, -51.9253], 4);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+        // 2. Estilos do Mapa (Tiles de Alta Performance e Design Clean)
+        const mapLayers = {
+            dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '©CARTO' }),
+            midnight: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '©CARTO' })
+        };
+
+        const map = L.map('map', { zoomControl: false, layers: [mapLayers.dark] }).setView([-14.2350, -51.9253], 4);
+        let layerAtual = 'dark';
+
+        // 3. Gerenciamento do Histórico de Rotas e Paradas
+        let historicoMeu = [];
+        let historicoParceiro = [];
+        let paradas = 0;
+
+        // Linhas personalizadas para desenhar a rota do casal (Polylines)
+        const rotaMinha = L.polyline([], { color: '#ff4b5c', weight: 4, opacity: 0.8, dashArray: '8, 8' }).addTo(map);
+        const rotaParceiro = L.polyline([], { color: '#3b82f6', weight: 4, opacity: 0.8 }).addTo(map);
 
         let meuMarcador = null;
         let marcadorParceiro = null;
+        let minhaUltimaPos = null;
+        let parceiroUltimaPos = null;
 
         const selectUsuario = document.getElementById('usuario');
-        
-        function obterParceiro() {
-            return selectUsuario.value === 'pessoa1' ? 'pessoa2' : 'pessoa1';
+
+        // Ícones em CSS Personalizado com Avatares
+        function criarIconeAvatar(urlImagem, rotulo, eParceiro = false) {
+            return L.divIcon({
+                className: 'custom-icon-wrapper',
+                html: `<div class="custom-avatar-marker ${eParceiro ? 'parceiro' : ''}" style="background-image: url('${urlImagem}');">
+                        <div class="marker-label">${rotulo}</div>
+                       </div>`,
+                iconSize: [48, 48],
+                iconAnchor: [24, 24]
+            });
         }
 
-        // 3. Enviar minha posição para o Firebase
-        if ("geolocation" in navigator) {
-            navigator.geolocation.watchPosition((posicao) => {
-                const lat = posicao.coords.latitude;
-                const lng = posicao.coords.longitude;
-                const meuNome = selectUsuario.value;
+        const avatarMeu = 'https://ui-avatars.com/api/?name=Voce&background=ff4b5c&color=fff&rounded=true';
+        const avatarParceiro = 'https://ui-avatars.com/api/?name=Amor&background=3b82f6&color=fff&rounded=true';
 
-                // Atualizar meu marcador no mapa
+        function obterParceiro() { return selectUsuario.value === 'pessoa1' ? 'pessoa2' : 'pessoa1'; }
+
+        // Cálculo da distância entre o casal (Fórmula de Haversine)
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return (R * c).toFixed(1);
+        }
+
+        // 4. Captura do GPS com Alta Precisão
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition((pos) => {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+                const meuNome = selectUsuario.value;
+                minhaUltimaPos = [lat, lng];
+
+                // Rastreamento de histórico de rota
+                historicoMeu.push([lat, lng]);
+                rotaMinha.setLatLngs(historicoMeu);
+
                 if (!meuMarcador) {
-                    meuMarcador = L.marker([lat, lng]).addTo(map).bindPopup("Você").openPopup();
-                    map.setView([lat, lng], 15);
+                    meuMarcador = L.marker([lat, lng], { icon: criarIconeAvatar(avatarMeu, 'Você') }).addTo(map);
+                    map.setView([lat, lng], 16);
                 } else {
                     meuMarcador.setLatLng([lat, lng]);
                 }
 
-                // Salvar no Firebase
-                db.ref('casal/' + meuNome).set({ lat: lat, lng: lng });
-            }, (erro) => console.error(erro), { enableHighAccuracy: true });
+                // Salva no banco de dados
+                db.ref('casal/' + meuNome).set({ lat: lat, lng: lng, timestamp: Date.now() });
+
+                atualizarStats();
+            }, (err) => console.error(err), { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
         }
 
-        // 4. Escutar a posição do Parceiro em tempo real
+        // 5. Escuta em tempo real da outra pessoa
         function escutarParceiro() {
             const parceiro = obterParceiro();
 
             db.ref('casal/' + parceiro).on('value', (snapshot) => {
                 const dados = snapshot.val();
                 if (dados && dados.lat && dados.lng) {
+                    parceiroUltimaPos = [dados.lat, dados.lng];
+
+                    // Atualiza rota do parceiro
+                    historicoParceiro.push([dados.lat, dados.lng]);
+                    rotaParceiro.setLatLngs(historicoParceiro);
+
                     if (!marcadorParceiro) {
-                        marcadorParceiro = L.marker([dados.lat, dados.lng]).addTo(map).bindPopup("Amor ❤️");
+                        marcadorParceiro = L.marker([dados.lat, dados.lng], { icon: criarIconeAvatar(avatarParceiro, 'Amor ❤️', true) }).addTo(map);
                     } else {
                         marcadorParceiro.setLatLng([dados.lat, dados.lng]);
                     }
+
+                    // Marcador de Parada Automático (Local de Parada)
+                    L.circleMarker([dados.lat, dados.lng], {
+                        radius: 6, color: '#3b82f6', fillColor: '#fff', fillOpacity: 0.9
+                    }).addTo(map).bindPopup("Parada do Amor ❤️");
+                    
+                    paradas++;
+                    document.getElementById('total-paradas').innerText = paradas;
+
+                    atualizarStats();
                 }
             });
         }
 
+        function atualizarStats() {
+            if (minhaUltimaPos && parceiroUltimaPos) {
+                const dist = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], parceiroUltimaPos[0], parceiroUltimaPos[1]);
+                document.getElementById('distancia-casal').innerText = `${dist} km`;
+            }
+        }
+
+        // Ações de Botões da Interface
+        document.getElementById('btn-recenter').addEventListener('click', () => {
+            if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 16, { animate: true, duration: 1.5 });
+        });
+
+        document.getElementById('btn-toggle-theme').addEventListener('click', () => {
+            map.removeLayer(mapLayers[layerAtual]);
+            layerAtual = layerAtual === 'dark' ? 'midnight' : 'dark';
+            mapLayers[layerAtual].addTo(map);
+        });
+
         selectUsuario.addEventListener('change', () => {
             db.ref('casal/' + obterParceiro()).off();
+            historicoParceiro = [];
+            rotaParceiro.setLatLngs([]);
             escutarParceiro();
         });
 
