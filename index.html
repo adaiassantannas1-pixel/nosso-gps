@@ -3,137 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Casal - Live Tracking</title>
+    <title>GPS Casal PRO - Rastreamento Inteligente</title>
 
-    <!-- Leaflet CSS -->
+    <!-- Leaflet & FontAwesome Icons -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!-- Google Fonts & FontAwesome Icons -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #0f172a; }
+        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #0f172a; color: white; }
 
-        /* Estilo do Mapa */
+        /* TELA DE LOGIN */
+        #login-screen {
+            position: fixed; inset: 0; z-index: 9999; background: #0f172a;
+            display: flex; align-items: center; justify-content: center; padding: 20px;
+        }
+        .login-card {
+            background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+        }
+        .login-card h2 { margin-bottom: 20px; color: #ff4b5c; font-size: 1.5rem; }
+        .input-group { margin-bottom: 15px; text-align: left; }
+        .input-group label { font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px; display: block; }
+        .input-group input, .input-group select {
+            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(15, 23, 42, 0.8); color: white; outline: none; font-size: 0.95rem;
+        }
+        .btn-primary {
+            width: 100%; padding: 12px; border-radius: 12px; border: none; background: #ff4b5c;
+            color: white; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px;
+        }
+        .btn-primary:hover { background: #e03e4e; }
+
+        /* MAPA */
         #map { flex: 1; width: 100%; z-index: 1; }
 
-        /* Painel Flutuante Superior (Header UI) */
+        /* PAINEL SUPERIOR FLUTUANTE */
         .glass-header {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(12px);
+            z-index: 1000; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px);
             padding: 10px 20px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex; align-items: center; gap: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            color: white; width: 90%; max-width: 450px; justify-content: space-between;
+            display: flex; align-items: center; justify-content: space-between; gap: 15px;
+            width: 90%; max-width: 500px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
 
-        .user-select {
-            background: rgba(255, 255, 255, 0.1); color: #fff; border: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 6px 12px; border-radius: 15px; font-weight: 600; font-size: 0.85rem; outline: none; cursor: pointer;
-        }
-        .user-select option { background: #0f172a; color: #fff; }
-
-        .status-badge {
-            display: flex; align-items: center; gap: 6px; font-size: 0.8rem; font-weight: 600; color: #4ade80;
-        }
-        .pulse-dot {
-            width: 8px; height: 8px; background: #4ade80; border-radius: 50%; box-shadow: 0 0 10px #4ade80;
-            animation: pulse-ring 1.5s infinite;
-        }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
-            70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(74, 222, 128, 0); }
-            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); }
-        }
-
-        /* Marcadores Customizados no Mapa */
+        /* MARCADOR CUSTOMIZADO */
         .custom-avatar-marker {
-            position: relative; width: 48px; height: 48px; border-radius: 50%;
-            border: 3px solid #ff4b5c; background-size: cover; background-position: center;
-            box-shadow: 0 4px 15px rgba(255, 75, 92, 0.5); transition: transform 0.3s ease;
+            position: relative; width: 50px; height: 50px; border-radius: 50%;
+            background: #1e293b; border: 3px solid #ff4b5c; display: flex;
+            align-items: center; justify-content: center; font-size: 1.4rem; color: white;
+            box-shadow: 0 4px 15px rgba(255, 75, 92, 0.6); transition: all 0.3s ease;
         }
-        .custom-avatar-marker.parceiro {
-            border-color: #3b82f6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.5);
-        }
-        .marker-label {
-            position: absolute; bottom: -22px; left: 50%; transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.9); color: white; padding: 2px 8px; border-radius: 10px;
-            font-size: 0.65rem; font-weight: 700; white-space: nowrap; border: 1px solid rgba(255,255,255,0.1);
+        .custom-avatar-marker.parceiro { border-color: #3b82f6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.6); }
+        .badge-mode {
+            position: absolute; top: -5px; right: -5px; background: #10b981; color: white;
+            width: 20px; height: 20px; border-radius: 50%; font-size: 0.65rem; display: flex;
+            align-items: center; justify-content: center; border: 2px solid #0f172a;
         }
 
-        /* Botões de Controle Inferiores */
+        /* CONTROLES FLUTUANTES */
         .controls-bar {
             position: absolute; bottom: 20px; right: 20px; z-index: 1000;
             display: flex; flex-direction: column; gap: 10px;
         }
         .btn-round {
-            width: 45px; height: 45px; border-radius: 50%; background: rgba(15, 23, 42, 0.85);
+            width: 48px; height: 48px; border-radius: 50%; background: rgba(15, 23, 42, 0.9);
             border: 1px solid rgba(255,255,255,0.15); color: white; backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
-            cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
+            cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
-        .btn-round:hover { transform: scale(1.08); background: #ff4b5c; }
+        .btn-round:hover { background: #ff4b5c; transform: scale(1.05); }
 
-        /* Card de Informações e Estatísticas */
+        /* DASHBOARD DE VELOCIDADE E STATUS */
         .stats-card {
             position: absolute; bottom: 20px; left: 20px; z-index: 1000;
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px); color: white;
-            padding: 15px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.8rem; display: flex; gap: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px);
+            padding: 12px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
+            display: flex; gap: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
         }
         .stat-item { text-align: center; }
-        .stat-value { font-weight: 700; font-size: 1rem; color: #ff4b5c; }
+        .stat-value { font-weight: 700; font-size: 1.1rem; color: #ff4b5c; }
+        .stat-label { font-size: 0.7rem; color: #94a3b8; }
+
+        /* ABA LATERAL (HISTÓRICO E CONFIGURAÇÕES) */
+        .sidebar {
+            position: fixed; top: 0; right: -350px; width: 320px; height: 100%;
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); z-index: 2000;
+            border-left: 1px solid rgba(255,255,255,0.1); padding: 25px 20px;
+            transition: right 0.3s ease; display: flex; flex-direction: column; gap: 20px;
+        }
+        .sidebar.open { right: 0; }
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-header h3 { font-size: 1.1rem; color: #ff4b5c; }
+        .stops-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .stop-card {
+            background: rgba(30, 41, 59, 0.8); padding: 12px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Header Flutuante -->
+    <!-- TELA DE LOGIN -->
+    <div id="login-screen">
+        <div class="login-card">
+            <h2>GPS Casal 👩‍❤️‍👨</h2>
+            <div class="input-group">
+                <label>Identifique-se:</label>
+                <select id="login-user">
+                    <option value="pessoa1">Pessoa 1 💖</option>
+                    <option value="pessoa2">Pessoa 2 💙</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Senha do Casal:</label>
+                <input type="password" id="login-pass" placeholder="Digite a senha...">
+            </div>
+            <button class="btn-primary" onclick="realizarLogin()">Entrar no Mapa</button>
+        </div>
+    </div>
+
+    <!-- HEADER SUPERIOR -->
     <div class="glass-header">
         <div style="display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-heart-pulse" style="color: #ff4b5c;"></i>
-            <span style="font-weight:700; font-size:0.9rem;">GPS Casal</span>
+            <span id="label-usuario" style="font-weight:700; font-size:0.9rem;">Conectando...</span>
         </div>
-        <div>
-            <select id="usuario" class="user-select">
-                <option value="pessoa1">Pessoa 1 💖</option>
-                <option value="pessoa2">Pessoa 2 💙</option>
-            </select>
-        </div>
-        <div class="status-badge">
-            <div class="pulse-dot"></div> Live
+        <div style="font-size: 0.8rem; color: #4ade80; display:flex; align-items:center; gap:5px;">
+            <i class="fa-solid fa-satellite"></i> GPS Ativo
         </div>
     </div>
 
-    <!-- Container do Mapa -->
+    <!-- MAPA -->
     <div id="map"></div>
 
-    <!-- Botões de Ação Rápida -->
+    <!-- BOTÕES FLUTUANTES -->
     <div class="controls-bar">
         <button class="btn-round" id="btn-recenter" title="Centralizar em mim"><i class="fa-solid fa-crosshairs"></i></button>
-        <button class="btn-round" id="btn-toggle-theme" title="Mudar Estilo do Mapa"><i class="fa-solid fa-layer-group"></i></button>
+        <button class="btn-round" id="btn-sidebar" title="Menu e Histórico"><i class="fa-solid fa-sliders"></i></button>
     </div>
 
-    <!-- Dashboard/Estatísticas em tempo real -->
+    <!-- DASHBOARD DE MEDIÇÃO EM TEMPO REAL -->
     <div class="stats-card">
         <div class="stat-item">
-            <div class="stat-value" id="distancia-casal">0.0 km</div>
-            <div style="color: #94a3b8;">Distância</div>
+            <div class="stat-value" id="stat-speed">0 km/h</div>
+            <div class="stat-label">Minha Vel.</div>
         </div>
         <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
         <div class="stat-item">
-            <div class="stat-value" id="total-paradas" style="color:#3b82f6;">0</div>
-            <div style="color: #94a3b8;">Paradas</div>
+            <div class="stat-value" id="stat-mode" style="color:#3b82f6;"><i class="fa-solid fa-child-walking"></i></div>
+            <div class="stat-label">Transporte</div>
+        </div>
+        <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
+        <div class="stat-item">
+            <div class="stat-value" id="stat-dist" style="color:#10b981;">0 km</div>
+            <div class="stat-label">Distância</div>
         </div>
     </div>
 
-    <!-- Scripts Leaflet e Firebase -->
+    <!-- ABA LATERAL (CONFIGURAÇÕES E HISTÓRICO DE PARADAS) -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Menu & Histórico</h3>
+            <i class="fa-solid fa-xmark" style="cursor:pointer;" id="btn-close-sidebar"></i>
+        </div>
+
+        <div class="input-group">
+            <label>Seu Avatar / Ícone:</label>
+            <select id="select-icon" onchange="atualizarIconeUsuario()">
+                <option value="fa-user">👤 Boneco Padrão</option>
+                <option value="fa-child-walking">🚶 Caminhando</option>
+                <option value="fa-car">🚗 Carro</option>
+                <option value="fa-motorcycle">🏍️ Moto</option>
+                <option value="fa-bicycle">🚲 Bicicleta</option>
+                <option value="fa-heart">❤️ Coração</option>
+            </select>
+        </div>
+
+        <h4 style="font-size:0.9rem; color:#94a3b8; margin-top:10px;"> Histórico de Paradas</h4>
+        <div class="stops-list" id="stops-container">
+            <!-- As paradas serão inseridas aqui dinamicamente -->
+        </div>
+    </div>
+
+    <!-- Leaflet & Firebase Scripts -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
-        // 1. Configuração do Firebase com suas chaves reais
+        // 1. Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDm3HCp_dc6C1an3qdiYKrNHAjvjnhSe3U",
             authDomain: "nosso-gps.firebaseapp.com",
@@ -146,144 +207,190 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // 2. Estilos do Mapa (Tiles de Alta Performance e Design Clean)
-        const mapLayers = {
-            dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '©CARTO' }),
-            midnight: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '©CARTO' })
-        };
+        let meuUsuario = 'pessoa1';
+        let parceiroUsuario = 'pessoa2';
+        let meuIcone = 'fa-user';
 
-        const map = L.map('map', { zoomControl: false, layers: [mapLayers.dark] }).setView([-14.2350, -51.9253], 4);
-        let layerAtual = 'dark';
+        // 2. Inicialização do Mapa
+        const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '©CARTO' }).addTo(map);
 
-        // 3. Gerenciamento do Histórico de Rotas e Paradas
-        let historicoMeu = [];
-        let historicoParceiro = [];
-        let paradas = 0;
+        let meuMarcador = null, marcadorParceiro = null;
+        let minhaUltimaPos = null, parceiroUltimaPos = null;
+        let historicoMeu = [], historicoParceiro = [];
 
-        // Linhas personalizadas para desenhar a rota do casal (Polylines)
-        const rotaMinha = L.polyline([], { color: '#ff4b5c', weight: 4, opacity: 0.8, dashArray: '8, 8' }).addTo(map);
+        const rotaMinha = L.polyline([], { color: '#ff4b5c', weight: 4, opacity: 0.8, dashArray: '6, 6' }).addTo(map);
         const rotaParceiro = L.polyline([], { color: '#3b82f6', weight: 4, opacity: 0.8 }).addTo(map);
 
-        let meuMarcador = null;
-        let marcadorParceiro = null;
-        let minhaUltimaPos = null;
-        let parceiroUltimaPos = null;
+        // 3. Sistema de Login
+        function realizarLogin() {
+            meuUsuario = document.getElementById('login-user').value;
+            parceiroUsuario = meuUsuario === 'pessoa1' ? 'pessoa2' : 'pessoa1';
+            
+            document.getElementById('label-usuario').innerText = meuUsuario === 'pessoa1' ? 'Pessoa 1 💖' : 'Pessoa 2 💙';
+            document.getElementById('login-screen').style.display = 'none';
 
-        const selectUsuario = document.getElementById('usuario');
+            iniciarRastreamento();
+            escutarParceiro();
+        }
 
-        // Ícones em CSS Personalizado com Avatares
-        function criarIconeAvatar(urlImagem, rotulo, eParceiro = false) {
+        // 4. Criação Dinâmica de Ícone (Avatar + Ícone de Veículo/Modo)
+        function criarIconeHTML(classeIcone, classeModo, eParceiro = false) {
             return L.divIcon({
                 className: 'custom-icon-wrapper',
-                html: `<div class="custom-avatar-marker ${eParceiro ? 'parceiro' : ''}" style="background-image: url('${urlImagem}');">
-                        <div class="marker-label">${rotulo}</div>
+                html: `<div class="custom-avatar-marker ${eParceiro ? 'parceiro' : ''}">
+                        <i class="fa-solid ${classeIcone}"></i>
+                        <div class="badge-mode"><i class="fa-solid ${classeModo}"></i></div>
                        </div>`,
-                iconSize: [48, 48],
-                iconAnchor: [24, 24]
+                iconSize: [50, 50],
+                iconAnchor: [25, 25]
             });
         }
 
-        const avatarMeu = 'https://ui-avatars.com/api/?name=Voce&background=ff4b5c&color=fff&rounded=true';
-        const avatarParceiro = 'https://ui-avatars.com/api/?name=Amor&background=3b82f6&color=fff&rounded=true';
+        // 5. Algoritmo para Identificar Tipo de Transporte por Velocidade (km/h)
+        function identificarTransporte(velocidadeKmh) {
+            if (velocidadeKmh < 2) return { modo: 'Parado', icone: 'fa-street-view' };
+            if (velocidadeKmh <= 12) return { modo: 'Caminhando', icone: 'fa-child-walking' };
+            if (velocidadeKmh <= 30) return { modo: 'Bicicleta / Moto', icone: 'fa-motorcycle' };
+            return { modo: 'Veículo / Carro', icone: 'fa-car' };
+        }
 
-        function obterParceiro() { return selectUsuario.value === 'pessoa1' ? 'pessoa2' : 'pessoa1'; }
-
-        // Cálculo da distância entre o casal (Fórmula de Haversine)
-        function calcularDistancia(lat1, lon1, lat2, lon2) {
-            const R = 6371;
+        // 6. Cálculo Distância Haversine (Filtro Antibug de Imprecisão do GPS)
+        function calcularDistanciaMetros(lat1, lon1, lat2, lon2) {
+            const R = 6371e3;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
                       Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
                       Math.sin(dLon/2) * Math.sin(dLon/2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-            return (R * c).toFixed(1);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // 4. Captura do GPS com Alta Precisão
-        if ("geolocation" in navigator) {
-            navigator.geolocation.watchPosition((pos) => {
-                const lat = pos.coords.latitude;
-                const lng = pos.coords.longitude;
-                const meuNome = selectUsuario.value;
-                minhaUltimaPos = [lat, lng];
+        // 7. Rastreamento e Correção de Bugs de GPS
+        let tempoParadoInicio = null;
 
-                // Rastreamento de histórico de rota
-                historicoMeu.push([lat, lng]);
-                rotaMinha.setLatLngs(historicoMeu);
+        function iniciarRastreamento() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.watchPosition((pos) => {
+                    const lat = pos.coords.latitude;
+                    const lng = pos.coords.longitude;
+                    const precisao = pos.coords.accuracy;
 
-                if (!meuMarcador) {
-                    meuMarcador = L.marker([lat, lng], { icon: criarIconeAvatar(avatarMeu, 'Você') }).addTo(map);
-                    map.setView([lat, lng], 16);
-                } else {
-                    meuMarcador.setLatLng([lat, lng]);
-                }
+                    // FILTRO ANTI-BUG: Ignora leituras imprecisas (acima de 25m de erro)
+                    if (precisao > 25) return;
 
-                // Salva no banco de dados
-                db.ref('casal/' + meuNome).set({ lat: lat, lng: lng, timestamp: Date.now() });
-
-                atualizarStats();
-            }, (err) => console.error(err), { enableHighAccuracy: true, maximumAge: 0, timeout: 5000 });
-        }
-
-        // 5. Escuta em tempo real da outra pessoa
-        function escutarParceiro() {
-            const parceiro = obterParceiro();
-
-            db.ref('casal/' + parceiro).on('value', (snapshot) => {
-                const dados = snapshot.val();
-                if (dados && dados.lat && dados.lng) {
-                    parceiroUltimaPos = [dados.lat, dados.lng];
-
-                    // Atualiza rota do parceiro
-                    historicoParceiro.push([dados.lat, dados.lng]);
-                    rotaParceiro.setLatLngs(historicoParceiro);
-
-                    if (!marcadorParceiro) {
-                        marcadorParceiro = L.marker([dados.lat, dados.lng], { icon: criarIconeAvatar(avatarParceiro, 'Amor ❤️', true) }).addTo(map);
-                    } else {
-                        marcadorParceiro.setLatLng([dados.lat, dados.lng]);
+                    // FILTRO ANTI-BUG: Se a variação for menor que 4 metros, ignora "saltos" de GPS
+                    if (minhaUltimaPos) {
+                        const distMovida = calcularDistanciaMetros(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng);
+                        if (distMovida < 4) return;
                     }
 
-                    // Marcador de Parada Automático (Local de Parada)
-                    L.circleMarker([dados.lat, dados.lng], {
-                        radius: 6, color: '#3b82f6', fillColor: '#fff', fillOpacity: 0.9
-                    }).addTo(map).bindPopup("Parada do Amor ❤️");
-                    
-                    paradas++;
-                    document.getElementById('total-paradas').innerText = paradas;
+                    // Cálculo da velocidade em km/h
+                    let speed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
+                    const transporte = identificarTransporte(speed);
 
-                    atualizarStats();
-                }
-            });
-        }
+                    minhaUltimaPos = [lat, lng];
+                    historicoMeu.push([lat, lng]);
+                    rotaMinha.setLatLngs(historicoMeu);
 
-        function atualizarStats() {
-            if (minhaUltimaPos && parceiroUltimaPos) {
-                const dist = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], parceiroUltimaPos[0], parceiroUltimaPos[1]);
-                document.getElementById('distancia-casal').innerText = `${dist} km`;
+                    // Atualizar UI dos elementos gráficos
+                    document.getElementById('stat-speed').innerText = `${speed.toFixed(0)} km/h`;
+                    document.getElementById('stat-mode').innerHTML = `<i class="fa-solid ${transporte.icone}"></i>`;
+
+                    if (!meuMarcador) {
+                        meuMarcador = L.marker([lat, lng], { icon: criarIconeHTML(meuIcone, transporte.icone) }).addTo(map);
+                        map.setView([lat, lng], 16);
+                    } else {
+                        meuMarcador.setLatLng([lat, lng]);
+                        meuMarcador.setIcon(criarIconeHTML(meuIcone, transporte.icone));
+                    }
+
+                    // Envia os dados filtrados para o Firebase
+                    db.ref('casal/' + meuUsuario).set({
+                        lat: lat, lng: lng, speed: speed,
+                        icone: meuIcone, modoIcone: transporte.icone,
+                        timestamp: Date.now()
+                    });
+
+                    atualizarDistanciaCasal();
+                }, (err) => console.error(err), { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 });
             }
         }
 
-        // Ações de Botões da Interface
-        document.getElementById('btn-recenter').addEventListener('click', () => {
-            if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 16, { animate: true, duration: 1.5 });
-        });
+        // 8. Escuta da Outra Pessoa em Tempo Real
+        function escutarParceiro() {
+            db.ref('casal/' + parceiroUsuario).on('value', (snapshot) => {
+                const dados = snapshot.val();
+                if (!dados || !dados.lat || !dados.lng) return;
 
-        document.getElementById('btn-toggle-theme').addEventListener('click', () => {
-            map.removeLayer(mapLayers[layerAtual]);
-            layerAtual = layerAtual === 'dark' ? 'midnight' : 'dark';
-            mapLayers[layerAtual].addTo(map);
-        });
+                // Checa se o parceiro está parado há mais de 3 minutos antes de registrar uma Parada Oficial
+                const agora = Date.now();
+                if (dados.speed < 2) {
+                    if (!tempoParadoInicio) tempoParadoInicio = agora;
+                    else if (agora - tempoParadoInicio > 180000) { // 3 minutos
+                        adicionarCardParada(dados.lat, dados.lng);
+                        tempoParadoInicio = null; // Reseta timer para a próxima parada
+                    }
+                } else {
+                    tempoParadoInicio = null;
+                }
 
-        selectUsuario.addEventListener('change', () => {
-            db.ref('casal/' + obterParceiro()).off();
-            historicoParceiro = [];
-            rotaParceiro.setLatLngs([]);
-            escutarParceiro();
-        });
+                parceiroUltimaPos = [dados.lat, dados.lng];
+                historicoParceiro.push([dados.lat, dados.lng]);
+                rotaParceiro.setLatLngs(historicoParceiro);
 
-        escutarParceiro();
+                const iconeP = dados.icone || 'fa-user';
+                const modoP = dados.modoIcone || 'fa-street-view';
+
+                if (!marcadorParceiro) {
+                    marcadorParceiro = L.marker([dados.lat, dados.lng], { icon: criarIconeHTML(iconeP, modoP, true) }).addTo(map);
+                } else {
+                    marcadorParceiro.setLatLng([dados.lat, dados.lng]);
+                    marcadorParceiro.setIcon(criarIconeHTML(iconeP, modoP, true));
+                }
+
+                atualizarDistanciaCasal();
+            });
+        }
+
+        // 9. Histórico de Paradas em Aba Separada
+        function adicionarCardParada(lat, lng) {
+            const container = document.getElementById('stops-container');
+            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            const card = document.createElement('div');
+            card.className = 'stop-card';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; color:#ff4b5c; font-weight:700;">
+                    <span><i class="fa-solid fa-location-dot"></i> Parada do Amor</span>
+                    <span>${hora}</span>
+                </div>
+                <div style="color:#94a3b8; margin-top:5px;">Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}</div>
+            `;
+            container.prepend(card);
+        }
+
+        function atualizarDistanciaCasal() {
+            if (minhaUltimaPos && parceiroUltimaPos) {
+                const distM = calcularDistanciaMetros(minhaUltimaPos[0], minhaUltimaPos[1], parceiroUltimaPos[0], parceiroUltimaPos[1]);
+                document.getElementById('stat-dist').innerText = distM > 1000 ? `${(distM/1000).toFixed(1)} km` : `${distM.toFixed(0)} m`;
+            }
+        }
+
+        function atualizarIconeUsuario() {
+            meuIcone = document.getElementById('select-icon').value;
+            if (meuMarcador && minhaUltimaPos) {
+                meuMarcador.setIcon(criarIconeHTML(meuIcone, 'fa-child-walking'));
+            }
+        }
+
+        // Controles de Interface da Sidebar
+        document.getElementById('btn-sidebar').onclick = () => document.getElementById('sidebar').classList.add('open');
+        document.getElementById('btn-close-sidebar').onclick = () => document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('btn-recenter').onclick = () => {
+            if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 16, { animate: true });
+        };
     </script>
 </body>
-</html>
+            </html>
+    
