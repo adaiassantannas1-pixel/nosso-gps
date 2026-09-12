@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa do Casal em Tempo Real</title>
+
+    <!-- CSS do Leaflet (Mapa) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; height: 100vh; }
+        header { background-color: #ff4b5c; color: white; padding: 10px; text-align: center; }
+        #map { flex: 1; width: 100%; }
+        .controles { padding: 10px; background: #fff; text-align: center; border-bottom: 1px solid #ccc; }
+        select { padding: 5px; font-size: 16px; margin-left: 5px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>GPS do Casal 👩‍❤️‍👨</h1>
+    </header>
+
+    <div class="controles">
+        <label for="usuario">Quem é você?</label>
+        <select id="usuario">
+            <option value="pessoa1">Pessoa 1</option>
+            <option value="pessoa2">Pessoa 2</option>
+        </select>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Scripts do Leaflet e Firebase -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
+    <script>
+        // 1. CONFIGURE SEU FIREBASE AQUI (Cole os dados do console do Firebase)
+        const firebaseConfig = {
+            apiKey: "SUA_API_KEY_AQUI",
+            authDomain: "SEU_PROJETO.firebaseapp.com",
+            databaseURL: "https://SEU_PROJETO-default-rtdb.firebaseio.com",
+            projectId: "SEU_PROJETO",
+            storageBucket: "SEU_PROJETO.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123def456"
+        };
+        
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // 2. Criar o Mapa
+        const map = L.map('map').setView([-14.2350, -51.9253], 4);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+
+        let meuMarcador = null;
+        let marcadorParceiro = null;
+
+        const selectUsuario = document.getElementById('usuario');
+        
+        function obterParceiro() {
+            return selectUsuario.value === 'pessoa1' ? 'pessoa2' : 'pessoa1';
+        }
+
+        // 3. Enviar minha posição para o Firebase
+        if ("geolocation" in navigator) {
+            navigator.geolocation.watchPosition((posicao) => {
+                const lat = posicao.coords.latitude;
+                const lng = posicao.coords.longitude;
+                const meuNome = selectUsuario.value;
+
+                // Atualizar meu marcador no meu próprio mapa
+                if (!meuMarcador) {
+                    meuMarcador = L.marker([lat, lng]).addTo(map).bindPopup("Você").openPopup();
+                    map.setView([lat, lng], 15);
+                } else {
+                    meuMarcador.setLatLng([lat, lng]);
+                }
+
+                // Salva no banco sob a chave "pessoa1" ou "pessoa2"
+                db.ref('casal/' + meuNome).set({ lat: lat, lng: lng });
+            }, (erro) => console.error(erro), { enableHighAccuracy: true });
+        }
+
+        // 4. Escutar a posição do Parceiro em tempo real
+        function escutarParceiro() {
+            const parceiro = obterParceiro();
+
+            db.ref('casal/' + parceiro).on('value', (snapshot) => {
+                const dados = snapshot.val();
+                if (dados && dados.lat && dados.lng) {
+                    if (!marcadorParceiro) {
+                        marcadorParceiro = L.marker([dados.lat, dados.lng]).addTo(map).bindPopup("Amor ❤️");
+                    } else {
+                        marcadorParceiro.setLatLng([dados.lat, dados.lng]);
+                    }
+                }
+            });
+        }
+
+        selectUsuario.addEventListener('change', () => {
+            db.ref('casal/' + obterParceiro()).off(); // Para de escutar o antigo
+            escutarParceiro(); // Começa a escutar o novo parceiro
+        });
+
+        // Iniciar escuta do parceiro
+        escutarParceiro();
+    </script>
+</body>
+</html>
