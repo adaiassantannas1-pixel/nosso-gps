@@ -3,82 +3,88 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GPS Casal PRO 3D</title>
+    <title>LifeCasal 360 - Rastreamento Profissional</title>
 
-    <!-- PWA / iOS Web App Capabilities -->
+    <!-- Configurações PWA e Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GPS Casal">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/854/854878.png">
     <meta name="theme-color" content="#0f172a">
 
-    <!-- CSS Leaflet, Google Fonts & FontAwesome -->
+    <!-- Stylesheets: Leaflet, FontAwesome e Google Fonts -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #0f172a; color: white; }
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --border-light: rgba(255, 255, 255, 0.12);
+        }
 
-        /* TELA DE LOGIN SEM EMAIL */
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: var(--bg-dark); color: white; }
+
+        /* TELA DE LOGIN PROFISSIONAL */
         #login-screen {
-            position: fixed; inset: 0; z-index: 9999; background: #0f172a;
+            position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
             display: flex; align-items: center; justify-content: center; padding: 20px;
         }
         .login-card {
-            background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 75, 92, 0.3);
-            padding: 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center;
-            box-shadow: 0 0 30px rgba(0,0,0,0.5); backdrop-filter: blur(15px);
+            background: rgba(30, 41, 59, 0.75); border: 1px solid var(--border-light);
+            padding: 35px 30px; border-radius: 28px; width: 100%; max-width: 400px; text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); backdrop-filter: blur(16px);
         }
-        .login-card h2 { font-family: 'Orbitron', sans-serif; margin-bottom: 20px; color: #ff4b5c; letter-spacing: 1px; }
-        .input-group { margin-bottom: 15px; text-align: left; }
-        .input-group label { font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px; display: block; }
+        .login-card .brand-icon {
+            width: 65px; height: 65px; background: linear-gradient(135deg, var(--primary), #818cf8);
+            border-radius: 20px; display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 15px; font-size: 1.8rem; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
+        }
+        .login-card h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 5px; letter-spacing: -0.5px; }
+        .login-card p { color: #94a3b8; font-size: 0.85rem; margin-bottom: 25px; }
+        
+        .input-group { margin-bottom: 16px; text-align: left; }
+        .input-group label { font-size: 0.75rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px; display: block; text-transform: uppercase; }
         .input-group input, .input-group select {
-            width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(15, 23, 42, 0.9); color: white; outline: none; font-size: 0.95rem;
+            width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--border-light);
+            background: rgba(15, 23, 42, 0.6); color: white; outline: none; font-size: 0.95rem; transition: all 0.2s;
         }
+        .input-group input:focus, .input-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
+
         .btn-primary {
-            width: 100%; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, #ff4b5c, #e03e4e);
+            width: 100%; padding: 14px; border-radius: 14px; border: none;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px;
-            box-shadow: 0 4px 15px rgba(255, 75, 92, 0.4);
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
         }
+        .btn-primary:active { transform: scale(0.98); }
 
-        /* CONTAINER DO MAPA COM INCLINAÇÃO 3D */
-        #map-wrapper { flex: 1; width: 100%; height: 100%; perspective: 1000px; overflow: hidden; position: relative; }
-        #map {
-            width: 100%; height: 100%;
-            transform: rotateX(30deg) scale(1.1); /* Estilo 3D Isométrico */
-            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        }
+        /* MAPA 2D LIMPO E ULTRA FLUIDO */
+        #map { width: 100%; height: 100%; flex: 1; z-index: 1; }
 
-        /* HUD SUPERIOR FLUTUANTE */
+        /* HUD SUPERIOR COMPACTA ESTILO LIFE360 */
         .glass-header {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(12px);
-            padding: 8px 18px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.15);
+            z-index: 1000; background: var(--card-bg); backdrop-filter: blur(12px);
+            padding: 8px 16px; border-radius: 40px; border: 1px solid var(--border-light);
             display: flex; align-items: center; justify-content: space-between; gap: 12px;
-            width: 92%; max-width: 500px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            width: 92%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
-
-        /* MARCADORES DE PERFIL NO MAPA */
-        .avatar-3d-marker {
-            position: relative; width: 52px; height: 52px; border-radius: 50%;
-            border: 3px solid #ff4b5c; background-size: cover; background-position: center;
-            box-shadow: 0 0 18px rgba(255, 75, 92, 0.8); transition: all 0.3s ease;
+        .header-profile { display: flex; align-items: center; gap: 10px; }
+        .header-avatar {
+            width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--primary);
+            background-size: cover; background-position: center;
         }
-        .avatar-3d-marker.parceiro { border-color: #3b82f6; box-shadow: 0 0 18px rgba(59, 130, 246, 0.8); }
-        .vehicle-badge {
-            position: absolute; bottom: -4px; right: -4px; background: #10b981; color: white;
-            width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; display: flex;
-            align-items: center; justify-content: center; border: 2px solid #0f172a;
-        }
-
-        /* BOTÃO SOS */
-        .btn-sos {
-            padding: 8px 16px; border-radius: 20px; background: #ef4444; color: white;
-            border: 2px solid #fca5a5; font-size: 0.9rem; font-weight: 800; font-family: 'Orbitron', sans-serif;
-            cursor: pointer; box-shadow: 0 0 15px rgba(239, 68, 68, 0.8); animation: pulse-sos 1s infinite;
+        
+        .btn-sos-header {
+            padding: 8px 16px; border-radius: 30px; background: var(--danger); color: white;
+            border: 2px solid #fca5a5; font-size: 0.8rem; font-weight: 800; cursor: pointer;
+            box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); animation: pulse-sos 1.5s infinite;
         }
         @keyframes pulse-sos {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
@@ -86,153 +92,185 @@
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        /* BANNER DE PARAR SOS */
+        /* BANNER SOS ATIVO COM BOTÃO DE DESATIVAR */
         #sos-banner {
             position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
-            z-index: 1001; background: #ef4444; color: white; padding: 10px 20px; border-radius: 25px;
-            display: none; align-items: center; gap: 15px; font-weight: 700; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.6);
-            border: 2px solid #fff; animation: bounce 0.5s infinite alternate;
+            z-index: 1001; background: var(--danger); color: white; padding: 10px 20px; border-radius: 30px;
+            display: none; align-items: center; gap: 15px; font-weight: 800; font-size: 0.85rem;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.6); border: 2px solid #fff;
         }
-        @keyframes bounce { 0% { transform: translateX(-50%) translateY(0); } 100% { transform: translateX(-50%) translateY(-5px); } }
-
         body.sos-active { animation: siren-flash 0.5s infinite alternate !important; }
         @keyframes siren-flash { 0% { background: #7f1d1d; } 100% { background: #1e3a8a; } }
 
-        /* CONTROLES FLUTUANTES */
-        .controls-bar { position: absolute; bottom: 25px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
-        .btn-round {
-            width: 48px; height: 48px; border-radius: 50%; background: rgba(15, 23, 42, 0.9);
-            border: 1px solid rgba(255,255,255,0.2); color: white; backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer;
+        /* MARCADOR NO MAPA COM STATUS DE BATERIA E TRANSPORTE */
+        .life-marker {
+            position: relative; width: 56px; height: 56px; border-radius: 50%;
+            border: 3px solid var(--primary); background-size: cover; background-position: center;
             box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: transform 0.2s;
         }
-        .btn-round:active { transform: scale(0.9); }
-
-        /* HUD STATS */
-        .stats-card {
-            position: absolute; bottom: 25px; left: 20px; z-index: 1000;
-            background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(12px);
-            padding: 12px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15);
-            display: flex; gap: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        .life-marker.parceiro { border-color: #3b82f6; }
+        .marker-badge {
+            position: absolute; bottom: -2px; right: -2px; background: #10b981; color: white;
+            width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; display: flex;
+            align-items: center; justify-content: center; border: 2px solid #0f172a;
         }
-        .stat-value { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.05rem; color: #ff4b5c; }
+        .battery-badge {
+            position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.9); color: #fff; padding: 1px 6px; border-radius: 8px;
+            font-size: 0.6rem; font-weight: 700; border: 1px solid var(--border-light); display: flex; align-items: center; gap: 3px;
+        }
 
-        /* ABA LATERAL (SIDEBAR) CORRIGIDA */
+        /* CONTROLES FLUTUANTES */
+        .controls-bar { position: absolute; bottom: 105px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+        .btn-round {
+            width: 46px; height: 46px; border-radius: 50%; background: var(--card-bg);
+            border: 1px solid var(--border-light); color: white; backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
+        }
+        .btn-round:active { transform: scale(0.92); }
+
+        /* PAINEL DE MONITORAMENTO INFERIOR (LIFE360 HUD) */
+        .hud-bottom {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; background: var(--card-bg); backdrop-filter: blur(16px);
+            padding: 12px 20px; border-radius: 24px; border: 1px solid var(--border-light);
+            display: flex; justify-content: space-around; align-items: center;
+            width: 92%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .hud-item { text-align: center; }
+        .hud-label { font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+        .hud-value { font-size: 1.1rem; font-weight: 800; color: #fff; }
+
+        /* ABA LATERAL (SIDEBAR) COMPLETA */
         .sidebar {
-            position: fixed; top: 0; right: -360px; width: 330px; height: 100%;
-            background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); z-index: 3000;
-            border-left: 1px solid rgba(255,255,255,0.15); padding: 25px 20px;
-            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 18px;
-            box-shadow: -10px 0 40px rgba(0,0,0,0.8);
+            position: fixed; top: 0; right: -380px; width: 340px; height: 100%;
+            background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); z-index: 3000;
+            border-left: 1px solid var(--border-light); padding: 25px 20px;
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 20px;
+            box-shadow: -10px 0 40px rgba(0,0,0,0.6);
         }
         .sidebar.open { right: 0 !important; }
-        
-        .profile-upload-box {
-            display: flex; flex-direction: column; align-items: center; gap: 12px;
-            padding: 15px; background: rgba(30, 41, 59, 0.6); border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.08);
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; }
+
+        .profile-upload-card {
+            background: rgba(30, 41, 59, 0.6); padding: 15px; border-radius: 20px;
+            border: 1px solid var(--border-light); display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
         .profile-img-preview {
-            width: 80px; height: 80px; border-radius: 50%; border: 3px solid #ff4b5c;
-            background-size: cover; background-position: center; box-shadow: 0 0 15px rgba(255, 75, 92, 0.5);
+            width: 75px; height: 75px; border-radius: 50%; border: 3px solid var(--primary);
+            background-size: cover; background-position: center; box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        .section-title { font-size: 0.8rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .history-card {
+            background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05);
+            padding: 12px; border-radius: 14px; font-size: 0.85rem; display: flex; align-items: center; gap: 12px;
+        }
+        .history-icon {
+            width: 38px; height: 38px; border-radius: 12px; background: rgba(99, 102, 241, 0.15);
+            color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1rem;
         }
     </style>
 </head>
 <body>
 
-    <!-- TELA DE LOGIN SEM EMAIL -->
+    <!-- TELA DE LOGIN DESIGN PROFISSIONAL -->
     <div id="login-screen">
         <div class="login-card">
-            <h2>GPS CASAL 3D</h2>
+            <div class="brand-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
+            <h2>LifeCasal 360</h2>
+            <p>Rastreamento inteligente em tempo real</p>
+            
             <div class="input-group">
-                <label>Nome de Usuário:</label>
-                <input type="text" id="login-user" placeholder="Digite seu nome">
+                <label>Seu Nome de Usuário</label>
+                <input type="text" id="login-user" placeholder="Ex: Lucas">
             </div>
             <div class="input-group">
-                <label>Senha:</label>
+                <label>Sua Senha</label>
                 <input type="password" id="login-pass" placeholder="******">
             </div>
             <div class="input-group">
-                <label>Perfil no Mapa:</label>
+                <label>Perfil no App</label>
                 <select id="login-perfil">
                     <option value="pessoa1">Pessoa 1 💖</option>
                     <option value="pessoa2">Pessoa 2 💙</option>
                 </select>
             </div>
-            <button class="btn-primary" onclick="autenticarUsuario()">Entrar no Sistema</button>
-            <div id="login-error" style="color:#ff4b5c; font-size:0.8rem; margin-top:10px;"></div>
+            <button class="btn-primary" onclick="autenticarUsuario()">Entrar no Círculo</button>
+            <div id="login-error" style="color:var(--danger); font-size:0.8rem; margin-top:12px; font-weight:600;"></div>
         </div>
     </div>
 
     <!-- HUD SUPERIOR -->
     <div class="glass-header">
-        <div style="display:flex; align-items:center; gap:8px;">
-            <i class="fa-solid fa-satellite-dish" style="color: #ff4b5c;"></i>
-            <span id="label-usuario" style="font-weight:700; font-size:0.85rem;">Conectando...</span>
+        <div class="header-profile">
+            <div class="header-avatar" id="header-avatar-img"></div>
+            <div>
+                <div id="label-usuario" style="font-weight:800; font-size:0.85rem;">Carregando...</div>
+                <div id="status-rede" style="font-size:0.65rem; color:var(--success); display:flex; align-items:center; gap:4px;">
+                    <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> Conectado
+                </div>
+            </div>
         </div>
-        <button class="btn-sos" onclick="dispararSOS()">SOS 🚨</button>
-        <button onclick="fazerLogout()" style="background:none; border:none; color:#ff4b5c; cursor:pointer; font-weight:700;"><i class="fa-solid fa-right-from-bracket"></i></button>
+        <button class="btn-sos-header" onclick="dispararSOS()">SOS 🚨</button>
     </div>
 
-    <!-- BANNER DE SOS ATIVO (COM BOTÃO DE PARAR PARA TODOS) -->
+    <!-- BANNER SOS ATIVO -->
     <div id="sos-banner">
-        <span>🚨 ALERTA SOS ATIVO!</span>
-        <button onclick="pararSOS()" style="background:#fff; color:#ef4444; border:none; padding:6px 12px; border-radius:12px; font-weight:800; cursor:pointer;">PARAR SOS</button>
+        <span>🚨 EMERGÊNCIA ATIVADA!</span>
+        <button onclick="pararSOS()" style="background:#fff; color:var(--danger); border:none; padding:6px 14px; border-radius:20px; font-weight:800; cursor:pointer;">PARAR</button>
     </div>
 
-    <!-- MAPA VISUALMENTE REFORMULADO -->
-    <div id="map-wrapper">
-        <div id="map"></div>
-    </div>
+    <!-- MAPA 2D LIMPO -->
+    <div id="map"></div>
 
-    <!-- CONTROLES FLUTUANTES -->
+    <!-- CONTROLES FLUTUANTES DA TELA -->
     <div class="controls-bar">
-        <button class="btn-round" id="btn-recenter" title="Centralizar"><i class="fa-solid fa-crosshairs"></i></button>
-        <button class="btn-round" id="btn-tilt" title="Alternar 3D/2D"><i class="fa-solid fa-cube"></i></button>
-        <button class="btn-round" id="btn-sidebar" title="Abrir Menu"><i class="fa-solid fa-bars"></i></button>
+        <button class="btn-round" id="btn-recenter" title="Minha Localização"><i class="fa-solid fa-crosshairs"></i></button>
+        <button class="btn-round" id="btn-fit-all" title="Ver Casal"><i class="fa-solid fa-users"></i></button>
+        <button class="btn-round" id="btn-sidebar" title="Configurações"><i class="fa-solid fa-gear"></i></button>
     </div>
 
-    <!-- HUD STATS -->
-    <div class="stats-card">
-        <div>
-            <div class="stat-value" id="stat-speed">0 KM/H</div>
-            <div style="font-size:0.65rem; color:#94a3b8;">VELOCIDADE</div>
+    <!-- MONITORAMENTO EM TEMPO REAL (HUD HUD-BOTTOM) -->
+    <div class="hud-bottom">
+        <div class="hud-item">
+            <div class="hud-value" id="stat-speed">0 <span style="font-size:0.7rem;">km/h</span></div>
+            <div class="hud-label">Velocidade</div>
         </div>
-        <div style="width:1px; background:rgba(255,255,255,0.1);"></div>
-        <div>
-            <div class="stat-value" id="stat-mode" style="color:#3b82f6;"><i class="fa-solid fa-child-walking"></i></div>
-            <div style="font-size:0.65rem; color:#94a3b8;">TRANSPORTE</div>
+        <div style="width:1px; height:25px; background:var(--border-light);"></div>
+        <div class="hud-item">
+            <div class="hud-value" id="stat-mode" style="color:#6366f1;"><i class="fa-solid fa-person-walking"></i></div>
+            <div class="hud-label" id="stat-mode-text">Parado</div>
         </div>
-        <div style="width:1px; background:rgba(255,255,255,0.1);"></div>
-        <div>
-            <div class="stat-value" id="stat-dist" style="color:#10b981;">0 M</div>
-            <div style="font-size:0.65rem; color:#94a3b8;">DISTÂNCIA</div>
+        <div style="width:1px; height:25px; background:var(--border-light);"></div>
+        <div class="hud-item">
+            <div class="hud-value" id="stat-dist" style="color:var(--success);">0 m</div>
+            <div class="hud-label">Distância</div>
         </div>
     </div>
 
-    <!-- ABA LATERAL (SIDEBAR) CORRIGIDA -->
+    <!-- MENU LATERAL COMPLETO COM CONFIGURAÇÕES -->
     <div class="sidebar" id="sidebar">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="color:#ff4b5c; font-family:'Orbitron'; font-size:1.1rem;">CONFIGURAÇÕES</h3>
-            <i class="fa-solid fa-xmark" style="cursor:pointer; font-size:1.4rem; color:#94a3b8;" id="btn-close-sidebar"></i>
+        <div class="sidebar-header">
+            <h3 style="font-weight:800; font-size:1.1rem;">Configurações</h3>
+            <i class="fa-solid fa-xmark" style="cursor:pointer; font-size:1.3rem; color:#94a3b8;" id="btn-close-sidebar"></i>
         </div>
 
-        <!-- UPLOAD DE FOTO FUNCIONAL -->
-        <div class="profile-upload-box">
-            <div class="profile-img-preview" id="profile-preview" style="background-image: url('https://ui-avatars.com/api/?name=User&background=ff4b5c&color=fff');"></div>
-            <label style="font-size:0.8rem; color:#94a3b8;">Sua Foto de Perfil:</label>
-            <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="processarFotoArquivo(event)">
-            <button class="btn-primary" style="padding:8px; font-size:0.85rem;" onclick="document.getElementById('file-input').click()">📷 Escolher da Galeria</button>
-            <input type="text" id="url-foto" placeholder="Ou cole a URL da imagem" style="width:100%; padding:8px; border-radius:10px; background:#0f172a; color:#fff; border:1px solid rgba(255,255,255,0.1); font-size:0.8rem;" onchange="salvarFotoURL(this.value)">
+        <div class="profile-upload-card">
+            <div class="profile-img-preview" id="profile-preview"></div>
+            <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="processarFoto(event)">
+            <button class="btn-primary" style="padding:10px; font-size:0.8rem;" onclick="document.getElementById('file-input').click()">📷 Alterar Foto de Perfil</button>
         </div>
 
-        <h4 style="font-size:0.85rem; color:#94a3b8; margin-top:5px;"> HISTÓRICO DE PARADAS</h4>
-        <div id="stops-container" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+        <div class="section-title">Histórico de Lugares / Paradas</div>
+        <div class="history-list" id="stops-container"></div>
 
-        <button class="btn-primary" style="background:#ef4444;" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
+        <button class="btn-primary" style="background:var(--danger); margin-top:auto;" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
     </div>
 
-    <!-- Leaflet & Firebase SDKs -->
+    <!-- Scripts CDN Leaflet & Firebase -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -254,16 +292,25 @@
         let meuPerfil = 'pessoa1', parceiroPerfil = 'pessoa2', meuUsuario = '';
         let meuMarcador = null, marcadorParceiro = null;
         let minhaUltimaPos = null, parceiroUltimaPos = null;
-        let fotoPerfilUrl = '';
-        let is3DTilted = true;
+        let fotoPerfilUrl = '', bateriaNivel = 100;
 
-        // 2. NOVO MAPA MODERNO (CartoDB Voyager)
+        // 2. MAPA 2D LIMPO, MODERNO E HD (CartoDB Voyager)
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { 
-            attribution: '©CartoDB', maxZoom: 19 
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+            attribution: '© CartoDB', maxZoom: 19
         }).addTo(map);
 
-        // 3. Login sem E-mail (Apenas Usuário/Senha)
+        // 3. Monitoramento de Bateria Real do Dispositivo
+        if ('getBattery' in navigator) {
+            navigator.getBattery().then(battery => {
+                bateriaNivel = Math.round(battery.level * 100);
+                battery.addEventListener('levelchange', () => {
+                    bateriaNivel = Math.round(battery.level * 100);
+                });
+            });
+        }
+
+        // 4. Autenticação Direta por Usuário/Senha
         function autenticarUsuario() {
             const user = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
@@ -271,172 +318,135 @@
             parceiroPerfil = meuPerfil === 'pessoa1' ? 'pessoa2' : 'pessoa1';
 
             if (!user || !pass) {
-                document.getElementById('login-error').innerText = "Preencha usuário e senha!";
+                document.getElementById('login-error').innerText = "Informe o usuário e a senha!";
                 return;
             }
 
-            db.ref('usuarios/' + user).once('value', (snapshot) => {
-                const dados = snapshot.val();
-                if (dados) {
-                    if (dados.senha !== pass) {
-                        document.getElementById('login-error').innerText = "Senha incorreta!";
-                        return;
-                    }
-                } else {
-                    db.ref('usuarios/' + user).set({ senha: pass, perfil: meuPerfil });
+            db.ref('usuarios/' + user).once('value', (snap) => {
+                const dados = snap.val();
+                if (dados && dados.senha !== pass) {
+                    document.getElementById('login-error').innerText = "Senha incorreta!";
+                    return;
                 }
+                if (!dados) db.ref('usuarios/' + user).set({ senha: pass, perfil: meuPerfil });
 
                 meuUsuario = user;
-                localStorage.setItem('gps_user', user);
-                localStorage.setItem('gps_perfil', meuPerfil);
+                localStorage.setItem('life_user', user);
+                localStorage.setItem('life_perfil', meuPerfil);
 
-                document.getElementById('label-usuario').innerText = `${user.toUpperCase()} (${meuPerfil === 'pessoa1' ? '💖' : '💙'})`;
+                document.getElementById('label-usuario').innerText = `${user} (${meuPerfil === 'pessoa1' ? '💖' : '💙'})`;
                 document.getElementById('login-screen').style.display = 'none';
 
-                iniciarRastreamento();
+                iniciarRastreamentoGPS();
                 escutarParceiro();
-                escutarAlertasSOS();
-                carregarFotoSalva();
+                escutarSOS();
+                carregarFoto();
+                carregarParadas();
             });
         }
 
-        function fazerLogout() {
-            localStorage.clear();
-            location.reload();
+        function fazerLogout() { localStorage.clear(); location.reload(); }
+        if (localStorage.getItem('life_user')) {
+            document.getElementById('login-user').value = localStorage.getItem('life_user');
+            document.getElementById('login-perfil').value = localStorage.getItem('life_perfil') || 'pessoa1';
         }
 
-        if (localStorage.getItem('gps_user')) {
-            document.getElementById('login-user').value = localStorage.getItem('gps_user');
-            document.getElementById('login-perfil').value = localStorage.getItem('gps_perfil') || 'pessoa1';
+        // 5. Automação de Reconhecimento por Velocidade / Modo de Transporte
+        function detectarTransporte(v) {
+            if (v < 2) return { modo: 'Parado', icone: 'fa-person-walking' };
+            if (v <= 15) return { modo: 'Caminhando', icone: 'fa-person-walking' };
+            if (v <= 35) return { modo: 'Moto/Bike', icone: 'fa-motorcycle' };
+            return { modo: 'Dirigindo', icone: 'fa-car' };
         }
 
-        // 4. Upload e Salvamento Correto de Foto de Perfil
-        function salvarFotoURL(url) {
-            if (!url) return;
-            fotoPerfilUrl = url;
-            document.getElementById('profile-preview').style.backgroundImage = `url('${url}')`;
-            db.ref('perfis/' + meuPerfil).set({ foto: url });
-        }
-
-        function processarFotoArquivo(e) {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(evt) {
-                    // Converter para imagem comprimida em Canvas para otimizar envio
-                    const img = new Image();
-                    img.src = evt.target.result;
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = 150; canvas.height = 150;
-                        ctx.drawImage(img, 0, 0, 150, 150);
-                        const base64Comprimido = canvas.toDataURL('image/jpeg', 0.8);
-                        salvarFotoURL(base64Comprimido);
-                    }
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function carregarFotoSalva() {
-            db.ref('perfis/' + meuPerfil).on('value', (snap) => {
-                if (snap.val() && snap.val().foto) {
-                    fotoPerfilUrl = snap.val().foto;
-                    document.getElementById('profile-preview').style.backgroundImage = `url('${fotoPerfilUrl}')`;
-                }
-            });
-        }
-
-        // 5. Marcadores 3D no Mapa
-        function criarIcone3D(urlFoto, modoIcone, eParceiro = false) {
-            const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3b82f6':'ff4b5c'}&color=fff`;
+        // 6. Marcador do Mapa Estilo Life360 (Foto + Bateria + Transporte)
+        function criarMarcadorLife(urlFoto, modoIcone, bat, eParceiro = false) {
+            const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3b82f6':'6366f1'}&color=fff`;
             return L.divIcon({
                 className: 'custom-icon-wrapper',
-                html: `<div class="avatar-3d-marker ${eParceiro ? 'parceiro' : ''}" style="background-image: url('${img}');">
-                        <div class="vehicle-badge"><i class="fa-solid ${modoIcone}"></i></div>
+                html: `<div class="life-marker ${eParceiro ? 'parceiro' : ''}" style="background-image: url('${img}');">
+                        <div class="battery-badge"><i class="fa-solid fa-battery-three-quarters"></i> ${bat}%</div>
+                        <div class="marker-badge"><i class="fa-solid ${modoIcone}"></i></div>
                        </div>`,
-                iconSize: [52, 52], iconAnchor: [26, 26]
+                iconSize: [56, 56], iconAnchor: [28, 28]
             });
         }
 
-        function identificarTransporte(v) {
-            if (v < 2) return { modo: 'Parado', icone: 'fa-street-view' };
-            if (v <= 12) return { modo: 'Caminhando', icone: 'fa-child-walking' };
-            if (v <= 35) return { modo: 'Moto/Bicicleta', icone: 'fa-motorcycle' };
-            return { modo: 'Veículo/Carro', icone: 'fa-car' };
-        }
-
-        function calcularDistanciaMetros(lat1, lon1, lat2, lon2) {
+        function calcularDistancia(lat1, lon1, lat2, lon2) {
             const R = 6371e3;
             const dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // 6. Rastreamento e GPS
-        function iniciarRastreamento() {
+        // 7. Rastreamento Continuo de GPS
+        let tempoParado = null;
+
+        function iniciarRastreamentoGPS() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.watchPosition((pos) => {
-                    const lat = pos.coords.latitude, lng = pos.coords.longitude, precisao = pos.coords.accuracy;
-                    if (precisao > 30) return;
+                    const lat = pos.coords.latitude, lng = pos.coords.longitude, prec = pos.coords.accuracy;
+                    if (prec > 35) return; // Filtro de precisão
 
-                    let speed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
-                    const transp = identificarTransporte(speed);
+                    let v = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
+                    const infoTransp = detectarTransporte(v);
                     minhaUltimaPos = [lat, lng];
 
-                    document.getElementById('stat-speed').innerText = `${speed.toFixed(0)} KM/H`;
-                    document.getElementById('stat-mode').innerHTML = `<i class="fa-solid ${transp.icone}"></i>`;
+                    document.getElementById('stat-speed').innerHTML = `${v.toFixed(0)} <span style="font-size:0.7rem;">km/h</span>`;
+                    document.getElementById('stat-mode').innerHTML = `<i class="fa-solid ${infoTransp.icone}"></i>`;
+                    document.getElementById('stat-mode-text').innerText = infoTransp.modo;
 
                     if (!meuMarcador) {
-                        meuMarcador = L.marker([lat, lng], { icon: criarIcone3D(fotoPerfilUrl, transp.icone) }).addTo(map);
-                        map.setView([lat, lng], 17);
+                        meuMarcador = L.marker([lat, lng], { icon: criarMarcadorLife(fotoPerfilUrl, infoTransp.icone, bateriaNivel) }).addTo(map);
+                        map.setView([lat, lng], 16);
                     } else {
                         meuMarcador.setLatLng([lat, lng]);
-                        meuMarcador.setIcon(criarIcone3D(fotoPerfilUrl, transp.icone));
+                        meuMarcador.setIcon(criarMarcadorLife(fotoPerfilUrl, infoTransp.icone, bateriaNivel));
                     }
 
+                    // Grava Parada no Histórico se ficar parado mais de 3 minutos
+                    if (v < 2) {
+                        if (!tempoParado) tempoParado = Date.now();
+                        else if (Date.now() - tempoParado > 180000) {
+                            db.ref('paradas').push({ usuario: meuUsuario, lat: lat, lng: lng, hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+                            tempoParado = null;
+                        }
+                    } else { tempoParado = null; }
+
                     db.ref('casal/' + meuPerfil).set({
-                        lat: lat, lng: lng, speed: speed,
-                        modoIcone: transp.icone, foto: fotoPerfilUrl, timestamp: Date.now()
+                        lat: lat, lng: lng, speed: v, modoIcone: infoTransp.icone,
+                        foto: fotoPerfilUrl, bateria: bateriaNivel, timestamp: Date.now()
                     });
 
-                    atualizarDistanciaCasal();
+                    atualizarDistancia();
                 }, (err) => console.error(err), { enableHighAccuracy: true, maximumAge: 1000 });
             }
         }
 
         function escutarParceiro() {
-            db.ref('casal/' + parceiroPerfil).on('value', (snapshot) => {
-                const dados = snapshot.val();
+            db.ref('casal/' + parceiroPerfil).on('value', (snap) => {
+                const dados = snap.val();
                 if (!dados || !dados.lat) return;
 
                 parceiroUltimaPos = [dados.lat, dados.lng];
                 if (!marcadorParceiro) {
-                    marcadorParceiro = L.marker([dados.lat, dados.lng], { icon: criarIcone3D(dados.foto, dados.modoIcone || 'fa-street-view', true) }).addTo(map);
+                    marcadorParceiro = L.marker([dados.lat, dados.lng], { icon: criarMarcadorLife(dados.foto, dados.modoIcone || 'fa-person-walking', dados.bateria || 100, true) }).addTo(map);
                 } else {
                     marcadorParceiro.setLatLng([dados.lat, dados.lng]);
-                    marcadorParceiro.setIcon(criarIcone3D(dados.foto, dados.modoIcone || 'fa-street-view', true));
+                    marcadorParceiro.setIcon(criarMarcadorLife(dados.foto, dados.modoIcone || 'fa-person-walking', dados.bateria || 100, true));
                 }
-                atualizarDistanciaCasal();
+                atualizarDistancia();
             });
         }
 
-        // 7. Sistema de Alerta SOS e Controle de Parar para Todos
+        // 8. Sirene e Alerta SOS Sincronizado
         let audioCtx = null, sirenOsc = null, sirenInterval = null;
-
-        function tocarSirenePerigo() {
+        function tocarSirene() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            
             sirenOsc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
-
-            sirenOsc.type = 'sawtooth';
-            sirenOsc.connect(gain);
-            gain.connect(audioCtx.destination);
-            sirenOsc.start();
-
+            sirenOsc.type = 'sawtooth'; sirenOsc.connect(gain); gain.connect(audioCtx.destination); sirenOsc.start();
             sirenInterval = setInterval(() => {
                 if (sirenOsc && audioCtx) {
                     sirenOsc.frequency.setValueAtTime(600, audioCtx.currentTime);
@@ -444,7 +454,6 @@
                 }
             }, 500);
         }
-
         function desligarSirene() {
             if (sirenOsc) { sirenOsc.stop(); sirenOsc.disconnect(); sirenOsc = null; }
             if (sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
@@ -452,45 +461,87 @@
             document.getElementById('sos-banner').style.display = 'none';
         }
 
-        function dispararSOS() {
-            db.ref('alertas_sos').set({ status: 'ATIVO', emissor: meuPerfil, timestamp: Date.now() });
-        }
-
-        function pararSOS() {
-            db.ref('alertas_sos').set({ status: 'INATIVO', timestamp: Date.now() });
-        }
-
-        function escutarAlertasSOS() {
+        function dispararSOS() { db.ref('alertas_sos').set({ status: 'ATIVO', timestamp: Date.now() }); }
+        function pararSOS() { db.ref('alertas_sos').set({ status: 'INATIVO', timestamp: Date.now() }); }
+        function escutarSOS() {
             db.ref('alertas_sos').on('value', (snap) => {
                 const dados = snap.val();
                 if (dados && dados.status === 'ATIVO') {
-                    tocarSirenePerigo();
+                    tocarSirene();
                     document.body.classList.add('sos-active');
                     document.getElementById('sos-banner').style.display = 'flex';
-                } else {
-                    desligarSirene();
-                }
+                } else { desligarSirene(); }
             });
         }
 
-        function atualizarDistanciaCasal() {
+        // 9. Fotos e Histórico no Firebase
+        function processarFoto(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    const img = new Image(); img.src = evt.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas'); const ctx = canvas.getContext('2d');
+                        canvas.width = 150; canvas.height = 150;
+                        ctx.drawImage(img, 0, 0, 150, 150);
+                        const base64 = canvas.toDataURL('image/jpeg', 0.8);
+                        fotoPerfilUrl = base64;
+                        document.getElementById('profile-preview').style.backgroundImage = `url('${base64}')`;
+                        document.getElementById('header-avatar-img').style.backgroundImage = `url('${base64}')`;
+                        db.ref('perfis/' + meuPerfil).set({ foto: base64 });
+                    }
+                }; reader.readAsDataURL(file);
+            }
+        }
+        function carregarFoto() {
+            db.ref('perfis/' + meuPerfil).on('value', (snap) => {
+                if (snap.val() && snap.val().foto) {
+                    fotoPerfilUrl = snap.val().foto;
+                    document.getElementById('profile-preview').style.backgroundImage = `url('${fotoPerfilUrl}')`;
+                    document.getElementById('header-avatar-img').style.backgroundImage = `url('${fotoPerfilUrl}')`;
+                }
+            });
+        }
+        function carregarParadas() {
+            db.ref('paradas').limitToLast(10).on('value', (snap) => {
+                const container = document.getElementById('stops-container');
+                container.innerHTML = '';
+                snap.forEach((child) => {
+                    const item = child.val();
+                    const card = document.createElement('div');
+                    card.className = 'history-card';
+                    card.innerHTML = `
+                        <div class="history-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div>
+                            <div style="font-weight:700;">${item.usuario} parou aqui</div>
+                            <div style="font-size:0.75rem; color:#94a3b8;">Às ${item.hora}</div>
+                        </div>
+                    `;
+                    container.prepend(card);
+                });
+            });
+        }
+
+        function atualizarDistancia() {
             if (minhaUltimaPos && parceiroUltimaPos) {
-                const distM = calcularDistanciaMetros(minhaUltimaPos[0], minhaUltimaPos[1], parceiroUltimaPos[0], parceiroUltimaPos[1]);
-                document.getElementById('stat-dist').innerText = distM > 1000 ? `${(distM/1000).toFixed(1)} KM` : `${distM.toFixed(0)} M`;
+                const d = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], parceiroUltimaPos[0], parceiroUltimaPos[1]);
+                document.getElementById('stat-dist').innerText = d > 1000 ? `${(d/1000).toFixed(1)} km` : `${d.toFixed(0)} m`;
             }
         }
 
-        // 8. Eventos e Ações dos Botões da Interface
-        document.getElementById('btn-tilt').onclick = () => {
-            is3DTilted = !is3DTilted;
-            document.getElementById('map').style.transform = is3DTilted ? 'rotateX(30deg) scale(1.1)' : 'rotateX(0deg) scale(1)';
+        // Controles de Clique e Ajuste de Tela
+        document.getElementById('btn-recenter').onclick = () => { if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 16); };
+        document.getElementById('btn-fit-all').onclick = () => {
+            if (minhaUltimaPos && parceiroUltimaPos) {
+                const bounds = L.latLngBounds([minhaUltimaPos, parceiroUltimaPos]);
+                map.fitBounds(bounds, { padding: [50, 50] });
+            }
         };
 
         const sidebar = document.getElementById('sidebar');
         document.getElementById('btn-sidebar').onclick = () => sidebar.classList.add('open');
         document.getElementById('btn-close-sidebar').onclick = () => sidebar.classList.remove('open');
-        document.getElementById('btn-recenter').onclick = () => { if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 17, { animate: true }); };
     </script>
 </body>
 </html>
- 
