@@ -2,199 +2,230 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Casal PRO - Rastreamento Inteligente</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>GPS Casal 3D - GTA V Style</title>
 
-    <!-- Leaflet & FontAwesome Icons -->
+    <!-- PWA / iOS Capabilities -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="GPS Casal 3D">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/854/854878.png">
+    <meta name="theme-color" content="#090d16">
+
+    <!-- CSS Leaflet & Fonts -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; }
-        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #0f172a; color: white; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #090d16; color: white; }
 
-        /* TELA DE LOGIN */
+        /* TELA DE LOGIN SEM EMAIL (SOMENTE USUÁRIO E SENHA) */
         #login-screen {
-            position: fixed; inset: 0; z-index: 9999; background: #0f172a;
+            position: fixed; inset: 0; z-index: 9999; background: #090d16;
             display: flex; align-items: center; justify-content: center; padding: 20px;
         }
         .login-card {
-            background: rgba(30, 41, 59, 0.9); border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 75, 92, 0.3);
             padding: 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(10px);
+            box-shadow: 0 0 30px rgba(255, 75, 92, 0.2); backdrop-filter: blur(15px);
         }
-        .login-card h2 { margin-bottom: 20px; color: #ff4b5c; font-size: 1.5rem; }
+        .login-card h2 { font-family: 'Orbitron', sans-serif; margin-bottom: 20px; color: #ff4b5c; letter-spacing: 1.5px; }
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px; display: block; }
         .input-group input, .input-group select {
             width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(15, 23, 42, 0.8); color: white; outline: none; font-size: 0.95rem;
+            background: rgba(10, 15, 26, 0.9); color: white; outline: none; font-size: 0.95rem;
         }
         .btn-primary {
-            width: 100%; padding: 12px; border-radius: 12px; border: none; background: #ff4b5c;
+            width: 100%; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, #ff4b5c, #e03e4e);
             color: white; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px;
+            box-shadow: 0 4px 15px rgba(255, 75, 92, 0.4);
         }
-        .btn-primary:hover { background: #e03e4e; }
 
-        /* MAPA */
-        #map { flex: 1; width: 100%; z-index: 1; }
+        /* EFEITO DE VISÃO 3D ISOMÉTRICA ESTILO GTA V */
+        #map-wrapper {
+            flex: 1; width: 100%; height: 100%; perspective: 1000px; overflow: hidden; position: relative;
+        }
+        #map {
+            width: 100%; height: 100%;
+            transform: rotateX(35deg) scale(1.15); /* Efeito 3D de Inclinação */
+            transition: transform 0.3s ease-out;
+        }
 
-        /* PAINEL SUPERIOR FLUTUANTE */
+        /* PAINEL SUPERIOR ESTILO HUD */
         .glass-header {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px);
-            padding: 10px 20px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000; background: rgba(9, 13, 22, 0.85); backdrop-filter: blur(12px);
+            padding: 10px 20px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.15);
             display: flex; align-items: center; justify-content: space-between; gap: 15px;
-            width: 90%; max-width: 500px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            width: 90%; max-width: 500px; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
         }
 
-        /* MARCADOR CUSTOMIZADO */
-        .custom-avatar-marker {
-            position: relative; width: 50px; height: 50px; border-radius: 50%;
-            background: #1e293b; border: 3px solid #ff4b5c; display: flex;
-            align-items: center; justify-content: center; font-size: 1.4rem; color: white;
-            box-shadow: 0 4px 15px rgba(255, 75, 92, 0.6); transition: all 0.3s ease;
+        /* MARCADOR COM FOTO EM 3D */
+        .avatar-3d-marker {
+            position: relative; width: 55px; height: 55px; border-radius: 50%;
+            border: 3px solid #ff4b5c; background-size: cover; background-position: center;
+            box-shadow: 0 0 20px rgba(255, 75, 92, 0.8); transition: transform 0.3s ease;
         }
-        .custom-avatar-marker.parceiro { border-color: #3b82f6; box-shadow: 0 4px 15px rgba(59, 130, 246, 0.6); }
-        .badge-mode {
-            position: absolute; top: -5px; right: -5px; background: #10b981; color: white;
-            width: 20px; height: 20px; border-radius: 50%; font-size: 0.65rem; display: flex;
-            align-items: center; justify-content: center; border: 2px solid #0f172a;
+        .avatar-3d-marker.parceiro { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        .vehicle-badge {
+            position: absolute; bottom: -5px; right: -5px; background: #10b981; color: white;
+            width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; display: flex;
+            align-items: center; justify-content: center; border: 2px solid #090d16;
         }
 
-        /* CONTROLES FLUTUANTES */
-        .controls-bar {
-            position: absolute; bottom: 20px; right: 20px; z-index: 1000;
-            display: flex; flex-direction: column; gap: 10px;
+        /* BOTÃO SOS DE ALERTA */
+        .btn-sos {
+            width: 55px; height: 55px; border-radius: 50%; background: #ef4444; color: white;
+            border: 3px solid #fca5a5; font-size: 1.3rem; font-weight: 900; font-family: 'Orbitron', sans-serif;
+            cursor: pointer; box-shadow: 0 0 20px rgba(239, 68, 68, 0.9); animation: pulse-sos 1s infinite;
         }
+        @keyframes pulse-sos {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { transform: scale(1.08); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+
+        /* ALERTA DE SIRENE PISCANDO NA TELA */
+        body.sos-active {
+            animation: siren-flash 0.5s infinite alternate !important;
+        }
+        @keyframes siren-flash {
+            0% { background: #7f1d1d; }
+            100% { background: #1e3a8a; }
+        }
+
+        /* CONTROLES DA HUD */
+        .controls-bar { position: absolute; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
         .btn-round {
-            width: 48px; height: 48px; border-radius: 50%; background: rgba(15, 23, 42, 0.9);
+            width: 48px; height: 48px; border-radius: 50%; background: rgba(9, 13, 22, 0.9);
             border: 1px solid rgba(255,255,255,0.15); color: white; backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-            cursor: pointer; transition: 0.2s; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer;
         }
-        .btn-round:hover { background: #ff4b5c; transform: scale(1.05); }
 
-        /* DASHBOARD DE VELOCIDADE E STATUS */
+        /* HUD STATS */
         .stats-card {
             position: absolute; bottom: 20px; left: 20px; z-index: 1000;
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px);
+            background: rgba(9, 13, 22, 0.85); backdrop-filter: blur(12px);
             padding: 12px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-            display: flex; gap: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            display: flex; gap: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
         }
-        .stat-item { text-align: center; }
-        .stat-value { font-weight: 700; font-size: 1.1rem; color: #ff4b5c; }
-        .stat-label { font-size: 0.7rem; color: #94a3b8; }
+        .stat-value { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.1rem; color: #ff4b5c; }
 
-        /* ABA LATERAL (HISTÓRICO E CONFIGURAÇÕES) */
+        /* ABA LATERAL */
         .sidebar {
             position: fixed; top: 0; right: -350px; width: 320px; height: 100%;
-            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px); z-index: 2000;
+            background: rgba(9, 13, 22, 0.98); backdrop-filter: blur(15px); z-index: 2000;
             border-left: 1px solid rgba(255,255,255,0.1); padding: 25px 20px;
-            transition: right 0.3s ease; display: flex; flex-direction: column; gap: 20px;
+            transition: right 0.3s ease; display: flex; flex-direction: column; gap: 15px;
         }
         .sidebar.open { right: 0; }
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; }
-        .sidebar-header h3 { font-size: 1.1rem; color: #ff4b5c; }
-        .stops-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .stop-card {
-            background: rgba(30, 41, 59, 0.8); padding: 12px; border-radius: 12px;
-            border: 1px solid rgba(255,255,255,0.05); font-size: 0.85rem;
+        .profile-upload-box {
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            padding: 15px; background: rgba(255,255,255,0.05); border-radius: 16px;
+        }
+        .profile-img-preview {
+            width: 70px; height: 70px; border-radius: 50%; border: 2px solid #ff4b5c;
+            background-size: cover; background-position: center;
         }
     </style>
 </head>
 <body>
 
-    <!-- TELA DE LOGIN -->
+    <!-- TELA DE LOGIN SEM EMAIL -->
     <div id="login-screen">
         <div class="login-card">
-            <h2>GPS Casal 👩‍❤️‍👨</h2>
+            <h2>GPS CASAL 3D</h2>
             <div class="input-group">
-                <label>Identifique-se:</label>
-                <select id="login-user">
+                <label>Nome de Usuário:</label>
+                <input type="text" id="login-user" placeholder="Ex: Lucas">
+            </div>
+            <div class="input-group">
+                <label>Senha:</label>
+                <input type="password" id="login-pass" placeholder="******">
+            </div>
+            <div class="input-group">
+                <label>Perfil no Mapa:</label>
+                <select id="login-perfil">
                     <option value="pessoa1">Pessoa 1 💖</option>
                     <option value="pessoa2">Pessoa 2 💙</option>
                 </select>
             </div>
-            <div class="input-group">
-                <label>Senha do Casal:</label>
-                <input type="password" id="login-pass" placeholder="Digite a senha...">
-            </div>
-            <button class="btn-primary" onclick="realizarLogin()">Entrar no Mapa</button>
+            <button class="btn-primary" onclick="autenticarUsuario()">Entrar no Sistema</button>
+            <div id="login-error" style="color:#ff4b5c; font-size:0.8rem; margin-top:10px;"></div>
         </div>
     </div>
 
-    <!-- HEADER SUPERIOR -->
+    <!-- HUD SUPERIOR -->
     <div class="glass-header">
         <div style="display:flex; align-items:center; gap:8px;">
-            <i class="fa-solid fa-heart-pulse" style="color: #ff4b5c;"></i>
-            <span id="label-usuario" style="font-weight:700; font-size:0.9rem;">Conectando...</span>
+            <i class="fa-solid fa-satellite-dish" style="color: #ff4b5c;"></i>
+            <span id="label-usuario" style="font-weight:700; font-size:0.85rem;">Conectando...</span>
         </div>
-        <div style="font-size: 0.8rem; color: #4ade80; display:flex; align-items:center; gap:5px;">
-            <i class="fa-solid fa-satellite"></i> GPS Ativo
-        </div>
+        <button class="btn-sos" onclick="dispararSOS()" title="ALERTA DE EMERGÊNCIA">SOS</button>
+        <button onclick="fazerLogout()" style="background:none; border:none; color:#ff4b5c; cursor:pointer; font-weight:700;"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
     </div>
 
-    <!-- MAPA -->
-    <div id="map"></div>
+    <!-- MAPA 3D ISOMÉTRICO -->
+    <div id="map-wrapper">
+        <div id="map"></div>
+    </div>
 
-    <!-- BOTÕES FLUTUANTES -->
+    <!-- CONTROLES -->
     <div class="controls-bar">
-        <button class="btn-round" id="btn-recenter" title="Centralizar em mim"><i class="fa-solid fa-crosshairs"></i></button>
-        <button class="btn-round" id="btn-sidebar" title="Menu e Histórico"><i class="fa-solid fa-sliders"></i></button>
+        <button class="btn-round" id="btn-recenter"><i class="fa-solid fa-crosshairs"></i></button>
+        <button class="btn-round" id="btn-tilt"><i class="fa-solid fa-cube"></i></button>
+        <button class="btn-round" id="btn-sidebar"><i class="fa-solid fa-bars"></i></button>
     </div>
 
-    <!-- DASHBOARD DE MEDIÇÃO EM TEMPO REAL -->
+    <!-- HUD STATS EM TEMPO REAL -->
     <div class="stats-card">
-        <div class="stat-item">
-            <div class="stat-value" id="stat-speed">0 km/h</div>
-            <div class="stat-label">Minha Vel.</div>
+        <div>
+            <div class="stat-value" id="stat-speed">0 KM/H</div>
+            <div style="font-size:0.65rem; color:#94a3b8;">VELOCIDADE</div>
         </div>
-        <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
-        <div class="stat-item">
+        <div style="width:1px; background:rgba(255,255,255,0.1);"></div>
+        <div>
             <div class="stat-value" id="stat-mode" style="color:#3b82f6;"><i class="fa-solid fa-child-walking"></i></div>
-            <div class="stat-label">Transporte</div>
+            <div style="font-size:0.65rem; color:#94a3b8;">TRANSPORTE</div>
         </div>
-        <div style="width: 1px; background: rgba(255,255,255,0.1);"></div>
-        <div class="stat-item">
-            <div class="stat-value" id="stat-dist" style="color:#10b981;">0 km</div>
-            <div class="stat-label">Distância</div>
+        <div style="width:1px; background:rgba(255,255,255,0.1);"></div>
+        <div>
+            <div class="stat-value" id="stat-dist" style="color:#10b981;">0 M</div>
+            <div style="font-size:0.65rem; color:#94a3b8;">DISTÂNCIA</div>
         </div>
     </div>
 
-    <!-- ABA LATERAL (CONFIGURAÇÕES E HISTÓRICO DE PARADAS) -->
+    <!-- MENU LATERAL COM FOTO E HISTÓRICO -->
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3>Menu & Histórico</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="color:#ff4b5c; font-family:'Orbitron';">CONFIGURAÇÕES</h3>
             <i class="fa-solid fa-xmark" style="cursor:pointer;" id="btn-close-sidebar"></i>
         </div>
 
-        <div class="input-group">
-            <label>Seu Avatar / Ícone:</label>
-            <select id="select-icon" onchange="atualizarIconeUsuario()">
-                <option value="fa-user">👤 Boneco Padrão</option>
-                <option value="fa-child-walking">🚶 Caminhando</option>
-                <option value="fa-car">🚗 Carro</option>
-                <option value="fa-motorcycle">🏍️ Moto</option>
-                <option value="fa-bicycle">🚲 Bicicleta</option>
-                <option value="fa-heart">❤️ Coração</option>
-            </select>
+        <div class="profile-upload-box">
+            <div class="profile-img-preview" id="profile-preview" style="background-image: url('https://ui-avatars.com/api/?name=User&background=ff4b5c&color=fff');"></div>
+            <label style="font-size:0.8rem; color:#94a3b8;">Sua Foto de Perfil:</label>
+            <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="carregarFotoArquivo(event)">
+            <button class="btn-primary" style="padding:6px; font-size:0.8rem;" onclick="document.getElementById('file-input').click()">Escolher da Galeria</button>
+            <input type="text" id="url-foto" placeholder="Ou cole a URL da imagem" style="width:100%; padding:8px; border-radius:8px; background:#000; color:#fff; border:1px solid #333;" onchange="salvarFotoURL(this.value)">
         </div>
 
-        <h4 style="font-size:0.9rem; color:#94a3b8; margin-top:10px;"> Histórico de Paradas</h4>
-        <div class="stops-list" id="stops-container">
-            <!-- As paradas serão inseridas aqui dinamicamente -->
-        </div>
+        <h4 style="font-size:0.85rem; color:#94a3b8;"> HISTÓRICO DE PARADAS</h4>
+        <div id="stops-container" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+
+        <button class="btn-primary" style="background:#ef4444;" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair do Sistema</button>
     </div>
 
-    <!-- Leaflet & Firebase Scripts -->
+    <!-- Leaflet & Firebase SDKs -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
-        // 1. Configuração do Firebase
+        // 1. Firebase Configuração
         const firebaseConfig = {
             apiKey: "AIzaSyDm3HCp_dc6C1an3qdiYKrNHAjvjnhSe3U",
             authDomain: "nosso-gps.firebaseapp.com",
@@ -207,190 +238,227 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let meuUsuario = 'pessoa1';
-        let parceiroUsuario = 'pessoa2';
-        let meuIcone = 'fa-user';
-
-        // 2. Inicialização do Mapa
-        const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { attribution: '©CARTO' }).addTo(map);
-
+        let meuPerfil = 'pessoa1', parceiroPerfil = 'pessoa2', meuUsuario = '';
         let meuMarcador = null, marcadorParceiro = null;
         let minhaUltimaPos = null, parceiroUltimaPos = null;
-        let historicoMeu = [], historicoParceiro = [];
+        let fotoPerfilUrl = '';
+        let is3DTilted = true;
 
-        const rotaMinha = L.polyline([], { color: '#ff4b5c', weight: 4, opacity: 0.8, dashArray: '6, 6' }).addTo(map);
-        const rotaParceiro = L.polyline([], { color: '#3b82f6', weight: 4, opacity: 0.8 }).addTo(map);
+        // 2. Mapa em Estilo Dark 3D
+        const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '©CartoDB' }).addTo(map);
 
-        // 3. Sistema de Login
-        function realizarLogin() {
-            meuUsuario = document.getElementById('login-user').value;
-            parceiroUsuario = meuUsuario === 'pessoa1' ? 'pessoa2' : 'pessoa1';
-            
-            document.getElementById('label-usuario').innerText = meuUsuario === 'pessoa1' ? 'Pessoa 1 💖' : 'Pessoa 2 💙';
-            document.getElementById('login-screen').style.display = 'none';
+        // 3. Sistema de Login sem E-mail (Apenas Usuário/Senha)
+        function autenticarUsuario() {
+            const user = document.getElementById('login-user').value.trim();
+            const pass = document.getElementById('login-pass').value.trim();
+            meuPerfil = document.getElementById('login-perfil').value;
+            parceiroPerfil = meuPerfil === 'pessoa1' ? 'pessoa2' : 'pessoa1';
 
-            iniciarRastreamento();
-            escutarParceiro();
-        }
+            if (!user || !pass) {
+                document.getElementById('login-error').innerText = "Preencha usuário e senha!";
+                return;
+            }
 
-        // 4. Criação Dinâmica de Ícone (Avatar + Ícone de Veículo/Modo)
-        function criarIconeHTML(classeIcone, classeModo, eParceiro = false) {
-            return L.divIcon({
-                className: 'custom-icon-wrapper',
-                html: `<div class="custom-avatar-marker ${eParceiro ? 'parceiro' : ''}">
-                        <i class="fa-solid ${classeIcone}"></i>
-                        <div class="badge-mode"><i class="fa-solid ${classeModo}"></i></div>
-                       </div>`,
-                iconSize: [50, 50],
-                iconAnchor: [25, 25]
+            // Verifica se a conta existe ou cria
+            db.ref('usuarios/' + user).once('value', (snapshot) => {
+                const dados = snapshot.val();
+                if (dados) {
+                    if (dados.senha !== pass) {
+                        document.getElementById('login-error').innerText = "Senha incorreta!";
+                        return;
+                    }
+                } else {
+                    db.ref('usuarios/' + user).set({ senha: pass, perfil: meuPerfil });
+                }
+
+                meuUsuario = user;
+                localStorage.setItem('gps_user', user);
+                localStorage.setItem('gps_perfil', meuPerfil);
+
+                document.getElementById('label-usuario').innerText = `${user.toUpperCase()} (${meuPerfil === 'pessoa1' ? '💖' : '💙'})`;
+                document.getElementById('login-screen').style.display = 'none';
+
+                iniciarRastreamento();
+                escutarParceiro();
+                escutarAlertasSOS();
+                carregarFotoSalva();
             });
         }
 
-        // 5. Algoritmo para Identificar Tipo de Transporte por Velocidade (km/h)
-        function identificarTransporte(velocidadeKmh) {
-            if (velocidadeKmh < 2) return { modo: 'Parado', icone: 'fa-street-view' };
-            if (velocidadeKmh <= 12) return { modo: 'Caminhando', icone: 'fa-child-walking' };
-            if (velocidadeKmh <= 30) return { modo: 'Bicicleta / Moto', icone: 'fa-motorcycle' };
-            return { modo: 'Veículo / Carro', icone: 'fa-car' };
+        function fazerLogout() {
+            localStorage.clear();
+            location.reload();
         }
 
-        // 6. Cálculo Distância Haversine (Filtro Antibug de Imprecisão do GPS)
-        function calcularDistanciaMetros(lat1, lon1, lat2, lon2) {
-            const R = 6371e3;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon/2) * Math.sin(dLon/2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        // Auto-login se já autenticado
+        if (localStorage.getItem('gps_user')) {
+            document.getElementById('login-user').value = localStorage.getItem('gps_user');
+            document.getElementById('login-perfil').value = localStorage.getItem('gps_perfil') || 'pessoa1';
         }
 
-        // 7. Rastreamento e Correção de Bugs de GPS
-        let tempoParadoInicio = null;
+        // 4. Customização de Fotos de Perfil
+        function salvarFotoURL(url) {
+            if (!url) return;
+            fotoPerfilUrl = url;
+            document.getElementById('profile-preview').style.backgroundImage = `url('${url}')`;
+            db.ref('perfis/' + meuPerfil).update({ foto: url });
+        }
 
-        function iniciarRastreamento() {
-            if ("geolocation" in navigator) {
-                navigator.geolocation.watchPosition((pos) => {
-                    const lat = pos.coords.latitude;
-                    const lng = pos.coords.longitude;
-                    const precisao = pos.coords.accuracy;
-
-                    // FILTRO ANTI-BUG: Ignora leituras imprecisas (acima de 25m de erro)
-                    if (precisao > 25) return;
-
-                    // FILTRO ANTI-BUG: Se a variação for menor que 4 metros, ignora "saltos" de GPS
-                    if (minhaUltimaPos) {
-                        const distMovida = calcularDistanciaMetros(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng);
-                        if (distMovida < 4) return;
-                    }
-
-                    // Cálculo da velocidade em km/h
-                    let speed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
-                    const transporte = identificarTransporte(speed);
-
-                    minhaUltimaPos = [lat, lng];
-                    historicoMeu.push([lat, lng]);
-                    rotaMinha.setLatLngs(historicoMeu);
-
-                    // Atualizar UI dos elementos gráficos
-                    document.getElementById('stat-speed').innerText = `${speed.toFixed(0)} km/h`;
-                    document.getElementById('stat-mode').innerHTML = `<i class="fa-solid ${transporte.icone}"></i>`;
-
-                    if (!meuMarcador) {
-                        meuMarcador = L.marker([lat, lng], { icon: criarIconeHTML(meuIcone, transporte.icone) }).addTo(map);
-                        map.setView([lat, lng], 16);
-                    } else {
-                        meuMarcador.setLatLng([lat, lng]);
-                        meuMarcador.setIcon(criarIconeHTML(meuIcone, transporte.icone));
-                    }
-
-                    // Envia os dados filtrados para o Firebase
-                    db.ref('casal/' + meuUsuario).set({
-                        lat: lat, lng: lng, speed: speed,
-                        icone: meuIcone, modoIcone: transporte.icone,
-                        timestamp: Date.now()
-                    });
-
-                    atualizarDistanciaCasal();
-                }, (err) => console.error(err), { enableHighAccuracy: true, maximumAge: 1000, timeout: 10000 });
+        function carregarFotoArquivo(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    salvarFotoURL(evt.target.result);
+                };
+                reader.readAsDataURL(file);
             }
         }
 
-        // 8. Escuta da Outra Pessoa em Tempo Real
-        function escutarParceiro() {
-            db.ref('casal/' + parceiroUsuario).on('value', (snapshot) => {
-                const dados = snapshot.val();
-                if (!dados || !dados.lat || !dados.lng) return;
-
-                // Checa se o parceiro está parado há mais de 3 minutos antes de registrar uma Parada Oficial
-                const agora = Date.now();
-                if (dados.speed < 2) {
-                    if (!tempoParadoInicio) tempoParadoInicio = agora;
-                    else if (agora - tempoParadoInicio > 180000) { // 3 minutos
-                        adicionarCardParada(dados.lat, dados.lng);
-                        tempoParadoInicio = null; // Reseta timer para a próxima parada
-                    }
-                } else {
-                    tempoParadoInicio = null;
+        function carregarFotoSalva() {
+            db.ref('perfis/' + meuPerfil).once('value', (snap) => {
+                if (snap.val() && snap.val().foto) {
+                    fotoPerfilUrl = snap.val().foto;
+                    document.getElementById('profile-preview').style.backgroundImage = `url('${fotoPerfilUrl}')`;
                 }
+            });
+        }
+
+        // 5. Marcador 3D com Fotos
+        function criarIcone3D(urlFoto, modoIcone, eParceiro = false) {
+            const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3b82f6':'ff4b5c'}&color=fff`;
+            return L.divIcon({
+                className: 'custom-icon-wrapper',
+                html: `<div class="avatar-3d-marker ${eParceiro ? 'parceiro' : ''}" style="background-image: url('${img}');">
+                        <div class="vehicle-badge"><i class="fa-solid ${modoIcone}"></i></div>
+                       </div>`,
+                iconSize: [55, 55], iconAnchor: [27, 27]
+            });
+        }
+
+        function identificarTransporte(v) {
+            if (v < 2) return { modo: 'Parado', icone: 'fa-street-view' };
+            if (v <= 12) return { modo: 'Caminhando', icone: 'fa-child-walking' };
+            if (v <= 35) return { modo: 'Moto/Bicicleta', icone: 'fa-motorcycle' };
+            return { modo: 'Veículo/Carro', icone: 'fa-car' };
+        }
+
+        function calcularDistanciaMetros(lat1, lon1, lat2, lon2) {
+            const R = 6371e3;
+            const dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+        }
+
+        // 6. Rastreamento e Animação Isométrica GTA V
+        function iniciarRastreamento() {
+            if ("geolocation" in navigator) {
+                navigator.geolocation.watchPosition((pos) => {
+                    const lat = pos.coords.latitude, lng = pos.coords.longitude, precisao = pos.coords.accuracy;
+                    if (precisao > 30) return;
+
+                    let speed = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
+                    const transp = identificarTransporte(speed);
+                    minhaUltimaPos = [lat, lng];
+
+                    document.getElementById('stat-speed').innerText = `${speed.toFixed(0)} KM/H`;
+                    document.getElementById('stat-mode').innerHTML = `<i class="fa-solid ${transp.icone}"></i>`;
+
+                    if (!meuMarcador) {
+                        meuMarcador = L.marker([lat, lng], { icon: criarIcone3D(fotoPerfilUrl, transp.icone) }).addTo(map);
+                        map.setView([lat, lng], 17);
+                    } else {
+                        meuMarcador.setLatLng([lat, lng]);
+                        meuMarcador.setIcon(criarIcone3D(fotoPerfilUrl, transp.icone));
+                    }
+
+                    db.ref('casal/' + meuPerfil).set({
+                        lat: lat, lng: lng, speed: speed,
+                        modoIcone: transp.icone, foto: fotoPerfilUrl, timestamp: Date.now()
+                    });
+
+                    atualizarDistanciaCasal();
+                }, (err) => console.error(err), { enableHighAccuracy: true, maximumAge: 1000 });
+            }
+        }
+
+        function escutarParceiro() {
+            db.ref('casal/' + parceiroPerfil).on('value', (snapshot) => {
+                const dados = snapshot.val();
+                if (!dados || !dados.lat) return;
 
                 parceiroUltimaPos = [dados.lat, dados.lng];
-                historicoParceiro.push([dados.lat, dados.lng]);
-                rotaParceiro.setLatLngs(historicoParceiro);
-
-                const iconeP = dados.icone || 'fa-user';
-                const modoP = dados.modoIcone || 'fa-street-view';
-
                 if (!marcadorParceiro) {
-                    marcadorParceiro = L.marker([dados.lat, dados.lng], { icon: criarIconeHTML(iconeP, modoP, true) }).addTo(map);
+                    marcadorParceiro = L.marker([dados.lat, dados.lng], { icon: criarIcone3D(dados.foto, dados.modoIcone || 'fa-street-view', true) }).addTo(map);
                 } else {
                     marcadorParceiro.setLatLng([dados.lat, dados.lng]);
-                    marcadorParceiro.setIcon(criarIconeHTML(iconeP, modoP, true));
+                    marcadorParceiro.setIcon(criarIcone3D(dados.foto, dados.modoIcone || 'fa-street-view', true));
                 }
-
                 atualizarDistanciaCasal();
             });
         }
 
-        // 9. Histórico de Paradas em Aba Separada
-        function adicionarCardParada(lat, lng) {
-            const container = document.getElementById('stops-container');
-            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        // 7. Sistema de Alerta SOS e Sirene Sintetizada (Web Audio API)
+        let audioCtx = null;
+        let sirenOsc = null;
 
-            const card = document.createElement('div');
-            card.className = 'stop-card';
-            card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; color:#ff4b5c; font-weight:700;">
-                    <span><i class="fa-solid fa-location-dot"></i> Parada do Amor</span>
-                    <span>${hora}</span>
-                </div>
-                <div style="color:#94a3b8; margin-top:5px;">Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}</div>
-            `;
-            container.prepend(card);
+        function tocarSirenePerigo() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            sirenOsc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            sirenOsc.type = 'sawtooth';
+            sirenOsc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            sirenOsc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.5);
+
+            sirenOsc.connect(gain);
+            gain.connect(audioCtx.destination);
+            sirenOsc.start();
+
+            // Modula o som da sirene
+            setInterval(() => {
+                if (sirenOsc && audioCtx) {
+                    sirenOsc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    sirenOsc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.4);
+                }
+            }, 500);
+        }
+
+        function dispararSOS() {
+            db.ref('alertas_sos').set({ emissor: meuPerfil, timestamp: Date.now() });
+            tocarSirenePerigo();
+            document.body.classList.add('sos-active');
+            alert("⚠️ ALERTA SOS ATIVADO! Notificando seu parceiro(a)...");
+        }
+
+        function escutarAlertasSOS() {
+            db.ref('alertas_sos').on('value', (snap) => {
+                const dados = snap.val();
+                if (dados && dados.emissor !== meuPerfil) {
+                    tocarSirenePerigo();
+                    document.body.classList.add('sos-active');
+                    alert("🚨 ALERTA DE PERIGO SOS DISPARADO PELO SEU AMOR! VEJA A LOCALIZAÇÃO IMEDIATAMENTE!");
+                }
+            });
         }
 
         function atualizarDistanciaCasal() {
             if (minhaUltimaPos && parceiroUltimaPos) {
                 const distM = calcularDistanciaMetros(minhaUltimaPos[0], minhaUltimaPos[1], parceiroUltimaPos[0], parceiroUltimaPos[1]);
-                document.getElementById('stat-dist').innerText = distM > 1000 ? `${(distM/1000).toFixed(1)} km` : `${distM.toFixed(0)} m`;
+                document.getElementById('stat-dist').innerText = distM > 1000 ? `${(distM/1000).toFixed(1)} KM` : `${distM.toFixed(0)} M`;
             }
         }
 
-        function atualizarIconeUsuario() {
-            meuIcone = document.getElementById('select-icon').value;
-            if (meuMarcador && minhaUltimaPos) {
-                meuMarcador.setIcon(criarIconeHTML(meuIcone, 'fa-child-walking'));
-            }
-        }
+        // 8. Alternador de Câmera 3D / 2D
+        document.getElementById('btn-tilt').onclick = () => {
+            is3DTilted = !is3DTilted;
+            document.getElementById('map').style.transform = is3DTilted ? 'rotateX(35deg) scale(1.15)' : 'rotateX(0deg) scale(1)';
+        };
 
-        // Controles de Interface da Sidebar
         document.getElementById('btn-sidebar').onclick = () => document.getElementById('sidebar').classList.add('open');
         document.getElementById('btn-close-sidebar').onclick = () => document.getElementById('sidebar').classList.remove('open');
-        document.getElementById('btn-recenter').onclick = () => {
-            if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 16, { animate: true });
-        };
+        document.getElementById('btn-recenter').onclick = () => { if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 17, { animate: true }); };
     </script>
 </body>
-            </html>
-    
+</html>
