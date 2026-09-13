@@ -3,40 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GPS Casal 3D - GTA V Style</title>
+    <title>GPS Casal PRO 3D</title>
 
-    <!-- PWA / iOS Capabilities -->
+    <!-- PWA / iOS Web App Capabilities -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="GPS Casal 3D">
+    <meta name="apple-mobile-web-app-title" content="GPS Casal">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/854/854878.png">
-    <meta name="theme-color" content="#090d16">
+    <meta name="theme-color" content="#0f172a">
 
-    <!-- CSS Leaflet & Fonts -->
+    <!-- CSS Leaflet, Google Fonts & FontAwesome -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
-        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #090d16; color: white; }
+        body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: #0f172a; color: white; }
 
-        /* TELA DE LOGIN SEM EMAIL (SOMENTE USUÁRIO E SENHA) */
+        /* TELA DE LOGIN SEM EMAIL */
         #login-screen {
-            position: fixed; inset: 0; z-index: 9999; background: #090d16;
+            position: fixed; inset: 0; z-index: 9999; background: #0f172a;
             display: flex; align-items: center; justify-content: center; padding: 20px;
         }
         .login-card {
-            background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255, 75, 92, 0.3);
+            background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255, 75, 92, 0.3);
             padding: 30px; border-radius: 24px; width: 100%; max-width: 380px; text-align: center;
-            box-shadow: 0 0 30px rgba(255, 75, 92, 0.2); backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); backdrop-filter: blur(15px);
         }
-        .login-card h2 { font-family: 'Orbitron', sans-serif; margin-bottom: 20px; color: #ff4b5c; letter-spacing: 1.5px; }
+        .login-card h2 { font-family: 'Orbitron', sans-serif; margin-bottom: 20px; color: #ff4b5c; letter-spacing: 1px; }
         .input-group { margin-bottom: 15px; text-align: left; }
         .input-group label { font-size: 0.8rem; color: #94a3b8; margin-bottom: 5px; display: block; }
         .input-group input, .input-group select {
             width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
-            background: rgba(10, 15, 26, 0.9); color: white; outline: none; font-size: 0.95rem;
+            background: rgba(15, 23, 42, 0.9); color: white; outline: none; font-size: 0.95rem;
         }
         .btn-primary {
             width: 100%; padding: 12px; border-radius: 12px; border: none; background: linear-gradient(135deg, #ff4b5c, #e03e4e);
@@ -44,91 +44,97 @@
             box-shadow: 0 4px 15px rgba(255, 75, 92, 0.4);
         }
 
-        /* EFEITO DE VISÃO 3D ISOMÉTRICA ESTILO GTA V */
-        #map-wrapper {
-            flex: 1; width: 100%; height: 100%; perspective: 1000px; overflow: hidden; position: relative;
-        }
+        /* CONTAINER DO MAPA COM INCLINAÇÃO 3D */
+        #map-wrapper { flex: 1; width: 100%; height: 100%; perspective: 1000px; overflow: hidden; position: relative; }
         #map {
             width: 100%; height: 100%;
-            transform: rotateX(35deg) scale(1.15); /* Efeito 3D de Inclinação */
-            transition: transform 0.3s ease-out;
+            transform: rotateX(30deg) scale(1.1); /* Estilo 3D Isométrico */
+            transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
         }
 
-        /* PAINEL SUPERIOR ESTILO HUD */
+        /* HUD SUPERIOR FLUTUANTE */
         .glass-header {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; background: rgba(9, 13, 22, 0.85); backdrop-filter: blur(12px);
-            padding: 10px 20px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.15);
-            display: flex; align-items: center; justify-content: space-between; gap: 15px;
-            width: 90%; max-width: 500px; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            z-index: 1000; background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(12px);
+            padding: 8px 18px; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            width: 92%; max-width: 500px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
 
-        /* MARCADOR COM FOTO EM 3D */
+        /* MARCADORES DE PERFIL NO MAPA */
         .avatar-3d-marker {
-            position: relative; width: 55px; height: 55px; border-radius: 50%;
+            position: relative; width: 52px; height: 52px; border-radius: 50%;
             border: 3px solid #ff4b5c; background-size: cover; background-position: center;
-            box-shadow: 0 0 20px rgba(255, 75, 92, 0.8); transition: transform 0.3s ease;
+            box-shadow: 0 0 18px rgba(255, 75, 92, 0.8); transition: all 0.3s ease;
         }
-        .avatar-3d-marker.parceiro { border-color: #3b82f6; box-shadow: 0 0 20px rgba(59, 130, 246, 0.8); }
+        .avatar-3d-marker.parceiro { border-color: #3b82f6; box-shadow: 0 0 18px rgba(59, 130, 246, 0.8); }
         .vehicle-badge {
-            position: absolute; bottom: -5px; right: -5px; background: #10b981; color: white;
+            position: absolute; bottom: -4px; right: -4px; background: #10b981; color: white;
             width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; display: flex;
-            align-items: center; justify-content: center; border: 2px solid #090d16;
+            align-items: center; justify-content: center; border: 2px solid #0f172a;
         }
 
-        /* BOTÃO SOS DE ALERTA */
+        /* BOTÃO SOS */
         .btn-sos {
-            width: 55px; height: 55px; border-radius: 50%; background: #ef4444; color: white;
-            border: 3px solid #fca5a5; font-size: 1.3rem; font-weight: 900; font-family: 'Orbitron', sans-serif;
-            cursor: pointer; box-shadow: 0 0 20px rgba(239, 68, 68, 0.9); animation: pulse-sos 1s infinite;
+            padding: 8px 16px; border-radius: 20px; background: #ef4444; color: white;
+            border: 2px solid #fca5a5; font-size: 0.9rem; font-weight: 800; font-family: 'Orbitron', sans-serif;
+            cursor: pointer; box-shadow: 0 0 15px rgba(239, 68, 68, 0.8); animation: pulse-sos 1s infinite;
         }
         @keyframes pulse-sos {
             0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1.08); box-shadow: 0 0 0 15px rgba(239, 68, 68, 0); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
         }
 
-        /* ALERTA DE SIRENE PISCANDO NA TELA */
-        body.sos-active {
-            animation: siren-flash 0.5s infinite alternate !important;
+        /* BANNER DE PARAR SOS */
+        #sos-banner {
+            position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
+            z-index: 1001; background: #ef4444; color: white; padding: 10px 20px; border-radius: 25px;
+            display: none; align-items: center; gap: 15px; font-weight: 700; box-shadow: 0 10px 30px rgba(239, 68, 68, 0.6);
+            border: 2px solid #fff; animation: bounce 0.5s infinite alternate;
         }
-        @keyframes siren-flash {
-            0% { background: #7f1d1d; }
-            100% { background: #1e3a8a; }
-        }
+        @keyframes bounce { 0% { transform: translateX(-50%) translateY(0); } 100% { transform: translateX(-50%) translateY(-5px); } }
 
-        /* CONTROLES DA HUD */
-        .controls-bar { position: absolute; bottom: 20px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+        body.sos-active { animation: siren-flash 0.5s infinite alternate !important; }
+        @keyframes siren-flash { 0% { background: #7f1d1d; } 100% { background: #1e3a8a; } }
+
+        /* CONTROLES FLUTUANTES */
+        .controls-bar { position: absolute; bottom: 25px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 12px; }
         .btn-round {
-            width: 48px; height: 48px; border-radius: 50%; background: rgba(9, 13, 22, 0.9);
-            border: 1px solid rgba(255,255,255,0.15); color: white; backdrop-filter: blur(8px);
+            width: 48px; height: 48px; border-radius: 50%; background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(255,255,255,0.2); color: white; backdrop-filter: blur(8px);
             display: flex; align-items: center; justify-content: center; font-size: 1.2rem; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: transform 0.2s;
         }
+        .btn-round:active { transform: scale(0.9); }
 
         /* HUD STATS */
         .stats-card {
-            position: absolute; bottom: 20px; left: 20px; z-index: 1000;
-            background: rgba(9, 13, 22, 0.85); backdrop-filter: blur(12px);
-            padding: 12px 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.1);
-            display: flex; gap: 20px; box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            position: absolute; bottom: 25px; left: 20px; z-index: 1000;
+            background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(12px);
+            padding: 12px 18px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15);
+            display: flex; gap: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         }
-        .stat-value { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.1rem; color: #ff4b5c; }
+        .stat-value { font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 1.05rem; color: #ff4b5c; }
 
-        /* ABA LATERAL */
+        /* ABA LATERAL (SIDEBAR) CORRIGIDA */
         .sidebar {
-            position: fixed; top: 0; right: -350px; width: 320px; height: 100%;
-            background: rgba(9, 13, 22, 0.98); backdrop-filter: blur(15px); z-index: 2000;
-            border-left: 1px solid rgba(255,255,255,0.1); padding: 25px 20px;
-            transition: right 0.3s ease; display: flex; flex-direction: column; gap: 15px;
+            position: fixed; top: 0; right: -360px; width: 330px; height: 100%;
+            background: rgba(15, 23, 42, 0.98); backdrop-filter: blur(20px); z-index: 3000;
+            border-left: 1px solid rgba(255,255,255,0.15); padding: 25px 20px;
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 18px;
+            box-shadow: -10px 0 40px rgba(0,0,0,0.8);
         }
-        .sidebar.open { right: 0; }
+        .sidebar.open { right: 0 !important; }
+        
         .profile-upload-box {
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-            padding: 15px; background: rgba(255,255,255,0.05); border-radius: 16px;
+            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            padding: 15px; background: rgba(30, 41, 59, 0.6); border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.08);
         }
         .profile-img-preview {
-            width: 70px; height: 70px; border-radius: 50%; border: 2px solid #ff4b5c;
-            background-size: cover; background-position: center;
+            width: 80px; height: 80px; border-radius: 50%; border: 3px solid #ff4b5c;
+            background-size: cover; background-position: center; box-shadow: 0 0 15px rgba(255, 75, 92, 0.5);
         }
     </style>
 </head>
@@ -140,7 +146,7 @@
             <h2>GPS CASAL 3D</h2>
             <div class="input-group">
                 <label>Nome de Usuário:</label>
-                <input type="text" id="login-user" placeholder="Ex: Lucas">
+                <input type="text" id="login-user" placeholder="Digite seu nome">
             </div>
             <div class="input-group">
                 <label>Senha:</label>
@@ -164,23 +170,29 @@
             <i class="fa-solid fa-satellite-dish" style="color: #ff4b5c;"></i>
             <span id="label-usuario" style="font-weight:700; font-size:0.85rem;">Conectando...</span>
         </div>
-        <button class="btn-sos" onclick="dispararSOS()" title="ALERTA DE EMERGÊNCIA">SOS</button>
-        <button onclick="fazerLogout()" style="background:none; border:none; color:#ff4b5c; cursor:pointer; font-weight:700;"><i class="fa-solid fa-right-from-bracket"></i> Sair</button>
+        <button class="btn-sos" onclick="dispararSOS()">SOS 🚨</button>
+        <button onclick="fazerLogout()" style="background:none; border:none; color:#ff4b5c; cursor:pointer; font-weight:700;"><i class="fa-solid fa-right-from-bracket"></i></button>
     </div>
 
-    <!-- MAPA 3D ISOMÉTRICO -->
+    <!-- BANNER DE SOS ATIVO (COM BOTÃO DE PARAR PARA TODOS) -->
+    <div id="sos-banner">
+        <span>🚨 ALERTA SOS ATIVO!</span>
+        <button onclick="pararSOS()" style="background:#fff; color:#ef4444; border:none; padding:6px 12px; border-radius:12px; font-weight:800; cursor:pointer;">PARAR SOS</button>
+    </div>
+
+    <!-- MAPA VISUALMENTE REFORMULADO -->
     <div id="map-wrapper">
         <div id="map"></div>
     </div>
 
-    <!-- CONTROLES -->
+    <!-- CONTROLES FLUTUANTES -->
     <div class="controls-bar">
-        <button class="btn-round" id="btn-recenter"><i class="fa-solid fa-crosshairs"></i></button>
-        <button class="btn-round" id="btn-tilt"><i class="fa-solid fa-cube"></i></button>
-        <button class="btn-round" id="btn-sidebar"><i class="fa-solid fa-bars"></i></button>
+        <button class="btn-round" id="btn-recenter" title="Centralizar"><i class="fa-solid fa-crosshairs"></i></button>
+        <button class="btn-round" id="btn-tilt" title="Alternar 3D/2D"><i class="fa-solid fa-cube"></i></button>
+        <button class="btn-round" id="btn-sidebar" title="Abrir Menu"><i class="fa-solid fa-bars"></i></button>
     </div>
 
-    <!-- HUD STATS EM TEMPO REAL -->
+    <!-- HUD STATS -->
     <div class="stats-card">
         <div>
             <div class="stat-value" id="stat-speed">0 KM/H</div>
@@ -198,25 +210,26 @@
         </div>
     </div>
 
-    <!-- MENU LATERAL COM FOTO E HISTÓRICO -->
+    <!-- ABA LATERAL (SIDEBAR) CORRIGIDA -->
     <div class="sidebar" id="sidebar">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="color:#ff4b5c; font-family:'Orbitron';">CONFIGURAÇÕES</h3>
-            <i class="fa-solid fa-xmark" style="cursor:pointer;" id="btn-close-sidebar"></i>
+            <h3 style="color:#ff4b5c; font-family:'Orbitron'; font-size:1.1rem;">CONFIGURAÇÕES</h3>
+            <i class="fa-solid fa-xmark" style="cursor:pointer; font-size:1.4rem; color:#94a3b8;" id="btn-close-sidebar"></i>
         </div>
 
+        <!-- UPLOAD DE FOTO FUNCIONAL -->
         <div class="profile-upload-box">
             <div class="profile-img-preview" id="profile-preview" style="background-image: url('https://ui-avatars.com/api/?name=User&background=ff4b5c&color=fff');"></div>
             <label style="font-size:0.8rem; color:#94a3b8;">Sua Foto de Perfil:</label>
-            <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="carregarFotoArquivo(event)">
-            <button class="btn-primary" style="padding:6px; font-size:0.8rem;" onclick="document.getElementById('file-input').click()">Escolher da Galeria</button>
-            <input type="text" id="url-foto" placeholder="Ou cole a URL da imagem" style="width:100%; padding:8px; border-radius:8px; background:#000; color:#fff; border:1px solid #333;" onchange="salvarFotoURL(this.value)">
+            <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="processarFotoArquivo(event)">
+            <button class="btn-primary" style="padding:8px; font-size:0.85rem;" onclick="document.getElementById('file-input').click()">📷 Escolher da Galeria</button>
+            <input type="text" id="url-foto" placeholder="Ou cole a URL da imagem" style="width:100%; padding:8px; border-radius:10px; background:#0f172a; color:#fff; border:1px solid rgba(255,255,255,0.1); font-size:0.8rem;" onchange="salvarFotoURL(this.value)">
         </div>
 
-        <h4 style="font-size:0.85rem; color:#94a3b8;"> HISTÓRICO DE PARADAS</h4>
+        <h4 style="font-size:0.85rem; color:#94a3b8; margin-top:5px;"> HISTÓRICO DE PARADAS</h4>
         <div id="stops-container" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
 
-        <button class="btn-primary" style="background:#ef4444;" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair do Sistema</button>
+        <button class="btn-primary" style="background:#ef4444;" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
     </div>
 
     <!-- Leaflet & Firebase SDKs -->
@@ -244,11 +257,13 @@
         let fotoPerfilUrl = '';
         let is3DTilted = true;
 
-        // 2. Mapa em Estilo Dark 3D
+        // 2. NOVO MAPA MODERNO (CartoDB Voyager)
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', { attribution: '©CartoDB' }).addTo(map);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', { 
+            attribution: '©CartoDB', maxZoom: 19 
+        }).addTo(map);
 
-        // 3. Sistema de Login sem E-mail (Apenas Usuário/Senha)
+        // 3. Login sem E-mail (Apenas Usuário/Senha)
         function autenticarUsuario() {
             const user = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
@@ -260,7 +275,6 @@
                 return;
             }
 
-            // Verifica se a conta existe ou cria
             db.ref('usuarios/' + user).once('value', (snapshot) => {
                 const dados = snapshot.val();
                 if (dados) {
@@ -291,33 +305,42 @@
             location.reload();
         }
 
-        // Auto-login se já autenticado
         if (localStorage.getItem('gps_user')) {
             document.getElementById('login-user').value = localStorage.getItem('gps_user');
             document.getElementById('login-perfil').value = localStorage.getItem('gps_perfil') || 'pessoa1';
         }
 
-        // 4. Customização de Fotos de Perfil
+        // 4. Upload e Salvamento Correto de Foto de Perfil
         function salvarFotoURL(url) {
             if (!url) return;
             fotoPerfilUrl = url;
             document.getElementById('profile-preview').style.backgroundImage = `url('${url}')`;
-            db.ref('perfis/' + meuPerfil).update({ foto: url });
+            db.ref('perfis/' + meuPerfil).set({ foto: url });
         }
 
-        function carregarFotoArquivo(e) {
+        function processarFotoArquivo(e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(evt) {
-                    salvarFotoURL(evt.target.result);
+                    // Converter para imagem comprimida em Canvas para otimizar envio
+                    const img = new Image();
+                    img.src = evt.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = 150; canvas.height = 150;
+                        ctx.drawImage(img, 0, 0, 150, 150);
+                        const base64Comprimido = canvas.toDataURL('image/jpeg', 0.8);
+                        salvarFotoURL(base64Comprimido);
+                    }
                 };
                 reader.readAsDataURL(file);
             }
         }
 
         function carregarFotoSalva() {
-            db.ref('perfis/' + meuPerfil).once('value', (snap) => {
+            db.ref('perfis/' + meuPerfil).on('value', (snap) => {
                 if (snap.val() && snap.val().foto) {
                     fotoPerfilUrl = snap.val().foto;
                     document.getElementById('profile-preview').style.backgroundImage = `url('${fotoPerfilUrl}')`;
@@ -325,7 +348,7 @@
             });
         }
 
-        // 5. Marcador 3D com Fotos
+        // 5. Marcadores 3D no Mapa
         function criarIcone3D(urlFoto, modoIcone, eParceiro = false) {
             const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3b82f6':'ff4b5c'}&color=fff`;
             return L.divIcon({
@@ -333,7 +356,7 @@
                 html: `<div class="avatar-3d-marker ${eParceiro ? 'parceiro' : ''}" style="background-image: url('${img}');">
                         <div class="vehicle-badge"><i class="fa-solid ${modoIcone}"></i></div>
                        </div>`,
-                iconSize: [55, 55], iconAnchor: [27, 27]
+                iconSize: [52, 52], iconAnchor: [26, 26]
             });
         }
 
@@ -351,7 +374,7 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // 6. Rastreamento e Animação Isométrica GTA V
+        // 6. Rastreamento e GPS
         function iniciarRastreamento() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.watchPosition((pos) => {
@@ -399,25 +422,22 @@
             });
         }
 
-        // 7. Sistema de Alerta SOS e Sirene Sintetizada (Web Audio API)
-        let audioCtx = null;
-        let sirenOsc = null;
+        // 7. Sistema de Alerta SOS e Controle de Parar para Todos
+        let audioCtx = null, sirenOsc = null, sirenInterval = null;
 
         function tocarSirenePerigo() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            
             sirenOsc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
 
             sirenOsc.type = 'sawtooth';
-            sirenOsc.frequency.setValueAtTime(600, audioCtx.currentTime);
-            sirenOsc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.5);
-
             sirenOsc.connect(gain);
             gain.connect(audioCtx.destination);
             sirenOsc.start();
 
-            // Modula o som da sirene
-            setInterval(() => {
+            sirenInterval = setInterval(() => {
                 if (sirenOsc && audioCtx) {
                     sirenOsc.frequency.setValueAtTime(600, audioCtx.currentTime);
                     sirenOsc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.4);
@@ -425,20 +445,30 @@
             }, 500);
         }
 
+        function desligarSirene() {
+            if (sirenOsc) { sirenOsc.stop(); sirenOsc.disconnect(); sirenOsc = null; }
+            if (sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
+            document.body.classList.remove('sos-active');
+            document.getElementById('sos-banner').style.display = 'none';
+        }
+
         function dispararSOS() {
-            db.ref('alertas_sos').set({ emissor: meuPerfil, timestamp: Date.now() });
-            tocarSirenePerigo();
-            document.body.classList.add('sos-active');
-            alert("⚠️ ALERTA SOS ATIVADO! Notificando seu parceiro(a)...");
+            db.ref('alertas_sos').set({ status: 'ATIVO', emissor: meuPerfil, timestamp: Date.now() });
+        }
+
+        function pararSOS() {
+            db.ref('alertas_sos').set({ status: 'INATIVO', timestamp: Date.now() });
         }
 
         function escutarAlertasSOS() {
             db.ref('alertas_sos').on('value', (snap) => {
                 const dados = snap.val();
-                if (dados && dados.emissor !== meuPerfil) {
+                if (dados && dados.status === 'ATIVO') {
                     tocarSirenePerigo();
                     document.body.classList.add('sos-active');
-                    alert("🚨 ALERTA DE PERIGO SOS DISPARADO PELO SEU AMOR! VEJA A LOCALIZAÇÃO IMEDIATAMENTE!");
+                    document.getElementById('sos-banner').style.display = 'flex';
+                } else {
+                    desligarSirene();
                 }
             });
         }
@@ -450,14 +480,15 @@
             }
         }
 
-        // 8. Alternador de Câmera 3D / 2D
+        // 8. Eventos e Ações dos Botões da Interface
         document.getElementById('btn-tilt').onclick = () => {
             is3DTilted = !is3DTilted;
-            document.getElementById('map').style.transform = is3DTilted ? 'rotateX(35deg) scale(1.15)' : 'rotateX(0deg) scale(1)';
+            document.getElementById('map').style.transform = is3DTilted ? 'rotateX(30deg) scale(1.1)' : 'rotateX(0deg) scale(1)';
         };
 
-        document.getElementById('btn-sidebar').onclick = () => document.getElementById('sidebar').classList.add('open');
-        document.getElementById('btn-close-sidebar').onclick = () => document.getElementById('sidebar').classList.remove('open');
+        const sidebar = document.getElementById('sidebar');
+        document.getElementById('btn-sidebar').onclick = () => sidebar.classList.add('open');
+        document.getElementById('btn-close-sidebar').onclick = () => sidebar.classList.remove('open');
         document.getElementById('btn-recenter').onclick = () => { if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 17, { animate: true }); };
     </script>
 </body>
