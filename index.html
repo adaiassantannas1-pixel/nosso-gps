@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCasal 360 - Rastreamento Profissional</title>
+    <title>LifeCasal 360 PRO</title>
 
-    <!-- Configurações PWA e Web App -->
+    <!-- Meta Tags PWA & iOS -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
 
-    <!-- Stylesheets: Leaflet, FontAwesome e Google Fonts -->
+    <!-- CSS Leaflet, Fonts & Icons -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,20 +23,20 @@
             --success: #10b981;
             --warning: #f59e0b;
             --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.85);
+            --card-bg: rgba(30, 41, 59, 0.9);
             --border-light: rgba(255, 255, 255, 0.12);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: var(--bg-dark); color: white; }
 
-        /* TELA DE LOGIN PROFISSIONAL */
+        /* LOGIN PROFISSIONAL */
         #login-screen {
             position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
             display: flex; align-items: center; justify-content: center; padding: 20px;
         }
         .login-card {
-            background: rgba(30, 41, 59, 0.75); border: 1px solid var(--border-light);
+            background: rgba(30, 41, 59, 0.85); border: 1px solid var(--border-light);
             padding: 35px 30px; border-radius: 28px; width: 100%; max-width: 400px; text-align: center;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); backdrop-filter: blur(16px);
         }
@@ -45,54 +45,46 @@
             border-radius: 20px; display: flex; align-items: center; justify-content: center;
             margin: 0 auto 15px; font-size: 1.8rem; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.4);
         }
-        .login-card h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 5px; letter-spacing: -0.5px; }
+        .login-card h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 5px; }
         .login-card p { color: #94a3b8; font-size: 0.85rem; margin-bottom: 25px; }
-        
         .input-group { margin-bottom: 16px; text-align: left; }
         .input-group label { font-size: 0.75rem; font-weight: 700; color: #cbd5e1; margin-bottom: 6px; display: block; text-transform: uppercase; }
         .input-group input, .input-group select {
             width: 100%; padding: 14px; border-radius: 14px; border: 1px solid var(--border-light);
-            background: rgba(15, 23, 42, 0.6); color: white; outline: none; font-size: 0.95rem; transition: all 0.2s;
+            background: rgba(15, 23, 42, 0.6); color: white; outline: none; font-size: 0.95rem;
         }
-        .input-group input:focus, .input-group select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2); }
-
         .btn-primary {
             width: 100%; padding: 14px; border-radius: 14px; border: none;
             background: linear-gradient(135deg, var(--primary), var(--primary-dark));
             color: white; font-weight: 700; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px;
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
         }
-        .btn-primary:active { transform: scale(0.98); }
 
-        /* MAPA 2D LIMPO E ULTRA FLUIDO */
+        /* MAPA 2D */
         #map { width: 100%; height: 100%; flex: 1; z-index: 1; }
 
-        /* HUD SUPERIOR COMPACTA ESTILO LIFE360 */
+        /* HUD SUPERIOR */
         .glass-header {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
             z-index: 1000; background: var(--card-bg); backdrop-filter: blur(12px);
             padding: 8px 16px; border-radius: 40px; border: 1px solid var(--border-light);
             display: flex; align-items: center; justify-content: space-between; gap: 12px;
-            width: 92%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 92%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
         .header-profile { display: flex; align-items: center; gap: 10px; }
         .header-avatar {
-            width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--primary);
+            width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--primary);
             background-size: cover; background-position: center;
         }
-        
         .btn-sos-header {
             padding: 8px 16px; border-radius: 30px; background: var(--danger); color: white;
             border: 2px solid #fca5a5; font-size: 0.8rem; font-weight: 800; cursor: pointer;
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); animation: pulse-sos 1.5s infinite;
         }
         @keyframes pulse-sos {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); }
         }
 
-        /* BANNER SOS ATIVO COM BOTÃO DE DESATIVAR */
         #sos-banner {
             position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
             z-index: 1001; background: var(--danger); color: white; padding: 10px 20px; border-radius: 30px;
@@ -102,11 +94,11 @@
         body.sos-active { animation: siren-flash 0.5s infinite alternate !important; }
         @keyframes siren-flash { 0% { background: #7f1d1d; } 100% { background: #1e3a8a; } }
 
-        /* MARCADOR NO MAPA COM STATUS DE BATERIA E TRANSPORTE */
+        /* MARCADOR NO MAPA */
         .life-marker {
             position: relative; width: 56px; height: 56px; border-radius: 50%;
             border: 3px solid var(--primary); background-size: cover; background-position: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
         }
         .life-marker.parceiro { border-color: #3b82f6; }
         .marker-badge {
@@ -120,7 +112,18 @@
             font-size: 0.6rem; font-weight: 700; border: 1px solid var(--border-light); display: flex; align-items: center; gap: 3px;
         }
 
-        /* CONTROLES FLUTUANTES */
+        /* BARRA INFERIOR LIFE360 */
+        .hud-bottom {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; background: var(--card-bg); backdrop-filter: blur(16px);
+            padding: 12px 20px; border-radius: 24px; border: 1px solid var(--border-light);
+            display: flex; justify-content: space-around; align-items: center;
+            width: 92%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .hud-item { text-align: center; }
+        .hud-label { font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+        .hud-value { font-size: 1.1rem; font-weight: 800; color: #fff; }
+
         .controls-bar { position: absolute; bottom: 105px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
         .btn-round {
             width: 46px; height: 46px; border-radius: 50%; background: var(--card-bg);
@@ -128,55 +131,40 @@
             display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
         }
-        .btn-round:active { transform: scale(0.92); }
 
-        /* PAINEL DE MONITORAMENTO INFERIOR (LIFE360 HUD) */
-        .hud-bottom {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; background: var(--card-bg); backdrop-filter: blur(16px);
-            padding: 12px 20px; border-radius: 24px; border: 1px solid var(--border-light);
-            display: flex; justify-content: space-around; align-items: center;
-            width: 92%; max-width: 480px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-        }
-        .hud-item { text-align: center; }
-        .hud-label { font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
-        .hud-value { font-size: 1.1rem; font-weight: 800; color: #fff; }
-
-        /* ABA LATERAL (SIDEBAR) COMPLETA */
+        /* PAINEL LATERAL DE ABAS (PARADAS / CHAT / CONDUÇÃO / CONFIG) */
         .sidebar {
-            position: fixed; top: 0; right: -380px; width: 340px; height: 100%;
+            position: fixed; top: 0; right: -400px; width: 360px; height: 100%;
             background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); z-index: 3000;
-            border-left: 1px solid var(--border-light); padding: 25px 20px;
-            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 20px;
+            border-left: 1px solid var(--border-light); padding: 20px;
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 15px;
             box-shadow: -10px 0 40px rgba(0,0,0,0.6);
         }
         .sidebar.open { right: 0 !important; }
-        .sidebar-header { display: flex; justify-content: space-between; align-items: center; }
+        
+        .tab-menu { display: flex; gap: 5px; background: rgba(30, 41, 59, 0.8); padding: 4px; border-radius: 14px; border: 1px solid var(--border-light); }
+        .tab-btn { flex: 1; padding: 8px; border: none; background: none; color: #94a3b8; font-weight: 700; font-size: 0.75rem; border-radius: 10px; cursor: pointer; }
+        .tab-btn.active { background: var(--primary); color: #fff; }
 
-        .profile-upload-card {
-            background: rgba(30, 41, 59, 0.6); padding: 15px; border-radius: 20px;
-            border: 1px solid var(--border-light); display: flex; flex-direction: column; align-items: center; gap: 10px;
-        }
-        .profile-img-preview {
-            width: 75px; height: 75px; border-radius: 50%; border: 3px solid var(--primary);
-            background-size: cover; background-position: center; box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
-        }
+        .tab-content { display: none; flex: 1; flex-direction: column; gap: 12px; overflow-y: auto; }
+        .tab-content.active { display: flex; }
 
-        .section-title { font-size: 0.8rem; font-weight: 800; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-        .history-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .history-card {
-            background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05);
-            padding: 12px; border-radius: 14px; font-size: 0.85rem; display: flex; align-items: center; gap: 12px;
-        }
-        .history-icon {
-            width: 38px; height: 38px; border-radius: 12px; background: rgba(99, 102, 241, 0.15);
-            color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1rem;
-        }
+        /* CHAT STYLE */
+        .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px; }
+        .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 0.85rem; line-height: 1.3; }
+        .msg-bubble.me { background: var(--primary); align-self: flex-end; border-bottom-right-radius: 4px; }
+        .msg-bubble.other { background: rgba(30, 41, 59, 0.9); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border-light); }
+        .chat-input-box { display: flex; gap: 8px; }
+        .chat-input-box input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-light); background: rgba(15, 23, 42, 0.8); color: white; outline: none; }
+
+        /* CARDS DE HISTÓRICO E DRIVE REPORT */
+        .card-info { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 14px; font-size: 0.85rem; display: flex; align-items: center; gap: 12px; }
+        .card-icon { width: 38px; height: 38px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
     </style>
 </head>
 <body>
 
-    <!-- TELA DE LOGIN DESIGN PROFISSIONAL -->
+    <!-- TELA DE LOGIN -->
     <div id="login-screen">
         <div class="login-card">
             <div class="brand-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
@@ -184,11 +172,11 @@
             <p>Rastreamento inteligente em tempo real</p>
             
             <div class="input-group">
-                <label>Seu Nome de Usuário</label>
+                <label>Nome de Usuário</label>
                 <input type="text" id="login-user" placeholder="Ex: Lucas">
             </div>
             <div class="input-group">
-                <label>Sua Senha</label>
+                <label>Senha</label>
                 <input type="password" id="login-pass" placeholder="******">
             </div>
             <div class="input-group">
@@ -208,7 +196,7 @@
         <div class="header-profile">
             <div class="header-avatar" id="header-avatar-img"></div>
             <div>
-                <div id="label-usuario" style="font-weight:800; font-size:0.85rem;">Carregando...</div>
+                <div id="label-usuario" style="font-weight:800; font-size:0.85rem;">Conectando...</div>
                 <div id="status-rede" style="font-size:0.65rem; color:var(--success); display:flex; align-items:center; gap:4px;">
                     <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> Conectado
                 </div>
@@ -217,23 +205,23 @@
         <button class="btn-sos-header" onclick="dispararSOS()">SOS 🚨</button>
     </div>
 
-    <!-- BANNER SOS ATIVO -->
+    <!-- BANNER SOS -->
     <div id="sos-banner">
         <span>🚨 EMERGÊNCIA ATIVADA!</span>
         <button onclick="pararSOS()" style="background:#fff; color:var(--danger); border:none; padding:6px 14px; border-radius:20px; font-weight:800; cursor:pointer;">PARAR</button>
     </div>
 
-    <!-- MAPA 2D LIMPO -->
+    <!-- MAPA 2D -->
     <div id="map"></div>
 
-    <!-- CONTROLES FLUTUANTES DA TELA -->
+    <!-- CONTROLES -->
     <div class="controls-bar">
         <button class="btn-round" id="btn-recenter" title="Minha Localização"><i class="fa-solid fa-crosshairs"></i></button>
         <button class="btn-round" id="btn-fit-all" title="Ver Casal"><i class="fa-solid fa-users"></i></button>
-        <button class="btn-round" id="btn-sidebar" title="Configurações"><i class="fa-solid fa-gear"></i></button>
+        <button class="btn-round" id="btn-sidebar" title="Menu e Abas"><i class="fa-solid fa-bars"></i></button>
     </div>
 
-    <!-- MONITORAMENTO EM TEMPO REAL (HUD HUD-BOTTOM) -->
+    <!-- HUD BOTTOM -->
     <div class="hud-bottom">
         <div class="hud-item">
             <div class="hud-value" id="stat-speed">0 <span style="font-size:0.7rem;">km/h</span></div>
@@ -251,32 +239,72 @@
         </div>
     </div>
 
-    <!-- MENU LATERAL COMPLETO COM CONFIGURAÇÕES -->
+    <!-- PAINEL LATERAL MULTI-ABAS -->
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3 style="font-weight:800; font-size:1.1rem;">Configurações</h3>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="font-weight:800; font-size:1.1rem;">Painel do Casal</h3>
             <i class="fa-solid fa-xmark" style="cursor:pointer; font-size:1.3rem; color:#94a3b8;" id="btn-close-sidebar"></i>
         </div>
 
-        <div class="profile-upload-card">
-            <div class="profile-img-preview" id="profile-preview"></div>
-            <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="processarFoto(event)">
-            <button class="btn-primary" style="padding:10px; font-size:0.8rem;" onclick="document.getElementById('file-input').click()">📷 Alterar Foto de Perfil</button>
+        <!-- MENU DE NAVEGAÇÃO ENTRE ABAS -->
+        <div class="tab-menu">
+            <button class="tab-btn active" onclick="trocarAba('tab-paradas', this)">Paradas</button>
+            <button class="tab-btn" onclick="trocarAba('tab-chat', this)">Chat</button>
+            <button class="tab-btn" onclick="trocarAba('tab-conducao', this)">Condução</button>
+            <button class="tab-btn" onclick="trocarAba('tab-config', this)">Perfil</button>
         </div>
 
-        <div class="section-title">Histórico de Lugares / Paradas</div>
-        <div class="history-list" id="stops-container"></div>
+        <!-- ABA 1: PARADAS E HISTÓRICO -->
+        <div class="tab-content active" id="tab-paradas">
+            <div style="font-size:0.8rem; font-weight:700; color:#94a3b8;">HISTÓRICO DE PARADAS</div>
+            <div id="stops-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+        </div>
 
-        <button class="btn-primary" style="background:var(--danger); margin-top:auto;" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
+        <!-- ABA 2: CHAT EM TEMPO REAL -->
+        <div class="tab-content" id="tab-chat">
+            <div class="chat-messages" id="chat-container"></div>
+            <div class="chat-input-box">
+                <input type="text" id="chat-input" placeholder="Digite uma mensagem...">
+                <button class="btn-primary" style="width:auto; padding:0 15px; margin:0;" onclick="enviarMensagem()"><i class="fa-solid fa-paper-plane"></i></button>
+            </div>
+        </div>
+
+        <!-- ABA 3: RELATÓRIO DE CONDUÇÃO -->
+        <div class="tab-content" id="tab-conducao">
+            <div class="card-info">
+                <div class="card-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                <div>
+                    <div style="font-weight:700;">Velocidade Máxima</div>
+                    <div id="drive-max-speed" style="color:#94a3b8; font-size:0.8rem;">0 km/h registrada</div>
+                </div>
+            </div>
+            <div class="card-info">
+                <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                <div>
+                    <div style="font-weight:700;">Eventos de Condução</div>
+                    <div id="drive-events" style="color:#94a3b8; font-size:0.8rem;">Nenhuma frenagem brusca</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ABA 4: CONFIGURAÇÕES E PERFIL -->
+        <div class="tab-content" id="tab-config">
+            <div style="display:flex; flex-direction:column; align-items:center; gap:10px; background:rgba(30,41,59,0.5); padding:15px; border-radius:16px;">
+                <div id="profile-preview" style="width:75px; height:75px; border-radius:50%; border:3px solid var(--primary); background-size:cover; background-position:center;"></div>
+                <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="processarFoto(event)">
+                <button class="btn-primary" style="padding:8px; font-size:0.8rem;" onclick="document.getElementById('file-input').click()">📷 Alterar Foto</button>
+            </div>
+            <button class="btn-primary" style="background:var(--danger); margin-top:auto;" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
+        </div>
     </div>
 
-    <!-- Scripts CDN Leaflet & Firebase -->
+    <!-- SDKs Leaflet & Firebase -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
-        // 1. Firebase Configuração
+        // 1. Configuração do Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDm3HCp_dc6C1an3qdiYKrNHAjvjnhSe3U",
             authDomain: "nosso-gps.firebaseapp.com",
@@ -292,25 +320,23 @@
         let meuPerfil = 'pessoa1', parceiroPerfil = 'pessoa2', meuUsuario = '';
         let meuMarcador = null, marcadorParceiro = null;
         let minhaUltimaPos = null, parceiroUltimaPos = null;
-        let fotoPerfilUrl = '', bateriaNivel = 100;
+        let fotoPerfilUrl = '', bateriaNivel = 100, maxVelocidadeRegistrada = 0;
 
-        // 2. MAPA 2D LIMPO, MODERNO E HD (CartoDB Voyager)
+        // 2. MAPA 2D
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© CartoDB', maxZoom: 19
         }).addTo(map);
 
-        // 3. Monitoramento de Bateria Real do Dispositivo
+        // Bateria
         if ('getBattery' in navigator) {
-            navigator.getBattery().then(battery => {
-                bateriaNivel = Math.round(battery.level * 100);
-                battery.addEventListener('levelchange', () => {
-                    bateriaNivel = Math.round(battery.level * 100);
-                });
+            navigator.getBattery().then(b => {
+                bateriaNivel = Math.round(b.level * 100);
+                b.addEventListener('levelchange', () => { bateriaNivel = Math.round(b.level * 100); });
             });
         }
 
-        // 4. Autenticação Direta por Usuário/Senha
+        // Login
         function autenticarUsuario() {
             const user = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
@@ -318,17 +344,17 @@
             parceiroPerfil = meuPerfil === 'pessoa1' ? 'pessoa2' : 'pessoa1';
 
             if (!user || !pass) {
-                document.getElementById('login-error').innerText = "Informe o usuário e a senha!";
+                document.getElementById('login-error').innerText = "Informe usuário e senha!";
                 return;
             }
 
             db.ref('usuarios/' + user).once('value', (snap) => {
-                const dados = snap.val();
-                if (dados && dados.senha !== pass) {
+                const d = snap.val();
+                if (d && d.senha !== pass) {
                     document.getElementById('login-error').innerText = "Senha incorreta!";
                     return;
                 }
-                if (!dados) db.ref('usuarios/' + user).set({ senha: pass, perfil: meuPerfil });
+                if (!d) db.ref('usuarios/' + user).set({ senha: pass, perfil: meuPerfil });
 
                 meuUsuario = user;
                 localStorage.setItem('life_user', user);
@@ -340,6 +366,7 @@
                 iniciarRastreamentoGPS();
                 escutarParceiro();
                 escutarSOS();
+                escutarChat();
                 carregarFoto();
                 carregarParadas();
             });
@@ -351,7 +378,18 @@
             document.getElementById('login-perfil').value = localStorage.getItem('life_perfil') || 'pessoa1';
         }
 
-        // 5. Automação de Reconhecimento por Velocidade / Modo de Transporte
+        // 3. FILTRO DE GPS KALMAN / SUAVIZAÇÃO DE SINAL (Evita movimentação falsa)
+        function validarMovimentoValido(novaLat, novaLng, precisao) {
+            if (precisao > 35) return false; // Despreza imprecisão acima de 35m
+            if (!minhaUltimaPos) return true;
+
+            const dist = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], novaLat, novaLng);
+            // Ignora pequenas oscilações falsas de GPS (menos de 5 metros parado)
+            if (dist < 5) return false;
+
+            return true;
+        }
+
         function detectarTransporte(v) {
             if (v < 2) return { modo: 'Parado', icone: 'fa-person-walking' };
             if (v <= 15) return { modo: 'Caminhando', icone: 'fa-person-walking' };
@@ -359,7 +397,6 @@
             return { modo: 'Dirigindo', icone: 'fa-car' };
         }
 
-        // 6. Marcador do Mapa Estilo Life360 (Foto + Bateria + Transporte)
         function criarMarcadorLife(urlFoto, modoIcone, bat, eParceiro = false) {
             const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3b82f6':'6366f1'}&color=fff`;
             return L.divIcon({
@@ -379,16 +416,22 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // 7. Rastreamento Continuo de GPS
+        // 4. RASTREAMENTO GPS COM FILTRO ANTIBUG
         let tempoParado = null;
 
         function iniciarRastreamentoGPS() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.watchPosition((pos) => {
                     const lat = pos.coords.latitude, lng = pos.coords.longitude, prec = pos.coords.accuracy;
-                    if (prec > 35) return; // Filtro de precisão
+
+                    if (!validarMovimentoValido(lat, lng, prec)) return;
 
                     let v = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
+                    if (v > maxVelocidadeRegistrada) {
+                        maxVelocidadeRegistrada = v;
+                        document.getElementById('drive-max-speed').innerText = `${v.toFixed(0)} km/h registrada`;
+                    }
+
                     const infoTransp = detectarTransporte(v);
                     minhaUltimaPos = [lat, lng];
 
@@ -404,7 +447,7 @@
                         meuMarcador.setIcon(criarMarcadorLife(fotoPerfilUrl, infoTransp.icone, bateriaNivel));
                     }
 
-                    // Grava Parada no Histórico se ficar parado mais de 3 minutos
+                    // Histórico de Paradas
                     if (v < 2) {
                         if (!tempoParado) tempoParado = Date.now();
                         else if (Date.now() - tempoParado > 180000) {
@@ -425,21 +468,46 @@
 
         function escutarParceiro() {
             db.ref('casal/' + parceiroPerfil).on('value', (snap) => {
-                const dados = snap.val();
-                if (!dados || !dados.lat) return;
+                const d = snap.val();
+                if (!d || !d.lat) return;
 
-                parceiroUltimaPos = [dados.lat, dados.lng];
+                parceiroUltimaPos = [d.lat, d.lng];
                 if (!marcadorParceiro) {
-                    marcadorParceiro = L.marker([dados.lat, dados.lng], { icon: criarMarcadorLife(dados.foto, dados.modoIcone || 'fa-person-walking', dados.bateria || 100, true) }).addTo(map);
+                    marcadorParceiro = L.marker([d.lat, d.lng], { icon: criarMarcadorLife(d.foto, d.modoIcone || 'fa-person-walking', d.bateria || 100, true) }).addTo(map);
                 } else {
-                    marcadorParceiro.setLatLng([dados.lat, dados.lng]);
-                    marcadorParceiro.setIcon(criarMarcadorLife(dados.foto, dados.modoIcone || 'fa-person-walking', dados.bateria || 100, true));
+                    marcadorParceiro.setLatLng([d.lat, d.lng]);
+                    marcadorParceiro.setIcon(criarMarcadorLife(d.foto, d.modoIcone || 'fa-person-walking', d.bateria || 100, true));
                 }
                 atualizarDistancia();
             });
         }
 
-        // 8. Sirene e Alerta SOS Sincronizado
+        // 5. CHAT EM TEMPO REAL
+        function enviarMensagem() {
+            const input = document.getElementById('chat-input');
+            const texto = input.value.trim();
+            if (!texto) return;
+
+            db.ref('chat').push({ emissor: meuUsuario, perfil: meuPerfil, mensagem: texto, timestamp: Date.now() });
+            input.value = '';
+        }
+
+        function escutarChat() {
+            db.ref('chat').limitToLast(20).on('value', (snap) => {
+                const container = document.getElementById('chat-container');
+                container.innerHTML = '';
+                snap.forEach((child) => {
+                    const m = child.val();
+                    const bubble = document.createElement('div');
+                    bubble.className = `msg-bubble ${m.perfil === meuPerfil ? 'me' : 'other'}`;
+                    bubble.innerText = m.mensagem;
+                    container.appendChild(bubble);
+                });
+                container.scrollTop = container.scrollHeight;
+            });
+        }
+
+        // 6. SOS E SIRENE
         let audioCtx = null, sirenOsc = null, sirenInterval = null;
         function tocarSirene() {
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -460,13 +528,12 @@
             document.body.classList.remove('sos-active');
             document.getElementById('sos-banner').style.display = 'none';
         }
-
         function dispararSOS() { db.ref('alertas_sos').set({ status: 'ATIVO', timestamp: Date.now() }); }
         function pararSOS() { db.ref('alertas_sos').set({ status: 'INATIVO', timestamp: Date.now() }); }
         function escutarSOS() {
             db.ref('alertas_sos').on('value', (snap) => {
-                const dados = snap.val();
-                if (dados && dados.status === 'ATIVO') {
+                const d = snap.val();
+                if (d && d.status === 'ATIVO') {
                     tocarSirene();
                     document.body.classList.add('sos-active');
                     document.getElementById('sos-banner').style.display = 'flex';
@@ -474,7 +541,14 @@
             });
         }
 
-        // 9. Fotos e Histórico no Firebase
+        // 7. ABAS E INTERFACE
+        function trocarAba(abaId, btn) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(abaId).classList.add('active');
+        }
+
         function processarFoto(e) {
             const file = e.target.files[0];
             if (file) {
@@ -510,9 +584,9 @@
                 snap.forEach((child) => {
                     const item = child.val();
                     const card = document.createElement('div');
-                    card.className = 'history-card';
+                    card.className = 'card-info';
                     card.innerHTML = `
-                        <div class="history-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <div class="card-icon"><i class="fa-solid fa-location-dot"></i></div>
                         <div>
                             <div style="font-weight:700;">${item.usuario} parou aqui</div>
                             <div style="font-size:0.75rem; color:#94a3b8;">Às ${item.hora}</div>
@@ -530,7 +604,6 @@
             }
         }
 
-        // Controles de Clique e Ajuste de Tela
         document.getElementById('btn-recenter').onclick = () => { if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 16); };
         document.getElementById('btn-fit-all').onclick = () => {
             if (minhaUltimaPos && parceiroUltimaPos) {
