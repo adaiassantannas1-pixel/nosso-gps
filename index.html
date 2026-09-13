@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCasal 360 PRO</title>
+    <title>LifeCasal 360 ELITE</title>
 
-    <!-- Meta Tags PWA & iOS -->
+    <!-- Meta Tags PWA / iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#0f172a">
 
-    <!-- CSS Leaflet, Fonts & Icons -->
+    <!-- Leaflet & FontAwesome & Fonts -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -23,14 +23,14 @@
             --success: #10b981;
             --warning: #f59e0b;
             --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.9);
+            --card-bg: rgba(30, 41, 59, 0.92);
             --border-light: rgba(255, 255, 255, 0.12);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
         body { display: flex; flex-direction: column; height: 100vh; overflow: hidden; background: var(--bg-dark); color: white; }
 
-        /* LOGIN PROFISSIONAL */
+        /* TELA DE LOGIN PROFISSIONAL */
         #login-screen {
             position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at top right, #1e1b4b, #0f172a);
             display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -81,9 +81,7 @@
             border: 2px solid #fca5a5; font-size: 0.8rem; font-weight: 800; cursor: pointer;
             box-shadow: 0 0 15px rgba(239, 68, 68, 0.6); animation: pulse-sos 1.5s infinite;
         }
-        @keyframes pulse-sos {
-            0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); }
-        }
+        @keyframes pulse-sos { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
         #sos-banner {
             position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
@@ -94,7 +92,7 @@
         body.sos-active { animation: siren-flash 0.5s infinite alternate !important; }
         @keyframes siren-flash { 0% { background: #7f1d1d; } 100% { background: #1e3a8a; } }
 
-        /* MARCADOR NO MAPA */
+        /* MARCADOR LIFE */
         .life-marker {
             position: relative; width: 56px; height: 56px; border-radius: 50%;
             border: 3px solid var(--primary); background-size: cover; background-position: center;
@@ -109,10 +107,10 @@
         .battery-badge {
             position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
             background: rgba(15, 23, 42, 0.9); color: #fff; padding: 1px 6px; border-radius: 8px;
-            font-size: 0.6rem; font-weight: 700; border: 1px solid var(--border-light); display: flex; align-items: center; gap: 3px;
+            font-size: 0.65rem; font-weight: 700; border: 1px solid var(--border-light); display: flex; align-items: center; gap: 3px;
         }
 
-        /* BARRA INFERIOR LIFE360 */
+        /* HUD BOTTOM */
         .hud-bottom {
             position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
             z-index: 1000; background: var(--card-bg); backdrop-filter: blur(16px);
@@ -132,10 +130,10 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
         }
 
-        /* PAINEL LATERAL DE ABAS (PARADAS / CHAT / CONDUÇÃO / CONFIG) */
+        /* PAINEL LATERAL MULTI-ABAS */
         .sidebar {
-            position: fixed; top: 0; right: -400px; width: 360px; height: 100%;
-            background: rgba(15, 23, 42, 0.96); backdrop-filter: blur(20px); z-index: 3000;
+            position: fixed; top: 0; right: -420px; width: 380px; height: 100%;
+            background: rgba(15, 23, 42, 0.97); backdrop-filter: blur(20px); z-index: 3000;
             border-left: 1px solid var(--border-light); padding: 20px;
             transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 15px;
             box-shadow: -10px 0 40px rgba(0,0,0,0.6);
@@ -143,23 +141,31 @@
         .sidebar.open { right: 0 !important; }
         
         .tab-menu { display: flex; gap: 5px; background: rgba(30, 41, 59, 0.8); padding: 4px; border-radius: 14px; border: 1px solid var(--border-light); }
-        .tab-btn { flex: 1; padding: 8px; border: none; background: none; color: #94a3b8; font-weight: 700; font-size: 0.75rem; border-radius: 10px; cursor: pointer; }
+        .tab-btn { flex: 1; padding: 8px 4px; border: none; background: none; color: #94a3b8; font-weight: 700; font-size: 0.75rem; border-radius: 10px; cursor: pointer; }
         .tab-btn.active { background: var(--primary); color: #fff; }
 
         .tab-content { display: none; flex: 1; flex-direction: column; gap: 12px; overflow-y: auto; }
         .tab-content.active { display: flex; }
 
-        /* CHAT STYLE */
-        .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-right: 5px; }
-        .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 16px; font-size: 0.85rem; line-height: 1.3; }
-        .msg-bubble.me { background: var(--primary); align-self: flex-end; border-bottom-right-radius: 4px; }
-        .msg-bubble.other { background: rgba(30, 41, 59, 0.9); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border-light); }
+        /* CHAT estilo WHATSAPP */
+        .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 5px; }
+        .msg-bubble { max-width: 82%; padding: 10px 14px; border-radius: 16px; font-size: 0.85rem; line-height: 1.35; position: relative; }
+        .msg-bubble .sender-name { font-size: 0.7rem; font-weight: 800; margin-bottom: 3px; color: #a5b4fc; }
+        .msg-bubble .meta { font-size: 0.65rem; opacity: 0.75; text-align: right; margin-top: 4px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+        .msg-bubble.me { background: #4f46e5; align-self: flex-end; border-bottom-right-radius: 4px; }
+        .msg-bubble.other { background: rgba(30, 41, 59, 0.95); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border-light); }
         .chat-input-box { display: flex; gap: 8px; }
         .chat-input-box input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-light); background: rgba(15, 23, 42, 0.8); color: white; outline: none; }
 
-        /* CARDS DE HISTÓRICO E DRIVE REPORT */
-        .card-info { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); padding: 12px; border-radius: 14px; font-size: 0.85rem; display: flex; align-items: center; gap: 12px; }
-        .card-icon { width: 38px; height: 38px; border-radius: 12px; background: rgba(99, 102, 241, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+        /* CARDS DO HISTÓRICO E CONDUÇÃO */
+        .stop-card { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-light); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .stop-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 0.85rem; color: #a5b4fc; }
+        .stop-address { font-size: 0.75rem; color: #cbd5e1; display: flex; align-items: flex-start; gap: 6px; }
+        .stop-time { font-size: 0.7rem; color: #94a3b8; }
+        .btn-mini-map { margin-top: 5px; background: rgba(99, 102, 241, 0.2); border: 1px solid var(--primary); color: white; padding: 6px 10px; border-radius: 10px; font-size: 0.75rem; font-weight: 700; cursor: pointer; align-self: flex-start; }
+
+        .card-info { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: 16px; font-size: 0.85rem; display: flex; align-items: center; gap: 12px; }
+        .card-icon { width: 42px; height: 42px; border-radius: 14px; background: rgba(99, 102, 241, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
     </style>
 </head>
 <body>
@@ -168,8 +174,8 @@
     <div id="login-screen">
         <div class="login-card">
             <div class="brand-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
-            <h2>LifeCasal 360</h2>
-            <p>Rastreamento inteligente em tempo real</p>
+            <h2>LifeCasal 360 ELITE</h2>
+            <p>Monitoramento avançado do casal</p>
             
             <div class="input-group">
                 <label>Nome de Usuário</label>
@@ -217,8 +223,8 @@
     <!-- CONTROLES -->
     <div class="controls-bar">
         <button class="btn-round" id="btn-recenter" title="Minha Localização"><i class="fa-solid fa-crosshairs"></i></button>
-        <button class="btn-round" id="btn-fit-all" title="Ver Casal"><i class="fa-solid fa-users"></i></button>
-        <button class="btn-round" id="btn-sidebar" title="Menu e Abas"><i class="fa-solid fa-bars"></i></button>
+        <button class="btn-round" id="btn-fit-all" title="Ver Ambos"><i class="fa-solid fa-users"></i></button>
+        <button class="btn-round" id="btn-sidebar" title="Menu e Painel"><i class="fa-solid fa-bars"></i></button>
     </div>
 
     <!-- HUD BOTTOM -->
@@ -246,30 +252,29 @@
             <i class="fa-solid fa-xmark" style="cursor:pointer; font-size:1.3rem; color:#94a3b8;" id="btn-close-sidebar"></i>
         </div>
 
-        <!-- MENU DE NAVEGAÇÃO ENTRE ABAS -->
         <div class="tab-menu">
             <button class="tab-btn active" onclick="trocarAba('tab-paradas', this)">Paradas</button>
-            <button class="tab-btn" onclick="trocarAba('tab-chat', this)">Chat</button>
-            <button class="tab-btn" onclick="trocarAba('tab-conducao', this)">Condução</button>
-            <button class="tab-btn" onclick="trocarAba('tab-config', this)">Perfil</button>
+            <button class="tab-btn" onclick="trocarAba('tab-chat', this)">Chat 💬</button>
+            <button class="tab-btn" onclick="trocarAba('tab-conducao', this)">Condução 🚘</button>
+            <button class="tab-btn" onclick="trocarAba('tab-config', this)">Perfil 👤</button>
         </div>
 
-        <!-- ABA 1: PARADAS E HISTÓRICO -->
+        <!-- ABA 1: PARADAS E ENDEREÇOS -->
         <div class="tab-content active" id="tab-paradas">
-            <div style="font-size:0.8rem; font-weight:700; color:#94a3b8;">HISTÓRICO DE PARADAS</div>
-            <div id="stops-container" style="display:flex; flex-direction:column; gap:10px;"></div>
+            <div style="font-size:0.8rem; font-weight:700; color:#94a3b8;">HISTÓRICO DE PARADAS & ENDEREÇOS</div>
+            <div id="stops-container" style="display:flex; flex-direction:column; gap:12px;"></div>
         </div>
 
-        <!-- ABA 2: CHAT EM TEMPO REAL -->
+        <!-- ABA 2: CHAT WHATSAPP STYLE -->
         <div class="tab-content" id="tab-chat">
             <div class="chat-messages" id="chat-container"></div>
             <div class="chat-input-box">
-                <input type="text" id="chat-input" placeholder="Digite uma mensagem...">
-                <button class="btn-primary" style="width:auto; padding:0 15px; margin:0;" onclick="enviarMensagem()"><i class="fa-solid fa-paper-plane"></i></button>
+                <input type="text" id="chat-input" placeholder="Mensagem..." onkeydown="if(event.key==='Enter') enviarMensagem()">
+                <button class="btn-primary" style="width:auto; padding:0 16px; margin:0;" onclick="enviarMensagem()"><i class="fa-solid fa-paper-plane"></i></button>
             </div>
         </div>
 
-        <!-- ABA 3: RELATÓRIO DE CONDUÇÃO -->
+        <!-- ABA 3: TELEMETRIA / CONDUÇÃO -->
         <div class="tab-content" id="tab-conducao">
             <div class="card-info">
                 <div class="card-icon"><i class="fa-solid fa-gauge-high"></i></div>
@@ -281,30 +286,36 @@
             <div class="card-info">
                 <div class="card-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
                 <div>
-                    <div style="font-weight:700;">Eventos de Condução</div>
-                    <div id="drive-events" style="color:#94a3b8; font-size:0.8rem;">Nenhuma frenagem brusca</div>
+                    <div style="font-weight:700;">Segurança ao Dirigir</div>
+                    <div id="drive-events" style="color:#94a3b8; font-size:0.8rem;">Nenhum evento grave</div>
                 </div>
             </div>
         </div>
 
-        <!-- ABA 4: CONFIGURAÇÕES E PERFIL -->
+        <!-- ABA 4: PERFIL EXPANDIDO -->
         <div class="tab-content" id="tab-config">
-            <div style="display:flex; flex-direction:column; align-items:center; gap:10px; background:rgba(30,41,59,0.5); padding:15px; border-radius:16px;">
-                <div id="profile-preview" style="width:75px; height:75px; border-radius:50%; border:3px solid var(--primary); background-size:cover; background-position:center;"></div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap:10px; background:rgba(30,41,59,0.5); padding:15px; border-radius:18px;">
+                <div id="profile-preview" style="width:80px; height:80px; border-radius:50%; border:3px solid var(--primary); background-size:cover; background-position:center;"></div>
                 <input type="file" id="file-input" accept="image/*" style="display:none;" onchange="processarFoto(event)">
-                <button class="btn-primary" style="padding:8px; font-size:0.8rem;" onclick="document.getElementById('file-input').click()">📷 Alterar Foto</button>
+                <button class="btn-primary" style="padding:8px; font-size:0.8rem;" onclick="document.getElementById('file-input').click()">📷 Galeria / Câmera</button>
             </div>
+
+            <div class="input-group">
+                <label>Nome Exibido</label>
+                <input type="text" id="profile-name" placeholder="Seu nome" onchange="salvarNomeExibido(this.value)">
+            </div>
+
             <button class="btn-primary" style="background:var(--danger); margin-top:auto;" onclick="fazerLogout()"><i class="fa-solid fa-right-from-bracket"></i> Sair da Conta</button>
         </div>
     </div>
 
-    <!-- SDKs Leaflet & Firebase -->
+    <!-- Leaflet & Firebase SDKs -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
     <script>
-        // 1. Configuração do Firebase
+        // 1. Firebase Config
         const firebaseConfig = {
             apiKey: "AIzaSyDm3HCp_dc6C1an3qdiYKrNHAjvjnhSe3U",
             authDomain: "nosso-gps.firebaseapp.com",
@@ -320,13 +331,16 @@
         let meuPerfil = 'pessoa1', parceiroPerfil = 'pessoa2', meuUsuario = '';
         let meuMarcador = null, marcadorParceiro = null;
         let minhaUltimaPos = null, parceiroUltimaPos = null;
-        let fotoPerfilUrl = '', bateriaNivel = 100, maxVelocidadeRegistrada = 0;
+        let fotoPerfilUrl = '', bateriaNivel = 100, maxSpeed = 0;
+        let rotaViagem = null, marcadorTemporarioParada = null;
 
-        // 2. MAPA 2D
+        // 2. Mapa 2D Clean
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© CartoDB', maxZoom: 19
         }).addTo(map);
+
+        rotaViagem = L.polyline([], { color: '#6366f1', weight: 4, opacity: 0.75, dashArray: '6,6' }).addTo(map);
 
         // Bateria
         if ('getBattery' in navigator) {
@@ -361,6 +375,7 @@
                 localStorage.setItem('life_perfil', meuPerfil);
 
                 document.getElementById('label-usuario').innerText = `${user} (${meuPerfil === 'pessoa1' ? '💖' : '💙'})`;
+                document.getElementById('profile-name').value = user;
                 document.getElementById('login-screen').style.display = 'none';
 
                 iniciarRastreamentoGPS();
@@ -378,16 +393,12 @@
             document.getElementById('login-perfil').value = localStorage.getItem('life_perfil') || 'pessoa1';
         }
 
-        // 3. FILTRO DE GPS KALMAN / SUAVIZAÇÃO DE SINAL (Evita movimentação falsa)
-        function validarMovimentoValido(novaLat, novaLng, precisao) {
-            if (precisao > 35) return false; // Despreza imprecisão acima de 35m
+        // 3. FILTRO DE MOVIMENTO ANTI-GHOSTING
+        function movimentoValido(lat, lng, precisao) {
+            if (precisao > 35) return false;
             if (!minhaUltimaPos) return true;
-
-            const dist = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], novaLat, novaLng);
-            // Ignora pequenas oscilações falsas de GPS (menos de 5 metros parado)
-            if (dist < 5) return false;
-
-            return true;
+            const dist = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng);
+            return dist >= 4; // Ignora oscilações < 4m
         }
 
         function detectarTransporte(v) {
@@ -416,24 +427,56 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // 4. RASTREAMENTO GPS COM FILTRO ANTIBUG
-        let tempoParado = null;
+        // 4. REVERSE GEOCODING (NOMINATIM / OSM)
+        async function buscarEndereco(lat, lng) {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=jsonv2`);
+                const data = await res.json();
+                if (data && data.address) {
+                    const rua = data.address.road || data.address.pedestrian || 'Rua sem nome';
+                    const bairro = data.address.suburb || data.address.neighbourhood || '';
+                    const cidade = data.address.city || data.address.town || '';
+                    return `${rua}${bairro ? ', ' + bairro : ''}${cidade ? ' - ' + cidade : ''}`;
+                }
+            } catch(e) { console.error(e); }
+            return `Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)}`;
+        }
+
+        // 5. GPS & TELEMETRIA
+        let tempoParadoInicio = null;
+        let pontosRotaViagem = [];
 
         function iniciarRastreamentoGPS() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.watchPosition((pos) => {
                     const lat = pos.coords.latitude, lng = pos.coords.longitude, prec = pos.coords.accuracy;
 
-                    if (!validarMovimentoValido(lat, lng, prec)) return;
+                    if (!movimentoValido(lat, lng, prec)) return;
 
                     let v = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
-                    if (v > maxVelocidadeRegistrada) {
-                        maxVelocidadeRegistrada = v;
+                    if (v > maxSpeed) {
+                        maxSpeed = v;
                         document.getElementById('drive-max-speed').innerText = `${v.toFixed(0)} km/h registrada`;
                     }
 
                     const infoTransp = detectarTransporte(v);
                     minhaUltimaPos = [lat, lng];
+
+                    // Atualizar Rota Dinâmica em movimento
+                    if (v >= 2) {
+                        pontosRotaViagem.push([lat, lng]);
+                        rotaViagem.setLatLngs(pontosRotaViagem);
+                        tempoParadoInicio = null;
+                    } else {
+                        // Se parou, acumula tempo para gerar registro oficial no banco
+                        if (!tempoParadoInicio) tempoParadoInicio = Date.now();
+                        else if (Date.now() - tempoParadoInicio > 180000) { // 3 minutos
+                            pontosRotaViagem = []; // Limpa rota ao consolidar parada
+                            rotaViagem.setLatLngs([]);
+                            registrarParadaOficial(lat, lng, tempoParadoInicio);
+                            tempoParadoInicio = null;
+                        }
+                    }
 
                     document.getElementById('stat-speed').innerHTML = `${v.toFixed(0)} <span style="font-size:0.7rem;">km/h</span>`;
                     document.getElementById('stat-mode').innerHTML = `<i class="fa-solid ${infoTransp.icone}"></i>`;
@@ -447,15 +490,6 @@
                         meuMarcador.setIcon(criarMarcadorLife(fotoPerfilUrl, infoTransp.icone, bateriaNivel));
                     }
 
-                    // Histórico de Paradas
-                    if (v < 2) {
-                        if (!tempoParado) tempoParado = Date.now();
-                        else if (Date.now() - tempoParado > 180000) {
-                            db.ref('paradas').push({ usuario: meuUsuario, lat: lat, lng: lng, hora: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-                            tempoParado = null;
-                        }
-                    } else { tempoParado = null; }
-
                     db.ref('casal/' + meuPerfil).set({
                         lat: lat, lng: lng, speed: v, modoIcone: infoTransp.icone,
                         foto: fotoPerfilUrl, bateria: bateriaNivel, timestamp: Date.now()
@@ -464,6 +498,22 @@
                     atualizarDistancia();
                 }, (err) => console.error(err), { enableHighAccuracy: true, maximumAge: 1000 });
             }
+        }
+
+        async function registrarParadaOficial(lat, lng, inicioMs) {
+            const duracaoMin = Math.round((Date.now() - inicioMs) / 60000);
+            const endereco = await buscarEndereco(lat, lng);
+            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            db.ref('paradas').push({
+                usuario: meuUsuario,
+                perfil: meuPerfil,
+                lat: lat, lng: lng,
+                endereco: endereco,
+                hora: hora,
+                duracao: duracaoMin || 3,
+                timestamp: Date.now()
+            });
         }
 
         function escutarParceiro() {
@@ -482,39 +532,66 @@
             });
         }
 
-        // 5. CHAT EM TEMPO REAL
+        // 6. CHAT COM DUPLO CHECK (✓✓) ESTILO WHATSAPP
         function enviarMensagem() {
             const input = document.getElementById('chat-input');
             const texto = input.value.trim();
             if (!texto) return;
 
-            db.ref('chat').push({ emissor: meuUsuario, perfil: meuPerfil, mensagem: texto, timestamp: Date.now() });
+            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            db.ref('chat').push({
+                emissor: meuUsuario,
+                perfil: meuPerfil,
+                mensagem: texto,
+                hora: hora,
+                lido: false,
+                timestamp: Date.now()
+            });
             input.value = '';
         }
 
         function escutarChat() {
-            db.ref('chat').limitToLast(20).on('value', (snap) => {
+            db.ref('chat').limitToLast(30).on('value', (snap) => {
                 const container = document.getElementById('chat-container');
                 container.innerHTML = '';
                 snap.forEach((child) => {
+                    const key = child.key;
                     const m = child.val();
+
+                    // Marcar como lido se a mensagem veio da outra pessoa
+                    if (m.perfil !== meuPerfil && !m.lido) {
+                        db.ref('chat/' + key).update({ lido: true });
+                    }
+
+                    const isMe = m.perfil === meuPerfil;
+                    const checkStatus = m.lido ? '<i class="fa-solid fa-check-double" style="color:#60a5fa;"></i>' : '<i class="fa-solid fa-check" style="opacity:0.7;"></i>';
+
                     const bubble = document.createElement('div');
-                    bubble.className = `msg-bubble ${m.perfil === meuPerfil ? 'me' : 'other'}`;
-                    bubble.innerText = m.mensagem;
+                    bubble.className = `msg-bubble ${isMe ? 'me' : 'other'}`;
+                    bubble.innerHTML = `
+                        <div class="sender-name">${isMe ? 'Você' : m.emissor}</div>
+                        <div>${m.mensagem}</div>
+                        <div class="meta">${m.hora} ${isMe ? checkStatus : ''}</div>
+                    `;
                     container.appendChild(bubble);
                 });
                 container.scrollTop = container.scrollHeight;
             });
         }
 
-        // 6. SOS E SIRENE
+        // 7. GERENCIADOR DE ÁUDIO SINGLETON SOS (SEM SOBREPOSIÇÃO)
         let audioCtx = null, sirenOsc = null, sirenInterval = null;
+
         function tocarSirene() {
+            if (sirenOsc) return; // Se já está tocando, não duplica
+
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             if (audioCtx.state === 'suspended') audioCtx.resume();
+
             sirenOsc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             sirenOsc.type = 'sawtooth'; sirenOsc.connect(gain); gain.connect(audioCtx.destination); sirenOsc.start();
+
             sirenInterval = setInterval(() => {
                 if (sirenOsc && audioCtx) {
                     sirenOsc.frequency.setValueAtTime(600, audioCtx.currentTime);
@@ -522,14 +599,17 @@
                 }
             }, 500);
         }
+
         function desligarSirene() {
             if (sirenOsc) { sirenOsc.stop(); sirenOsc.disconnect(); sirenOsc = null; }
             if (sirenInterval) { clearInterval(sirenInterval); sirenInterval = null; }
             document.body.classList.remove('sos-active');
             document.getElementById('sos-banner').style.display = 'none';
         }
+
         function dispararSOS() { db.ref('alertas_sos').set({ status: 'ATIVO', timestamp: Date.now() }); }
         function pararSOS() { db.ref('alertas_sos').set({ status: 'INATIVO', timestamp: Date.now() }); }
+
         function escutarSOS() {
             db.ref('alertas_sos').on('value', (snap) => {
                 const d = snap.val();
@@ -541,12 +621,54 @@
             });
         }
 
-        // 7. ABAS E INTERFACE
+        // 8. ABAS E MAPA DE PARADAS
         function trocarAba(abaId, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById(abaId).classList.add('active');
+        }
+
+        function carregarParadas() {
+            db.ref('paradas').limitToLast(15).on('value', (snap) => {
+                const container = document.getElementById('stops-container');
+                container.innerHTML = '';
+                snap.forEach((child) => {
+                    const item = child.val();
+                    const card = document.createElement('div');
+                    card.className = 'stop-card';
+                    card.innerHTML = `
+                        <div class="stop-header">
+                            <span><i class="fa-solid fa-location-pin"></i> ${item.usuario}</span>
+                            <span class="stop-time">${item.hora} (${item.duracao || 3} min)</span>
+                        </div>
+                        <div class="stop-address"><i class="fa-solid fa-map-location-dot" style="margin-top:2px;"></i> ${item.endereco || 'Endereço indisponível'}</div>
+                        <button class="btn-mini-map" onclick="focarPontoParada(${item.lat}, ${item.lng})">📍 Ver este ponto no mapa</button>
+                    `;
+                    container.prepend(card);
+                });
+            });
+        }
+
+        function focarPontoParada(lat, lng) {
+            if (marcadorTemporarioParada) map.removeLayer(marcadorTemporarioParada);
+            marcadorTemporarioParada = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    className: 'custom-stop-point',
+                    html: `<div style="background:#ef4444; color:white; width:30px; height:30px; border-radius:50%; border:2px solid white; display:flex; align-items:center; justify-content:center; box-shadow:0 0 10px rgba(239,68,68,0.8);"><i class="fa-solid fa-flag"></i></div>`,
+                    iconSize: [30, 30], iconAnchor: [15, 15]
+                })
+            }).addTo(map);
+
+            map.flyTo([lat, lng], 18, { animate: true });
+            document.getElementById('sidebar').classList.remove('open');
+        }
+
+        function salvarNomeExibido(novoNome) {
+            if (!novoNome) return;
+            meuUsuario = novoNome;
+            document.getElementById('label-usuario').innerText = `${novoNome} (${meuPerfil === 'pessoa1' ? '💖' : '💙'})`;
+            db.ref('usuarios/' + novoNome).update({ nome: novoNome });
         }
 
         function processarFoto(e) {
@@ -568,6 +690,7 @@
                 }; reader.readAsDataURL(file);
             }
         }
+
         function carregarFoto() {
             db.ref('perfis/' + meuPerfil).on('value', (snap) => {
                 if (snap.val() && snap.val().foto) {
@@ -575,25 +698,6 @@
                     document.getElementById('profile-preview').style.backgroundImage = `url('${fotoPerfilUrl}')`;
                     document.getElementById('header-avatar-img').style.backgroundImage = `url('${fotoPerfilUrl}')`;
                 }
-            });
-        }
-        function carregarParadas() {
-            db.ref('paradas').limitToLast(10).on('value', (snap) => {
-                const container = document.getElementById('stops-container');
-                container.innerHTML = '';
-                snap.forEach((child) => {
-                    const item = child.val();
-                    const card = document.createElement('div');
-                    card.className = 'card-info';
-                    card.innerHTML = `
-                        <div class="card-icon"><i class="fa-solid fa-location-dot"></i></div>
-                        <div>
-                            <div style="font-weight:700;">${item.usuario} parou aqui</div>
-                            <div style="font-size:0.75rem; color:#94a3b8;">Às ${item.hora}</div>
-                        </div>
-                    `;
-                    container.prepend(card);
-                });
             });
         }
 
