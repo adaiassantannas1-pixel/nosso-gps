@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCasal 360 ELITE - Geofencing</title>
+    <title>LifeCasal 360 ELITE - Geofencing Interativo</title>
 
     <!-- Meta Tags PWA / iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -83,7 +83,7 @@
         }
         @keyframes pulse-sos { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* BANNER DE NOTIFICAÇÃO DE CHEGADA / SAÍDA EM LUGARES */
+        /* NOTIFICAÇÃO DE CHEGADA / SAÍDA */
         #place-notification-banner {
             position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
             z-index: 1001; background: var(--primary); color: white; padding: 10px 20px; border-radius: 30px;
@@ -102,7 +102,7 @@
         body.sos-active { animation: siren-flash 0.5s infinite alternate !important; }
         @keyframes siren-flash { 0% { background: #7f1d1d; } 100% { background: #1e3a8a; } }
 
-        /* MARCADOR LIFE */
+        /* MARCADORES NO MAPA */
         .life-marker {
             position: relative; width: 56px; height: 56px; border-radius: 50%;
             border: 3px solid var(--primary); background-size: cover; background-position: center;
@@ -118,6 +118,13 @@
             position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
             background: rgba(15, 23, 42, 0.9); color: #fff; padding: 1px 6px; border-radius: 8px;
             font-size: 0.65rem; font-weight: 700; border: 1px solid var(--border-light); display: flex; align-items: center; gap: 3px;
+        }
+
+        /* MARCADORES DE LUGARES (CASA, TRABALHO, ETC) */
+        .place-map-icon {
+            width: 42px; height: 42px; border-radius: 50%; background: #6366f1; color: white;
+            border: 3px solid white; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.6);
         }
 
         /* HUD BOTTOM */
@@ -157,8 +164,7 @@
         .tab-content { display: none; flex: 1; flex-direction: column; gap: 12px; overflow-y: auto; }
         .tab-content.active { display: flex; }
 
-        /* CARDS DO SISTEMA */
-        .place-card { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-light); padding: 12px; border-radius: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .place-card { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-light); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 10px; }
         .stop-card { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-light); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 6px; }
         
         /* CHAT estilo WHATSAPP */
@@ -170,6 +176,13 @@
         .msg-bubble.other { background: rgba(30, 41, 59, 0.95); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border-light); }
         .chat-input-box { display: flex; gap: 8px; }
         .chat-input-box input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-light); background: rgba(15, 23, 42, 0.8); color: white; outline: none; }
+
+        /* ESTILO POP-UP NO MAPA */
+        .leaflet-popup-content-wrapper {
+            background: rgba(15, 23, 42, 0.95) !important; color: white !important;
+            border-radius: 16px !important; border: 1px solid var(--border-light) !important;
+        }
+        .leaflet-popup-tip { background: rgba(15, 23, 42, 0.95) !important; }
     </style>
 </head>
 <body>
@@ -179,7 +192,7 @@
         <div class="login-card">
             <div class="brand-icon"><i class="fa-solid fa-location-crosshairs"></i></div>
             <h2>LifeCasal 360 ELITE</h2>
-            <p>Monitoramento e Geofencing de Lugares</p>
+            <p>Geofencing Interativo no Mapa</p>
             
             <div class="input-group">
                 <label>Nome de Usuário</label>
@@ -215,7 +228,7 @@
         <button class="btn-sos-header" onclick="dispararSOS()">SOS 🚨</button>
     </div>
 
-    <!-- NOTIFICAÇÃO DE GEOFENCING (CHEGADA / SAÍDA DE LUGARES) -->
+    <!-- NOTIFICAÇÃO DE CHEGADA / SAÍDA DE LUGARES -->
     <div id="place-notification-banner">
         <i class="fa-solid fa-bell"></i> <span id="place-notification-text">Amor chegou em Casa</span>
     </div>
@@ -270,8 +283,9 @@
 
         <!-- ABA LUGARES (GEOFENCING) -->
         <div class="tab-content active" id="tab-lugares">
-            <button class="btn-primary" onclick="cadastrarLugarAtual()"><i class="fa-solid fa-location-dot"></i> Salvar Local Atual como Lugar</button>
-            <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; margin-top:10px;">LUGARES CADASTRADOS (CASA, ESCOLA, TRABALHO)</div>
+            <div style="font-size:0.8rem; font-weight:700; color:#cbd5e1;">💡 Dica: Você também pode **clicar direto no mapa** para marcar um novo lugar.</div>
+            <button class="btn-primary" onclick="cadastrarLugarModoPrompt()"><i class="fa-solid fa-location-dot"></i> Salvar Minha Posição Atual</button>
+            <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; margin-top:10px;">LUGARES CADASTRADOS & RAIO DE ALERTA</div>
             <div id="places-container" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>
 
@@ -326,6 +340,7 @@
         let fotoPerfilUrl = '', bateriaNivel = 100;
         let lugaresCadastrados = {};
         let lugarAtualParceiro = null;
+        let camadasLugaresMapa = []; // Camadas de marcadores e círculos de lugares
 
         // 2. Mapa 2D
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
@@ -375,6 +390,7 @@
                 carregarLugares();
                 carregarFoto();
                 carregarParadas();
+                configurarCliqueNoMapa();
             });
         }
 
@@ -384,17 +400,44 @@
             document.getElementById('login-perfil').value = localStorage.getItem('life_perfil') || 'pessoa1';
         }
 
-        // 3. SISTEMA DE GEOFENCING E NOTIFICAÇÃO DE LUGARES
-        function cadastrarLugarAtual() {
-            if (!minhaUltimaPos) { alert("Aguardando localização do GPS..."); return; }
-            const nomeLugar = prompt("Qual o nome deste lugar? (Ex: Casa, Faculdade, Trabalho, Escola):");
-            if (!nomeLugar) return;
+        // 3. SISTEMA DE LUGARES E GEOFENCING INTERATIVO
+        const iconesLugar = {
+            'fa-house': 'Casa 🏠',
+            'fa-briefcase': 'Trabalho 💼',
+            'fa-school': 'Escola 🏫',
+            'fa-graduation-cap': 'Faculdade 🎓',
+            'fa-dumbbell': 'Academia 🏋️',
+            'fa-cart-shopping': 'Mercado 🛒',
+            'fa-location-dot': 'Outro 📍'
+        };
+
+        function configurarCliqueNoMapa() {
+            map.on('click', (e) => {
+                const lat = e.latlng.lat;
+                const lng = e.latlng.lng;
+                salvarNovoLugarModal(lat, lng);
+            });
+        }
+
+        function cadastrarLugarModoPrompt() {
+            if (!minhaUltimaPos) { alert("Aguardando posição de GPS..."); return; }
+            salvarNovoLugarModal(minhaUltimaPos[0], minhaUltimaPos[1]);
+        }
+
+        function salvarNovoLugarModal(lat, lng) {
+            const nome = prompt("Nome do Lugar (Ex: Casa, Trabalho, Faculdade):");
+            if (!nome) return;
+
+            const iconeChave = prompt("Escolha o ícone:\n1. Casa 🏠\n2. Trabalho 💼\n3. Escola 🏫\n4. Faculdade 🎓\n5. Academia 🏋️\n6. Mercado 🛒\n7. Outro 📍", "1");
+            const mapaIcones = { '1':'fa-house', '2':'fa-briefcase', '3':'fa-school', '4':'fa-graduation-cap', '5':'fa-dumbbell', '6':'fa-cart-shopping', '7':'fa-location-dot' };
+            const iconeFinal = mapaIcones[iconeChave] || 'fa-house';
 
             db.ref('lugares').push({
-                nome: nomeLugar,
-                lat: minhaUltimaPos[0],
-                lng: minhaUltimaPos[1],
-                raio: 100 // Raio de 100 metros
+                nome: nome,
+                icone: iconeFinal,
+                lat: lat,
+                lng: lng,
+                raio: 100 // Raio padrão inicial: 100 metros
             });
         }
 
@@ -404,30 +447,71 @@
                 container.innerHTML = '';
                 lugaresCadastrados = snap.val() || {};
 
+                // Limpa camadas antigas de lugares do mapa
+                camadasLugaresMapa.forEach(layer => map.removeLayer(layer));
+                camadasLugaresMapa = [];
+
                 snap.forEach((child) => {
                     const place = child.val();
                     const key = child.key;
 
-                    // Desenha o círculo do lugar no mapa
-                    L.circle([place.lat, place.lng], {
-                        color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.15, radius: place.raio || 100
-                    }).addTo(map).bindPopup(`<b>${place.nome}</b>`);
+                    // Marcador com Ícone do Lugar no Mapa
+                    const placeIcon = L.divIcon({
+                        className: 'custom-place-icon',
+                        html: `<div class="place-map-icon"><i class="fa-solid ${place.icone || 'fa-house'}"></i></div>`,
+                        iconSize: [42, 42], iconAnchor: [21, 21]
+                    });
 
+                    const placeMarker = L.marker([place.lat, place.lng], { icon: placeIcon }).addTo(map);
+                    
+                    // Círculo visual do Raio de Detecção
+                    const placeCircle = L.circle([place.lat, place.lng], {
+                        color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.15, radius: place.raio || 100
+                    }).addTo(map);
+
+                    placeMarker.bindPopup(`
+                        <div style="text-align:center; padding:5px;">
+                            <div style="font-weight:800; font-size:1rem; color:#a5b4fc;"><i class="fa-solid ${place.icone || 'fa-house'}"></i> ${place.nome}</div>
+                            <div style="font-size:0.75rem; color:#94a3b8; margin:5px 0;">Raio de Alerta: <b>${place.raio || 100}m</b></div>
+                            <button onclick="alterarRaioLugar('${key}', ${place.raio || 100})" style="background:#6366f1; color:white; border:none; padding:5px 10px; border-radius:8px; font-weight:700; cursor:pointer;">Editar Raio</button>
+                            <button onclick="removerLugar('${key}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:8px; font-weight:700; cursor:pointer; margin-left:4px;">Excluir</button>
+                        </div>
+                    `);
+
+                    camadasLugaresMapa.push(placeMarker, placeCircle);
+
+                    // Card da Sidebar
                     const card = document.createElement('div');
                     card.className = 'place-card';
                     card.innerHTML = `
-                        <div>
-                            <div style="font-weight:800; font-size:0.9rem;"><i class="fa-solid fa-house"></i> ${place.nome}</div>
-                            <div style="font-size:0.7rem; color:#94a3b8;">Raio de detecção: ${place.raio || 100}m</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-weight:800; font-size:0.9rem;"><i class="fa-solid ${place.icone || 'fa-house'}" style="color:#6366f1;"></i> ${place.nome}</div>
+                            <button style="background:none; border:none; color:var(--danger); cursor:pointer;" onclick="removerLugar('${key}')"><i class="fa-solid fa-trash"></i></button>
                         </div>
-                        <button style="background:none; border:none; color:var(--danger); cursor:pointer;" onclick="removerLugar('${key}')"><i class="fa-solid fa-trash"></i></button>
+                        <div style="font-size:0.75rem; color:#94a3b8; display:flex; justify-content:space-between; align-items:center;">
+                            <span>Raio: <b>${place.raio || 100} metros</b></span>
+                            <button onclick="alterarRaioLugar('${key}', ${place.raio || 100})" style="background:rgba(99, 102, 241, 0.2); border:1px solid #6366f1; color:white; padding:4px 8px; border-radius:8px; font-size:0.7rem; font-weight:700; cursor:pointer;">Ajustar Raio</button>
+                        </div>
                     `;
                     container.appendChild(card);
                 });
             });
         }
 
-        function removerLugar(key) { db.ref('lugares/' + key).remove(); }
+        function alterarRaioLugar(key, raioAtual) {
+            const novoRaio = prompt(`Ajuste o raio de alerta para este lugar em metros (Atual: ${raioAtual}m):`, raioAtual);
+            if (!novoRaio || isNaN(novoRaio)) return;
+
+            db.ref('lugares/' + key).update({
+                raio: parseInt(novoRaio)
+            });
+        }
+
+        function removerLugar(key) {
+            if (confirm("Deseja mesmo excluir este lugar?")) {
+                db.ref('lugares/' + key).remove();
+            }
+        }
 
         function checarLugaresParceiro(lat, lng) {
             let lugarDetectado = null;
