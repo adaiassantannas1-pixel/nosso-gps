@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCasal 360 - Waze Edition</title>
+    <title>LifeCasal 360 - Waze Edition Complete</title>
 
     <!-- Meta Tags PWA / iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#334155">
+    <meta name="theme-color" content="#1e293b">
 
-    <!-- Leaflet, FontAwesome & Fonts -->
+    <!-- Leaflet & FontAwesome & Fonts -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -21,7 +21,9 @@
             --waze-yellow: #fbbc04;
             --waze-red: #ea4335;
             --waze-green: #34a853;
-            --bg-dark: #1e293b;
+            --primary: #6366f1;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
             --card-bg: rgba(30, 41, 59, 0.94);
             --border-light: rgba(255, 255, 255, 0.15);
         }
@@ -59,7 +61,7 @@
             box-shadow: 0 4px 15px rgba(51, 136, 255, 0.4);
         }
 
-        /* MAPA ESTILO WAZE */
+        /* MAPA ESTILO WAZE MODERNO */
         #map { width: 100%; height: 100%; flex: 1; z-index: 1; }
 
         /* HUD SUPERIOR */
@@ -82,20 +84,31 @@
         }
         @keyframes pulse-sos { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* BANNER DE EXCESSO DE VELOCIDADE OU RADAR */
-        #traffic-alert-banner {
+        /* BANNER DE ALERTAS DO TRÂNSITO / SOS / LUGARES */
+        #traffic-alert-banner, #place-notification-banner {
             position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
             z-index: 1001; background: var(--waze-red); color: white; padding: 10px 20px; border-radius: 30px;
             display: none; align-items: center; gap: 10px; font-weight: 800; font-size: 0.85rem;
             box-shadow: 0 10px 30px rgba(234, 67, 53, 0.7); border: 2px solid #fff;
             animation: bounceAlert 0.4s ease infinite alternate;
         }
+        #place-notification-banner { background: var(--waze-blue); animation: slideDown 0.4s ease; }
         @keyframes bounceAlert { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(-5px); } }
+        @keyframes slideDown { from { transform: translateX(-50%) translateY(-20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+
+        #sos-banner {
+            position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
+            z-index: 1001; background: var(--danger); color: white; padding: 10px 20px; border-radius: 30px;
+            display: none; align-items: center; gap: 15px; font-weight: 800; font-size: 0.85rem;
+            box-shadow: 0 10px 30px rgba(239, 68, 68, 0.6); border: 2px solid #fff;
+        }
+        body.sos-active { animation: siren-flash 0.5s infinite alternate !important; }
+        @keyframes siren-flash { 0% { background: #7f1d1d; } 100% { background: #1e3a8a; } }
 
         /* VELOCÍMETRO WAZE HUD */
         .speedometer-waze {
-            position: absolute; bottom: 95px; left: 20px; z-index: 1000;
-            width: 75px; height: 75px; border-radius: 50%; background: #0f172a;
+            position: absolute; bottom: 105px; left: 20px; z-index: 1000;
+            width: 70px; height: 70px; border-radius: 50%; background: #0f172a;
             border: 4px solid var(--waze-blue); display: flex; flex-direction: column;
             align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             transition: all 0.3s ease;
@@ -105,13 +118,60 @@
             animation: pulseSpeed 0.5s infinite alternate;
         }
         @keyframes pulseSpeed { from { transform: scale(1); } to { transform: scale(1.1); } }
-        .speed-number { font-family: 'Orbitron', sans-serif; font-size: 1.4rem; font-weight: 900; line-height: 1; }
-        .speed-unit { font-size: 0.6rem; font-weight: 800; text-transform: uppercase; margin-top: 2px; }
+        .speed-number { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; font-weight: 900; line-height: 1; }
+        .speed-unit { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-top: 2px; }
+
+        /* MARCADOR ESTILO LIFE360 */
+        .life-marker {
+            position: relative; width: 56px; height: 56px; border-radius: 50%;
+            border: 3px solid var(--waze-blue); background-size: cover; background-position: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+        }
+        .life-marker.parceiro { border-color: #38bdf8; }
+        .marker-badge {
+            position: absolute; bottom: -2px; right: -2px; background: #10b981; color: white;
+            width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; display: flex;
+            align-items: center; justify-content: center; border: 2px solid #0f172a;
+        }
+        .battery-badge {
+            position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.9); color: #fff; padding: 1px 6px; border-radius: 8px;
+            font-size: 0.65rem; font-weight: 700; border: 1px solid var(--border-light); display: flex; align-items: center; gap: 3px;
+        }
+
+        /* MARCADORES DE LUGARES E RADARES */
+        .place-map-icon {
+            width: 42px; height: 42px; border-radius: 50%; background: #6366f1; color: white;
+            border: 3px solid white; display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.6);
+        }
+        .radar-icon-map {
+            width: 32px; height: 32px; border-radius: 50%; background: var(--waze-red); color: white;
+            border: 2px solid white; display: flex; align-items: center; justify-content: center;
+            font-size: 0.9rem; box-shadow: 0 0 12px rgba(234, 67, 53, 0.8);
+        }
+        .traffic-light-icon {
+            width: 34px; height: 34px; border-radius: 12px; background: #000; color: white;
+            border: 2px solid var(--border-light); display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 0.75rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        /* HUD INFERIOR LIFE360 */
+        .hud-bottom {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 1000; background: var(--card-bg); backdrop-filter: blur(16px);
+            padding: 12px 20px; border-radius: 24px; border: 1px solid var(--border-light);
+            display: flex; justify-content: space-around; align-items: center;
+            width: 92%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        }
+        .hud-item { text-align: center; }
+        .hud-label { font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
+        .hud-value { font-size: 1rem; font-weight: 800; color: #fff; }
 
         /* BOTÕES FLUTUANTES */
-        .controls-bar { position: absolute; bottom: 95px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+        .controls-bar { position: absolute; bottom: 105px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
         .btn-round {
-            width: 48px; height: 48px; border-radius: 50%; background: var(--card-bg);
+            width: 46px; height: 46px; border-radius: 50%; background: var(--card-bg);
             border: 1px solid var(--border-light); color: white; backdrop-filter: blur(12px);
             display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
@@ -128,23 +188,16 @@
         .sidebar.open { right: 0 !important; }
 
         .tab-menu { display: flex; gap: 4px; background: rgba(30, 41, 59, 0.8); padding: 4px; border-radius: 14px; border: 1px solid var(--border-light); }
-        .tab-btn { flex: 1; padding: 8px 2px; border: none; background: none; color: #94a3b8; font-weight: 700; font-size: 0.7rem; border-radius: 10px; cursor: pointer; }
+        .tab-btn { flex: 1; padding: 8px 2px; border: none; background: none; color: #94a3b8; font-weight: 700; font-size: 0.68rem; border-radius: 10px; cursor: pointer; }
         .tab-btn.active { background: var(--waze-blue); color: #fff; }
 
         .tab-content { display: none; flex: 1; flex-direction: column; gap: 12px; overflow-y: auto; }
         .tab-content.active { display: flex; }
 
-        /* ÍCONES DE RADAR E SEMÁFORO NO MAPA */
-        .radar-icon-map {
-            width: 32px; height: 32px; border-radius: 50%; background: var(--waze-red); color: white;
-            border: 2px solid white; display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem; box-shadow: 0 0 12px rgba(234, 67, 53, 0.8);
-        }
-        .traffic-light-icon {
-            width: 34px; height: 34px; border-radius: 12px; background: #000; color: white;
-            border: 2px solid var(--border-light); display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 0.75rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        }
+        .place-card { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-light); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 10px; }
+        .stop-card { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-light); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 6px; }
+        .card-info { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: 16px; font-size: 0.85rem; display: flex; align-items: center; gap: 12px; }
+        .card-icon { width: 42px; height: 42px; border-radius: 14px; background: rgba(99, 102, 241, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
 
         /* CHAT estilo WHATSAPP */
         .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 5px; }
@@ -163,8 +216,8 @@
     <div id="login-screen">
         <div class="login-card">
             <div class="brand-icon"><i class="fa-solid fa-car-side"></i></div>
-            <h2>LifeCasal - Waze</h2>
-            <p>Trânsito, Radares e Semáforos em Tempo Real</p>
+            <h2>LifeCasal 360</h2>
+            <p>Waze Edition & Monitoramento Completo</p>
             
             <div class="input-group">
                 <label>Nome de Usuário</label>
@@ -181,7 +234,7 @@
                     <option value="pessoa2">Pessoa 2 💙</option>
                 </select>
             </div>
-            <button class="btn-primary" onclick="autenticarUsuario()">Iniciar Navegação</button>
+            <button class="btn-primary" onclick="autenticarUsuario()">Entrar no Sistema</button>
             <div id="login-error" style="color:var(--waze-red); font-size:0.8rem; margin-top:12px; font-weight:600;"></div>
         </div>
     </div>
@@ -193,16 +246,27 @@
             <div>
                 <div id="label-usuario" style="font-weight:800; font-size:0.85rem;">Conectando...</div>
                 <div id="status-rede" style="font-size:0.65rem; color:var(--waze-green); display:flex; align-items:center; gap:4px;">
-                    <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> Modo Waze Ativo
+                    <i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> Conectado
                 </div>
             </div>
         </div>
         <button class="btn-sos-header" onclick="dispararSOS()">SOS 🚨</button>
     </div>
 
-    <!-- BANNER ALERTA DE RADAR / VELOCIDADE -->
+    <!-- NOTIFICAÇÃO DE CHEGADA / LUGARES -->
+    <div id="place-notification-banner">
+        <i class="fa-solid fa-bell"></i> <span id="place-notification-text">Amor chegou em Casa</span>
+    </div>
+
+    <!-- BANNER DE RADAR OU VELOCIDADE EXCESSIVA -->
     <div id="traffic-alert-banner">
         <i class="fa-solid fa-triangle-exclamation"></i> <span id="traffic-alert-text">Atenção: Radar à frente!</span>
+    </div>
+
+    <!-- BANNER SOS -->
+    <div id="sos-banner">
+        <span>🚨 EMERGÊNCIA ATIVADA!</span>
+        <button onclick="pararSOS()" style="background:#fff; color:var(--danger); border:none; padding:6px 14px; border-radius:20px; font-weight:800; cursor:pointer;">PARAR</button>
     </div>
 
     <!-- VELOCÍMETRO WAZE -->
@@ -214,44 +278,79 @@
     <!-- MAPA WAZE -->
     <div id="map"></div>
 
-    <!-- CONTROLES -->
+    <!-- CONTROLES FLUTUANTES -->
     <div class="controls-bar">
-        <button class="btn-round" id="btn-recenter" title="Minha Posição"><i class="fa-solid fa-crosshairs"></i></button>
-        <button class="btn-round" onclick="carregarRadaresECameras()" title="Buscar Radares"><i class="fa-solid fa-camera"></i></button>
+        <button class="btn-round" id="btn-recenter" title="Minha Localização"><i class="fa-solid fa-crosshairs"></i></button>
+        <button class="btn-round" onclick="carregarRadaresECameras()" title="Escanear Radares"><i class="fa-solid fa-camera"></i></button>
+        <button class="btn-round" id="btn-fit-all" title="Ver Ambos"><i class="fa-solid fa-users"></i></button>
         <button class="btn-round" id="btn-sidebar" title="Menu e Painel"><i class="fa-solid fa-bars"></i></button>
+    </div>
+
+    <!-- HUD BOTTOM LIFE360 -->
+    <div class="hud-bottom">
+        <div class="hud-item">
+            <div class="hud-value" id="stat-speed">0 <span style="font-size:0.7rem;">km/h</span></div>
+            <div class="hud-label">Velocidade</div>
+        </div>
+        <div style="width:1px; height:25px; background:var(--border-light);"></div>
+        <div class="hud-item">
+            <div class="hud-value" id="stat-mode" style="color:#6366f1;"><i class="fa-solid fa-person-walking"></i></div>
+            <div class="hud-label" id="stat-mode-text">Parado</div>
+        </div>
+        <div style="width:1px; height:25px; background:var(--border-light);"></div>
+        <div class="hud-item">
+            <div class="hud-value" id="stat-dist" style="color:var(--waze-green);">0 m</div>
+            <div class="hud-label">Distância</div>
+        </div>
     </div>
 
     <!-- PAINEL LATERAL MULTI-ABAS -->
     <div class="sidebar" id="sidebar">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-            <h3 style="font-weight:800; font-size:1.1rem;">Painel de Navegação</h3>
+            <h3 style="font-weight:800; font-size:1.1rem;">Painel do Casal</h3>
             <i class="fa-solid fa-xmark" style="cursor:pointer; font-size:1.3rem; color:#94a3b8;" id="btn-close-sidebar"></i>
         </div>
 
         <div class="tab-menu">
             <button class="tab-btn active" onclick="trocarAba('tab-waze', this)">Waze 🚗</button>
             <button class="tab-btn" onclick="trocarAba('tab-lugares', this)">Lugares 🏠</button>
+            <button class="tab-btn" onclick="trocarAba('tab-paradas', this)">Paradas 📍</button>
             <button class="tab-btn" onclick="trocarAba('tab-chat', this)">Chat 💬</button>
             <button class="tab-btn" onclick="trocarAba('tab-config', this)">Perfil 👤</button>
         </div>
 
-        <!-- ABA WAZE E TRÂNSITO -->
+        <!-- ABA 1: WAZE E TRÂNSITO -->
         <div class="tab-content active" id="tab-waze">
             <div class="input-group">
-                <label>Limite Max. de Velocidade da Via (KM/H)</label>
+                <label>Limite Max. de Velocidade (KM/H)</label>
                 <input type="number" id="input-max-speed" value="60" onchange="limiteVelocidadeMax = parseInt(this.value)">
             </div>
-            <button class="btn-primary" onclick="carregarRadaresECameras()"><i class="fa-solid fa-camera"></i> Escanear Radares da Região</button>
-            <div style="font-size:0.75rem; color:#94a3b8; margin-top:5px;">O sistema analisa radares de velocidade e calcula a contagem de semáforos próximos.</div>
+            <button class="btn-primary" onclick="carregarRadaresECameras()"><i class="fa-solid fa-camera"></i> Escanear Radares Próximos</button>
+            
+            <div class="card-info" style="margin-top:10px;">
+                <div class="card-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                <div>
+                    <div style="font-weight:700;">Velocidade Máxima Hoje</div>
+                    <div id="drive-max-speed" style="color:#94a3b8; font-size:0.8rem;">0 km/h registrada</div>
+                </div>
+            </div>
         </div>
 
-        <!-- ABA LUGARES -->
+        <!-- ABA 2: LUGARES (GEOFENCING) -->
         <div class="tab-content" id="tab-lugares">
-            <button class="btn-primary" onclick="cadastrarLugarModoPrompt()"><i class="fa-solid fa-location-dot"></i> Salvar Lugar no Mapa</button>
-            <div id="places-container" style="display:flex; flex-direction:column; gap:10px; margin-top:10px;"></div>
+            <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1;">💡 Clique em qualquer ponto do mapa para marcar um novo lugar!</div>
+            <button class="btn-primary" onclick="cadastrarLugarModoPrompt()"><i class="fa-solid fa-location-dot"></i> Salvar Minha Posição Atual</button>
+            <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; margin-top:10px;">LUGARES CADASTRADOS & RAIO</div>
+            <div id="places-container" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>
 
-        <!-- ABA CHAT -->
+        <!-- ABA 3: HISTÓRICO DE PARADAS -->
+        <div class="tab-content" id="tab-paradas">
+            <div style="font-size:0.8rem; font-weight:700; color:#94a3b8;">HISTÓRICO DE ENDEREÇOS E PARADAS</div>
+            <div id="stops-container" style="display:flex; flex-direction:column; gap:12px;"></div>
+        </div>
+
+        <!-- ABA 4: CHAT -->
         <div class="tab-content" id="tab-chat">
             <div class="chat-messages" id="chat-container"></div>
             <div class="chat-input-box">
@@ -260,7 +359,7 @@
             </div>
         </div>
 
-        <!-- ABA PERFIL -->
+        <!-- ABA 5: PERFIL -->
         <div class="tab-content" id="tab-config">
             <div style="display:flex; flex-direction:column; align-items:center; gap:10px; background:rgba(30,41,59,0.5); padding:15px; border-radius:18px;">
                 <div id="profile-preview" style="width:80px; height:80px; border-radius:50%; border:3px solid var(--waze-blue); background-size:cover; background-position:center;"></div>
@@ -293,12 +392,15 @@
         let meuPerfil = 'pessoa1', parceiroPerfil = 'pessoa2', meuUsuario = '';
         let meuMarcador = null, marcadorParceiro = null;
         let minhaUltimaPos = null, parceiroUltimaPos = null;
-        let fotoPerfilUrl = '', bateriaNivel = 100;
+        let fotoPerfilUrl = '', bateriaNivel = 100, maxSpeedRecorded = 0;
         let limiteVelocidadeMax = 60;
+        let lugaresCadastrados = {};
+        let lugarAtualParceiro = null;
+        let camadasLugaresMapa = [];
         let camadaRadares = L.layerGroup(), camadaSemaforos = L.layerGroup();
         let listaRadaresProximos = [];
 
-        // 2. MAPA ESTILO WAZE (CartoDB Voyager)
+        // 2. MAPA ESTILO WAZE MODERNO (CartoDB Voyager)
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap / CartoDB / Waze Style', maxZoom: 19
@@ -346,7 +448,10 @@
                 escutarParceiro();
                 escutarSOS();
                 escutarChat();
+                carregarLugares();
                 carregarFoto();
+                carregarParadas();
+                configurarCliqueNoMapa();
                 iniciarCicloSemaforosRegressivos();
             });
         }
@@ -357,13 +462,12 @@
             document.getElementById('login-perfil').value = localStorage.getItem('life_perfil') || 'pessoa1';
         }
 
-        // 3. API OVERPASS - CONSULTAR RADARES E SEMÁFOROS
+        // 3. CONSULTAR RADARES E SEMÁFOROS (OVERPASS API)
         async function carregarRadaresECameras() {
             if (!minhaUltimaPos) return;
             const lat = minhaUltimaPos[0];
             const lng = minhaUltimaPos[1];
 
-            // Busca elementos em um raio de 2.5km
             const query = `[out:json];(node["highway"="speed_camera"](around:2500,${lat},${lng});node["highway"="traffic_signals"](around:1500,${lat},${lng}););out;`;
             const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
 
@@ -394,7 +498,7 @@
             } catch (e) { console.error(e); }
         }
 
-        // 4. CONTAGEM REGRESSIVA DE SEMÁFOROS
+        // SEMÁFOROS
         let semaforosMapa = [];
         function desenharSemaforoNoMapa(lat, lng) {
             const semIcon = L.divIcon({
@@ -405,7 +509,7 @@
                        </div>`,
                 iconSize: [34, 34], iconAnchor: [17, 17]
             });
-            const marker = L.marker([lat, lng], { icon: semIcon }).addTo(camadaSemaforos);
+            L.marker([lat, lng], { icon: semIcon }).addTo(camadaSemaforos);
             semaforosMapa.push({ lat, lng, tempoVerde: 20, tempoVermelho: 15, estadoAtual: 'VERDE', tempoRestante: 20, elementId: `sem-${lat.toString().replace('.','')}` });
         }
 
@@ -426,7 +530,6 @@
             }, 1000);
         }
 
-        // 5. CHECAGEM DE EXCESSO DE VELOCIDADE E RADAR PRÓXIMO
         function verificarAlertasVelocidadeERadar(vKmh) {
             const speedBox = document.getElementById('speedometer-box');
             const alertBanner = document.getElementById('traffic-alert-banner');
@@ -434,7 +537,6 @@
 
             document.getElementById('speed-val').innerText = vKmh.toFixed(0);
 
-            // Alerta de Excesso de Velocidade
             if (vKmh > limiteVelocidadeMax) {
                 speedBox.classList.add('overspeed');
                 alertText.innerText = `Atenção: Excesso de velocidade (${vKmh.toFixed(0)} km/h)!`;
@@ -444,7 +546,6 @@
                 speedBox.classList.remove('overspeed');
             }
 
-            // Alerta de Radar Próximo (Menos de 200 metros)
             let radarProximo = false;
             if (minhaUltimaPos) {
                 listaRadaresProximos.forEach(r => {
@@ -461,13 +562,124 @@
             }
         }
 
-        // 6. GPS E RASTREAMENTO
+        // 4. LUGARES E GEOFENCING INTERATIVO
+        function configurarCliqueNoMapa() {
+            map.on('click', (e) => {
+                salvarNovoLugarModal(e.latlng.lat, e.latlng.lng);
+            });
+        }
+
+        function cadastrarLugarModoPrompt() {
+            if (!minhaUltimaPos) { alert("Aguardando posição de GPS..."); return; }
+            salvarNovoLugarModal(minhaUltimaPos[0], minhaUltimaPos[1]);
+        }
+
+        function salvarNovoLugarModal(lat, lng) {
+            const nome = prompt("Nome do Lugar (Ex: Casa, Trabalho, Faculdade):");
+            if (!nome) return;
+
+            const iconeChave = prompt("Escolha o ícone:\n1. Casa 🏠\n2. Trabalho 💼\n3. Escola 🏫\n4. Faculdade 🎓\n5. Academia 🏋️\n6. Mercado 🛒\n7. Outro 📍", "1");
+            const mapaIcones = { '1':'fa-house', '2':'fa-briefcase', '3':'fa-school', '4':'fa-graduation-cap', '5':'fa-dumbbell', '6':'fa-cart-shopping', '7':'fa-location-dot' };
+            const iconeFinal = mapaIcones[iconeChave] || 'fa-house';
+
+            db.ref('lugares').push({ nome, icone: iconeFinal, lat, lng, raio: 100 });
+        }
+
+        function carregarLugares() {
+            db.ref('lugares').on('value', (snap) => {
+                const container = document.getElementById('places-container');
+                container.innerHTML = '';
+                lugaresCadastrados = snap.val() || {};
+
+                camadasLugaresMapa.forEach(layer => map.removeLayer(layer));
+                camadasLugaresMapa = [];
+
+                snap.forEach((child) => {
+                    const place = child.val();
+                    const key = child.key;
+
+                    const placeIcon = L.divIcon({
+                        className: 'custom-place-icon',
+                        html: `<div class="place-map-icon"><i class="fa-solid ${place.icone || 'fa-house'}"></i></div>`,
+                        iconSize: [42, 42], iconAnchor: [21, 21]
+                    });
+
+                    const placeMarker = L.marker([place.lat, place.lng], { icon: placeIcon }).addTo(map);
+                    const placeCircle = L.circle([place.lat, place.lng], {
+                        color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.15, radius: place.raio || 100
+                    }).addTo(map);
+
+                    placeMarker.bindPopup(`
+                        <div style="text-align:center; padding:5px; color:#fff;">
+                            <div style="font-weight:800; font-size:1rem; color:#a5b4fc;"><i class="fa-solid ${place.icone || 'fa-house'}"></i> ${place.nome}</div>
+                            <div style="font-size:0.75rem; color:#94a3b8; margin:5px 0;">Raio: <b>${place.raio || 100}m</b></div>
+                            <button onclick="alterarRaioLugar('${key}', ${place.raio || 100})" style="background:#6366f1; color:white; border:none; padding:5px 10px; border-radius:8px; font-weight:700; cursor:pointer;">Editar Raio</button>
+                            <button onclick="removerLugar('${key}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:8px; font-weight:700; cursor:pointer; margin-left:4px;">Excluir</button>
+                        </div>
+                    `);
+
+                    camadasLugaresMapa.push(placeMarker, placeCircle);
+
+                    const card = document.createElement('div');
+                    card.className = 'place-card';
+                    card.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-weight:800; font-size:0.9rem;"><i class="fa-solid ${place.icone || 'fa-house'}" style="color:#6366f1;"></i> ${place.nome}</div>
+                            <button style="background:none; border:none; color:var(--danger); cursor:pointer;" onclick="removerLugar('${key}')"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                        <div style="font-size:0.75rem; color:#94a3b8; display:flex; justify-content:space-between; align-items:center;">
+                            <span>Raio: <b>${place.raio || 100} metros</b></span>
+                            <button onclick="alterarRaioLugar('${key}', ${place.raio || 100})" style="background:rgba(99, 102, 241, 0.2); border:1px solid #6366f1; color:white; padding:4px 8px; border-radius:8px; font-size:0.7rem; font-weight:700; cursor:pointer;">Ajustar Raio</button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        function alterarRaioLugar(key, raioAtual) {
+            const novo = prompt(`Ajuste o raio de alerta em metros (Atual: ${raioAtual}m):`, raioAtual);
+            if (!novo || isNaN(novo)) return;
+            db.ref('lugares/' + key).update({ raio: parseInt(novo) });
+        }
+
+        function removerLugar(key) {
+            if (confirm("Excluir este lugar?")) db.ref('lugares/' + key).remove();
+        }
+
+        function checarLugaresParceiro(lat, lng) {
+            let lugarDetectado = null;
+            Object.values(lugaresCadastrados).forEach(place => {
+                const d = calcularDistancia(lat, lng, place.lat, place.lng);
+                if (d <= (place.raio || 100)) lugarDetectado = place.nome;
+            });
+
+            if (lugarDetectado !== lugarAtualParceiro) {
+                if (lugarDetectado) {
+                    exibirNotificacaoLugar(`Amor chegou em ${lugarDetectado} 🏠`);
+                } else if (lugarAtualParceiro) {
+                    exibirNotificacaoLugar(`Amor saiu de ${lugarAtualParceiro} 🚗`);
+                }
+                lugarAtualParceiro = lugarDetectado;
+            }
+            return lugarDetectado;
+        }
+
+        function exibirNotificacaoLugar(texto) {
+            const banner = document.getElementById('place-notification-banner');
+            document.getElementById('place-notification-text').innerText = texto;
+            banner.style.display = 'flex';
+            setTimeout(() => { banner.style.display = 'none'; }, 6000);
+        }
+
+        // 5. GPS E TELEMETRIA
         function criarMarcadorLife(urlFoto, modoIcone, bat, eParceiro = false) {
-            const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3388ff':'3b82f6'}&color=fff`;
+            const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3388ff':'6366f1'}&color=fff`;
             return L.divIcon({
                 className: 'custom-icon-wrapper',
-                html: `<div style="position:relative; width:56px; height:56px; border-radius:50%; border:3px solid ${eParceiro?'#3388ff':'#34a853'}; background-image:url('${img}'); background-size:cover;">
-                        <div style="position:absolute; top:-5px; left:50%; transform:translateX(-50%); background:#0f172a; color:#fff; padding:1px 6px; border-radius:8px; font-size:0.6rem; font-weight:800;">${bat}%</div>
+                html: `<div class="life-marker ${eParceiro ? 'parceiro' : ''}" style="background-image: url('${img}');">
+                        <div class="battery-badge"><i class="fa-solid fa-battery-three-quarters"></i> ${bat}%</div>
+                        <div class="marker-badge"><i class="fa-solid ${modoIcone}"></i></div>
                        </div>`,
                 iconSize: [56, 56], iconAnchor: [28, 28]
             });
@@ -487,23 +699,32 @@
                     if (prec > 35) return;
 
                     let v = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
-                    minhaUltimaPos = [lat, lng];
+                    if (v > maxSpeedRecorded) {
+                        maxSpeedRecorded = v;
+                        document.getElementById('drive-max-speed').innerText = `${v.toFixed(0)} km/h registrada`;
+                    }
 
+                    minhaUltimaPos = [lat, lng];
                     verificarAlertasVelocidadeERadar(v);
 
+                    const modoIcone = v > 2 ? (v > 30 ? 'fa-car' : 'fa-motorcycle') : 'fa-person-walking';
+                    document.getElementById('stat-speed').innerHTML = `${v.toFixed(0)} <span style="font-size:0.7rem;">km/h</span>`;
+
                     if (!meuMarcador) {
-                        meuMarcador = L.marker([lat, lng], { icon: criarMarcadorLife(fotoPerfilUrl, 'fa-car', bateriaNivel) }).addTo(map);
+                        meuMarcador = L.marker([lat, lng], { icon: criarMarcadorLife(fotoPerfilUrl, modoIcone, bateriaNivel) }).addTo(map);
                         map.setView([lat, lng], 16);
                         carregarRadaresECameras();
                     } else {
                         meuMarcador.setLatLng([lat, lng]);
-                        meuMarcador.setIcon(criarMarcadorLife(fotoPerfilUrl, 'fa-car', bateriaNivel));
+                        meuMarcador.setIcon(criarMarcadorLife(fotoPerfilUrl, modoIcone, bateriaNivel));
                     }
 
                     db.ref('casal/' + meuPerfil).set({
-                        lat: lat, lng: lng, speed: v,
+                        lat: lat, lng: lng, speed: v, modoIcone: modoIcone,
                         foto: fotoPerfilUrl, bateria: bateriaNivel, timestamp: Date.now()
                     });
+
+                    atualizarDistancia();
                 }, (err) => console.error(err), { enableHighAccuracy: true });
             }
         }
@@ -514,16 +735,21 @@
                 if (!d || !d.lat) return;
 
                 parceiroUltimaPos = [d.lat, d.lng];
+                const lugarNome = checarLugaresParceiro(d.lat, d.lng);
+
+                document.getElementById('stat-mode-text').innerText = lugarNome ? lugarNome : (d.speed > 2 ? 'Em Movimento' : 'Parado');
+
                 if (!marcadorParceiro) {
-                    marcadorParceiro = L.marker([d.lat, d.lng], { icon: criarMarcadorLife(d.foto, 'fa-car', d.bateria || 100, true) }).addTo(map);
+                    marcadorParceiro = L.marker([d.lat, d.lng], { icon: criarMarcadorLife(d.foto, d.modoIcone || 'fa-person-walking', d.bateria || 100, true) }).addTo(map);
                 } else {
                     marcadorParceiro.setLatLng([d.lat, d.lng]);
-                    marcadorParceiro.setIcon(criarMarcadorLife(d.foto, 'fa-car', d.bateria || 100, true));
+                    marcadorParceiro.setIcon(criarMarcadorLife(d.foto, d.modoIcone || 'fa-person-walking', d.bateria || 100, true));
                 }
+                atualizarDistancia();
             });
         }
 
-        // 7. CHAT & AUXILIARES
+        // 6. CHAT
         function enviarMensagem() {
             const input = document.getElementById('chat-input');
             const texto = input.value.trim();
@@ -550,15 +776,31 @@
             });
         }
 
+        // 7. SOS
+        let audioCtx = null, sirenOsc = null;
+        function tocarSirene() {
+            if (sirenOsc) return;
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            sirenOsc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            sirenOsc.type = 'sawtooth'; sirenOsc.connect(gain); gain.connect(audioCtx.destination); sirenOsc.start();
+        }
+        function desligarSirene() {
+            if (sirenOsc) { sirenOsc.stop(); sirenOsc.disconnect(); sirenOsc = null; }
+            document.body.classList.remove('sos-active');
+            document.getElementById('sos-banner').style.display = 'none';
+        }
         function dispararSOS() { db.ref('alertas_sos').set({ status: 'ATIVO', timestamp: Date.now() }); }
         function pararSOS() { db.ref('alertas_sos').set({ status: 'INATIVO', timestamp: Date.now() }); }
         function escutarSOS() {
             db.ref('alertas_sos').on('value', (snap) => {
                 const d = snap.val();
-                if (d && d.status === 'ATIVO') alert("🚨 SOS DISPARADO!");
+                if (d && d.status === 'ATIVO') { tocarSirene(); document.body.classList.add('sos-active'); document.getElementById('sos-banner').style.display = 'flex'; }
+                else { desligarSirene(); }
             });
         }
 
+        // AUXILIARES
         function trocarAba(abaId, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
@@ -588,7 +830,34 @@
             }
         }
 
+        function carregarParadas() {
+            db.ref('paradas').limitToLast(10).on('value', (snap) => {
+                const container = document.getElementById('stops-container');
+                container.innerHTML = '';
+                snap.forEach((child) => {
+                    const item = child.val();
+                    const card = document.createElement('div');
+                    card.className = 'stop-card';
+                    card.innerHTML = `<div style="font-weight:800;">${item.usuario}</div><div style="font-size:0.75rem; color:#cbd5e1;">${item.endereco || 'Parada registrada'}</div>`;
+                    container.prepend(card);
+                });
+            });
+        }
+
+        function atualizarDistancia() {
+            if (minhaUltimaPos && parceiroUltimaPos) {
+                const d = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], parceiroUltimaPos[0], parceiroUltimaPos[1]);
+                document.getElementById('stat-dist').innerText = d > 1000 ? `${(d/1000).toFixed(1)} km` : `${d.toFixed(0)} m`;
+            }
+        }
+
         document.getElementById('btn-recenter').onclick = () => { if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 16); };
+        document.getElementById('btn-fit-all').onclick = () => {
+            if (minhaUltimaPos && parceiroUltimaPos) {
+                map.fitBounds(L.latLngBounds([minhaUltimaPos, parceiroUltimaPos]), { padding: [50, 50] });
+            }
+        };
+
         const sidebar = document.getElementById('sidebar');
         document.getElementById('btn-sidebar').onclick = () => sidebar.classList.add('open');
         document.getElementById('btn-close-sidebar').onclick = () => sidebar.classList.remove('open');
