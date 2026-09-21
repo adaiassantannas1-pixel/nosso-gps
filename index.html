@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCasal 360 - Waze Edition Complete</title>
+    <title>LifeCasal 360 - Waze Ultra Edition</title>
 
     <!-- Meta Tags PWA / iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#1e293b">
+    <meta name="theme-color" content="#0f172a">
 
     <!-- Leaflet & FontAwesome & Fonts -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -84,7 +84,7 @@
         }
         @keyframes pulse-sos { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* BANNER DE ALERTAS DO TRÂNSITO / SOS / LUGARES */
+        /* BANNERS DE ALERTAS */
         #traffic-alert-banner, #place-notification-banner {
             position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
             z-index: 1001; background: var(--waze-red); color: white; padding: 10px 20px; border-radius: 30px;
@@ -108,7 +108,7 @@
         /* VELOCÍMETRO WAZE HUD */
         .speedometer-waze {
             position: absolute; bottom: 105px; left: 20px; z-index: 1000;
-            width: 70px; height: 70px; border-radius: 50%; background: #0f172a;
+            width: 72px; height: 72px; border-radius: 50%; background: #0f172a;
             border: 4px solid var(--waze-blue); display: flex; flex-direction: column;
             align-items: center; justify-content: center; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             transition: all 0.3s ease;
@@ -146,12 +146,12 @@
             font-size: 1.2rem; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.6);
         }
         .radar-icon-map {
-            width: 32px; height: 32px; border-radius: 50%; background: var(--waze-red); color: white;
+            width: 34px; height: 34px; border-radius: 50%; background: var(--waze-red); color: white;
             border: 2px solid white; display: flex; align-items: center; justify-content: center;
-            font-size: 0.9rem; box-shadow: 0 0 12px rgba(234, 67, 53, 0.8);
+            font-size: 0.95rem; box-shadow: 0 0 12px rgba(234, 67, 53, 0.8);
         }
         .traffic-light-icon {
-            width: 34px; height: 34px; border-radius: 12px; background: #000; color: white;
+            width: 36px; height: 36px; border-radius: 12px; background: #000; color: white;
             border: 2px solid var(--border-light); display: flex; flex-direction: column; align-items: center; justify-content: center;
             font-size: 0.75rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
@@ -171,11 +171,13 @@
         /* BOTÕES FLUTUANTES */
         .controls-bar { position: absolute; bottom: 105px; right: 20px; z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
         .btn-round {
-            width: 46px; height: 46px; border-radius: 50%; background: var(--card-bg);
+            width: 48px; height: 48px; border-radius: 50%; background: var(--card-bg);
             border: 1px solid var(--border-light); color: white; backdrop-filter: blur(12px);
-            display: flex; align-items: center; justify-content: center; font-size: 1.1rem; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; font-size: 1.15rem; cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
         }
+        .btn-round.loading { animation: spin 1s infinite linear; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* PAINEL LATERAL MULTI-ABAS */
         .sidebar {
@@ -217,7 +219,7 @@
         <div class="login-card">
             <div class="brand-icon"><i class="fa-solid fa-car-side"></i></div>
             <h2>LifeCasal 360</h2>
-            <p>Waze Edition & Monitoramento Completo</p>
+            <p>Waze Ultra & Monitoramento em Tempo Real</p>
             
             <div class="input-group">
                 <label>Nome de Usuário</label>
@@ -281,7 +283,7 @@
     <!-- CONTROLES FLUTUANTES -->
     <div class="controls-bar">
         <button class="btn-round" id="btn-recenter" title="Minha Localização"><i class="fa-solid fa-crosshairs"></i></button>
-        <button class="btn-round" onclick="carregarRadaresECameras()" title="Escanear Radares"><i class="fa-solid fa-camera"></i></button>
+        <button class="btn-round" id="btn-scan-radar" onclick="carregarRadaresECameras()" title="Escanear Radares"><i class="fa-solid fa-camera"></i></button>
         <button class="btn-round" id="btn-fit-all" title="Ver Ambos"><i class="fa-solid fa-users"></i></button>
         <button class="btn-round" id="btn-sidebar" title="Menu e Painel"><i class="fa-solid fa-bars"></i></button>
     </div>
@@ -326,6 +328,7 @@
                 <input type="number" id="input-max-speed" value="60" onchange="limiteVelocidadeMax = parseInt(this.value)">
             </div>
             <button class="btn-primary" onclick="carregarRadaresECameras()"><i class="fa-solid fa-camera"></i> Escanear Radares Próximos</button>
+            <div id="scan-status-text" style="font-size:0.75rem; color:#94a3b8; margin-top:6px; text-align:center;">Clique para buscar radares num raio de 3km</div>
             
             <div class="card-info" style="margin-top:10px;">
                 <div class="card-icon"><i class="fa-solid fa-gauge-high"></i></div>
@@ -400,10 +403,10 @@
         let camadaRadares = L.layerGroup(), camadaSemaforos = L.layerGroup();
         let listaRadaresProximos = [];
 
-        // 2. MAPA ESTILO WAZE MODERNO (CartoDB Voyager)
+        // 2. MAPA ESTILO WAZE MODERNO (CartoDB Voyager HD)
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap / CartoDB / Waze Style', maxZoom: 19
+            attribution: '© OpenStreetMap / CartoDB Voyager', maxZoom: 19
         }).addTo(map);
 
         camadaRadares.addTo(map);
@@ -462,52 +465,89 @@
             document.getElementById('login-perfil').value = localStorage.getItem('life_perfil') || 'pessoa1';
         }
 
-        // 3. CONSULTAR RADARES E SEMÁFOROS (OVERPASS API)
+        // 3. CONSULTAR RADARES E SEMÁFOROS (OVERPASS API COM FALLBACK MULTI-SERVIDOR)
         async function carregarRadaresECameras() {
-            if (!minhaUltimaPos) return;
+            if (!minhaUltimaPos) {
+                alert("Aguardando sinal do GPS para escanear radares da área...");
+                return;
+            }
+
+            const btnScan = document.getElementById('btn-scan-radar');
+            const statusText = document.getElementById('scan-status-text');
+            if (btnScan) btnScan.classList.add('loading');
+            if (statusText) statusText.innerText = "Procurando radares na região...";
+
             const lat = minhaUltimaPos[0];
             const lng = minhaUltimaPos[1];
 
-            const query = `[out:json];(node["highway"="speed_camera"](around:2500,${lat},${lng});node["highway"="traffic_signals"](around:1500,${lat},${lng}););out;`;
-            const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(query)}`;
+            // Busca elementos em um raio de 3000 metros
+            const overpassQuery = `[out:json][timeout:15];(node["highway"="speed_camera"](around:3000,${lat},${lng});node["highway"="traffic_signals"](around:2000,${lat},${lng}););out body;`;
 
-            try {
+            // Servidores espelhos para evitar travamentos
+            const endpoints = [
+                'https://overpass-api.de/api/interpreter',
+                'https://overpass.khtml.org/api/interpreter',
+                'https://maps.mail.ru/osm/tools/overpass/api/interpreter'
+            ];
+
+            let data = null;
+            for (let url of endpoints) {
+                try {
+                    const res = await fetch(url, {
+                        method: 'POST',
+                        body: 'data=' + encodeURIComponent(overpassQuery),
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+                    });
+                    if (res.ok) {
+                        data = await res.json();
+                        if (data && data.elements) break;
+                    }
+                } catch (e) {
+                    console.warn('Tentando servidor espelho Overpass...');
+                }
+            }
+
+            if (btnScan) btnScan.classList.remove('loading');
+
+            if (data && data.elements) {
                 camadaRadares.clearLayers();
                 camadaSemaforos.clearLayers();
                 listaRadaresProximos = [];
+                let qtdRadares = 0, qtdSemaforos = 0;
 
-                const res = await fetch(url);
-                const data = await res.json();
+                data.elements.forEach(item => {
+                    if (item.tags && item.tags.highway === 'speed_camera') {
+                        qtdRadares++;
+                        listaRadaresProximos.push({ lat: item.lat, lng: item.lon });
+                        const radarIcon = L.divIcon({
+                            className: 'custom-radar',
+                            html: `<div class="radar-icon-map"><i class="fa-solid fa-camera"></i></div>`,
+                            iconSize: [34, 34], iconAnchor: [17, 17]
+                        });
+                        L.marker([item.lat, item.lon], { icon: radarIcon }).addTo(camadaRadares)
+                         .bindPopup("<b>Radar de Velocidade</b><br>Fiscalização Ativa!");
+                    } else if (item.tags && item.tags.highway === 'traffic_signals') {
+                        qtdSemaforos++;
+                        desenharSemaforoNoMapa(item.lat, item.lon);
+                    }
+                });
 
-                if (data && data.elements) {
-                    data.elements.forEach(item => {
-                        if (item.tags.highway === 'speed_camera') {
-                            listaRadaresProximos.push({ lat: item.lat, lng: item.lon });
-                            const radarIcon = L.divIcon({
-                                className: 'custom-radar',
-                                html: `<div class="radar-icon-map"><i class="fa-solid fa-camera"></i></div>`,
-                                iconSize: [32, 32], iconAnchor: [16, 16]
-                            });
-                            L.marker([item.lat, item.lon], { icon: radarIcon }).addTo(camadaRadares)
-                             .bindPopup("<b>Radar de Velocidade</b><br>Respeite o limite!");
-                        } else if (item.tags.highway === 'traffic_signals') {
-                            desenharSemaforoNoMapa(item.lat, item.lon);
-                        }
-                    });
-                }
-            } catch (e) { console.error(e); }
+                if (statusText) statusText.innerText = `Encontrados: ${qtdRadares} radares e ${qtdSemaforos} semáforos.`;
+            } else {
+                if (statusText) statusText.innerText = "Nenhum radar cadastrado no OpenStreetMap nesta área.";
+            }
         }
 
-        // SEMÁFOROS
+        // SEMÁFOROS INTELIGENTES TEMPORIZADOS
         let semaforosMapa = [];
         function desenharSemaforoNoMapa(lat, lng) {
             const semIcon = L.divIcon({
                 className: 'custom-sem',
                 html: `<div class="traffic-light-icon" id="sem-${lat.toString().replace('.','')}">
                         <i class="fa-solid fa-circle" style="color:#34a853; font-size:0.6rem;"></i>
-                        <span style="font-size:0.6rem;" class="timer-val">15</span>
+                        <span style="font-size:0.6rem;" class="timer-val">15s</span>
                        </div>`,
-                iconSize: [34, 34], iconAnchor: [17, 17]
+                iconSize: [36, 36], iconAnchor: [18, 18]
             });
             L.marker([lat, lng], { icon: semIcon }).addTo(camadaSemaforos);
             semaforosMapa.push({ lat, lng, tempoVerde: 20, tempoVermelho: 15, estadoAtual: 'VERDE', tempoRestante: 20, elementId: `sem-${lat.toString().replace('.','')}` });
@@ -550,12 +590,12 @@
             if (minhaUltimaPos) {
                 listaRadaresProximos.forEach(r => {
                     const d = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], r.lat, r.lng);
-                    if (d < 200) radarProximo = true;
+                    if (d < 250) radarProximo = true;
                 });
             }
 
             if (radarProximo) {
-                alertText.innerText = "Radar de Velocidade a 200m!";
+                alertText.innerText = "Radar de Velocidade a 250m!";
                 alertBanner.style.display = 'flex';
             } else if (vKmh <= limiteVelocidadeMax) {
                 alertBanner.style.display = 'none';
