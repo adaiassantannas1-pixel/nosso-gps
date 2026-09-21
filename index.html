@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCasal 360 - Waze Realtime Edition</title>
+    <title>LifeCasal 360 - Pro Waze Edition</title>
 
     <!-- Meta Tags PWA / iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,8 +24,8 @@
             --primary: #6366f1;
             --danger: #ef4444;
             --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.94);
-            --border-light: rgba(255, 255, 255, 0.15);
+            --card-bg: rgba(15, 23, 42, 0.92);
+            --border-light: rgba(255, 255, 255, 0.18);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -37,7 +37,7 @@
             display: flex; align-items: center; justify-content: center; padding: 20px;
         }
         .login-card {
-            background: rgba(30, 41, 59, 0.9); border: 1px solid var(--border-light);
+            background: rgba(30, 41, 59, 0.93); border: 1px solid var(--border-light);
             padding: 35px 30px; border-radius: 28px; width: 100%; max-width: 400px; text-align: center;
             box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); backdrop-filter: blur(16px);
         }
@@ -61,16 +61,16 @@
             box-shadow: 0 4px 15px rgba(51, 136, 255, 0.4);
         }
 
-        /* MAPA ESTILO WAZE MODERNO */
-        #map { width: 100%; height: 100%; flex: 1; z-index: 1; }
+        /* MAPA PRO HD */
+        #map { width: 100%; height: 100%; flex: 1; z-index: 1; filter: contrast(105%) brightness(98%); }
 
         /* HUD SUPERIOR */
         .glass-header {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; background: var(--card-bg); backdrop-filter: blur(12px);
+            z-index: 1000; background: var(--card-bg); backdrop-filter: blur(14px);
             padding: 8px 16px; border-radius: 40px; border: 1px solid var(--border-light);
             display: flex; align-items: center; justify-content: space-between; gap: 12px;
-            width: 92%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            width: 92%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .header-profile { display: flex; align-items: center; gap: 10px; }
         .header-avatar {
@@ -84,17 +84,23 @@
         }
         @keyframes pulse-sos { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* BANNERS DE ALERTAS */
-        #traffic-alert-banner, #place-notification-banner {
+        /* BANNERS DE ALERTAS COM BOTÃO OK DE FECHAR */
+        .alert-banner-hud {
             position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
-            z-index: 1001; background: var(--waze-red); color: white; padding: 10px 20px; border-radius: 30px;
-            display: none; align-items: center; gap: 10px; font-weight: 800; font-size: 0.85rem;
-            box-shadow: 0 10px 30px rgba(234, 67, 53, 0.7); border: 2px solid #fff;
-            animation: bounceAlert 0.4s ease infinite alternate;
+            z-index: 1001; color: white; padding: 10px 16px; border-radius: 30px;
+            display: none; align-items: center; gap: 12px; font-weight: 800; font-size: 0.85rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 2px solid #fff;
+            backdrop-filter: blur(10px); width: 90%; max-width: 440px; justify-content: space-between;
         }
-        #place-notification-banner { background: var(--waze-blue); animation: slideDown 0.4s ease; }
-        @keyframes bounceAlert { from { transform: translateX(-50%) translateY(0); } to { transform: translateX(-50%) translateY(-5px); } }
-        @keyframes slideDown { from { transform: translateX(-50%) translateY(-20px); opacity: 0; } to { transform: translateX(-50%) translateY(0); opacity: 1; } }
+        #traffic-alert-banner { background: rgba(234, 67, 53, 0.95); animation: slideDown 0.3s ease; }
+        #place-notification-banner { background: rgba(51, 136, 255, 0.95); animation: slideDown 0.3s ease; }
+
+        .btn-close-banner {
+            background: rgba(255, 255, 255, 0.25); border: 1px solid #fff; color: white;
+            padding: 4px 12px; border-radius: 20px; font-weight: 900; font-size: 0.75rem; cursor: pointer;
+            transition: 0.2s;
+        }
+        .btn-close-banner:active { transform: scale(0.92); background: #fff; color: #000; }
 
         #sos-banner {
             position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
@@ -121,47 +127,43 @@
         .speed-number { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; font-weight: 900; line-height: 1; }
         .speed-unit { font-size: 0.55rem; font-weight: 800; text-transform: uppercase; margin-top: 2px; }
 
-        /* MARCADOR ESTILO LIFE360 */
+        /* MARCADOR DINÂMICO DE MOVIMENTO */
         .life-marker {
             position: relative; width: 56px; height: 56px; border-radius: 50%;
             border: 3px solid var(--waze-blue); background-size: cover; background-position: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: all 0.5s ease;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         .life-marker.parceiro { border-color: #38bdf8; }
+        .life-marker.stopped { border-radius: 50%; box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.3); }
+        .life-marker.driving { border-color: #fbbc04 !important; border-radius: 16px !important; }
+        .life-marker.walking { border-color: #10b981 !important; }
+
         .marker-badge {
             position: absolute; bottom: -2px; right: -2px; background: #10b981; color: white;
-            width: 22px; height: 22px; border-radius: 50%; font-size: 0.7rem; display: flex;
-            align-items: center; justify-content: center; border: 2px solid #0f172a;
+            width: 24px; height: 24px; border-radius: 50%; font-size: 0.75rem; display: flex;
+            align-items: center; justify-content: center; border: 2px solid #0f172a; box-shadow: 0 2px 6px rgba(0,0,0,0.4);
         }
         .battery-badge {
-            position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
-            background: rgba(15, 23, 42, 0.9); color: #fff; padding: 1px 6px; border-radius: 8px;
-            font-size: 0.65rem; font-weight: 700; border: 1px solid var(--border-light); display: flex; align-items: center; gap: 3px;
+            position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.95); color: #fff; padding: 2px 7px; border-radius: 10px;
+            font-size: 0.65rem; font-weight: 800; border: 1px solid var(--border-light); display: flex; align-items: center; gap: 3px;
         }
 
-        /* MARCADORES DE LUGARES, RADARES E INCIDENTES */
-        .place-map-icon {
-            width: 42px; height: 42px; border-radius: 50%; background: #6366f1; color: white;
-            border: 3px solid white; display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.6);
+        /* SEMÁFOROS MODERNOS */
+        .traffic-light-modern {
+            width: 32px; height: 44px; border-radius: 12px; background: rgba(15, 23, 42, 0.9);
+            border: 2px solid var(--border-light); display: flex; flex-direction: column; align-items: center; justify-content: space-around;
+            padding: 3px 0; box-shadow: 0 6px 15px rgba(0,0,0,0.6); backdrop-filter: blur(8px);
         }
-        .radar-icon-map {
-            width: 34px; height: 34px; border-radius: 50%; background: var(--waze-red); color: white;
-            border: 2px solid white; display: flex; align-items: center; justify-content: center;
-            font-size: 0.95rem; box-shadow: 0 0 12px rgba(234, 67, 53, 0.8);
-        }
-        .incident-icon-map {
-            width: 38px; height: 38px; border-radius: 50%; color: white;
-            border: 2px solid white; display: flex; align-items: center; justify-content: center;
-            font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            animation: bounceIncident 1s infinite alternate;
-        }
-        @keyframes bounceIncident { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+        .sem-led { width: 10px; height: 10px; border-radius: 50%; opacity: 0.2; transition: all 0.3s; }
+        .sem-led.active { opacity: 1; box-shadow: 0 0 10px currentColor; }
+        .sem-timer { font-family: 'Orbitron', sans-serif; font-size: 0.55rem; font-weight: 900; color: #fff; }
 
-        .traffic-light-icon {
-            width: 36px; height: 36px; border-radius: 12px; background: #000; color: white;
-            border: 2px solid var(--border-light); display: flex; flex-direction: column; align-items: center; justify-content: center;
-            font-size: 0.75rem; font-weight: 900; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        /* LOJAS E POIs */
+        .poi-icon-map {
+            width: 30px; height: 30px; border-radius: 50%; background: #38bdf8; color: white;
+            border: 2px solid white; display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; box-shadow: 0 3px 10px rgba(0,0,0,0.4);
         }
 
         /* HUD INFERIOR LIFE360 */
@@ -170,7 +172,7 @@
             z-index: 1000; background: var(--card-bg); backdrop-filter: blur(16px);
             padding: 12px 20px; border-radius: 24px; border: 1px solid var(--border-light);
             display: flex; justify-content: space-around; align-items: center;
-            width: 92%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            width: 92%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .hud-item { text-align: center; }
         .hud-label { font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
@@ -185,8 +187,6 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
         }
         .btn-report { background: linear-gradient(135deg, #f59e0b, #d97706) !important; border: 2px solid #fff; }
-        .btn-round.loading { animation: spin 1s infinite linear; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* PAINEL LATERAL MULTI-ABAS */
         .sidebar {
@@ -228,7 +228,7 @@
         <div class="login-card">
             <div class="brand-icon"><i class="fa-solid fa-car-side"></i></div>
             <h2>LifeCasal 360</h2>
-            <p>Waze Realtime & Monitoramento Completo</p>
+            <p>Waze Pro Realtime Edition</p>
             
             <div class="input-group">
                 <label>Nome de Usuário</label>
@@ -264,14 +264,20 @@
         <button class="btn-sos-header" onclick="dispararSOS()">SOS 🚨</button>
     </div>
 
-    <!-- NOTIFICAÇÃO DE CHEGADA / LUGARES -->
-    <div id="place-notification-banner">
-        <i class="fa-solid fa-bell"></i> <span id="place-notification-text">Amor chegou em Casa</span>
+    <!-- NOTIFICAÇÃO DE CHEGADA / LUGARES COM BOTÃO OK -->
+    <div id="place-notification-banner" class="alert-banner-hud">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-bell"></i> <span id="place-notification-text">Amor chegou em Casa</span>
+        </div>
+        <button class="btn-close-banner" onclick="fecharBannerNotificacao('place-notification-banner')">OK</button>
     </div>
 
-    <!-- BANNER DE RADAR OU INCIDENTE -->
-    <div id="traffic-alert-banner">
-        <i class="fa-solid fa-triangle-exclamation"></i> <span id="traffic-alert-text">Atenção: Radar à frente!</span>
+    <!-- BANNER DE RADAR OU INCIDENTE COM BOTÃO OK -->
+    <div id="traffic-alert-banner" class="alert-banner-hud">
+        <div style="display:flex; align-items:center; gap:8px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> <span id="traffic-alert-text">Atenção: Radar à frente!</span>
+        </div>
+        <button class="btn-close-banner" onclick="fecharBannerNotificacao('traffic-alert-banner')">OK</button>
     </div>
 
     <!-- BANNER SOS -->
@@ -293,7 +299,7 @@
     <div class="controls-bar">
         <button class="btn-round btn-report" onclick="reportarAlertaTrânsito()" title="Reportar Trânsito/Acidente"><i class="fa-solid fa-triangle-exclamation"></i></button>
         <button class="btn-round" id="btn-recenter" title="Minha Localização"><i class="fa-solid fa-crosshairs"></i></button>
-        <button class="btn-round" id="btn-scan-radar" onclick="carregarRadaresECameras()" title="Escanear Radares"><i class="fa-solid fa-camera"></i></button>
+        <button class="btn-round" id="btn-scan-radar" onclick="carregarRadaresECameras()" title="Escanear Radares e Lojas"><i class="fa-solid fa-camera"></i></button>
         <button class="btn-round" id="btn-fit-all" title="Ver Ambos"><i class="fa-solid fa-users"></i></button>
         <button class="btn-round" id="btn-sidebar" title="Menu e Painel"><i class="fa-solid fa-bars"></i></button>
     </div>
@@ -337,8 +343,8 @@
                 <label>Limite Max. de Velocidade (KM/H)</label>
                 <input type="number" id="input-max-speed" value="60" onchange="limiteVelocidadeMax = parseInt(this.value)">
             </div>
-            <button class="btn-primary" onclick="carregarRadaresECameras()"><i class="fa-solid fa-camera"></i> Escanear Radares Próximos</button>
-            <div id="scan-status-text" style="font-size:0.75rem; color:#94a3b8; margin-top:6px; text-align:center;">Clique para buscar radares num raio de 3km</div>
+            <button class="btn-primary" onclick="carregarRadaresECameras()"><i class="fa-solid fa-camera"></i> Escanear Radares e Lojas Próximas</button>
+            <div id="scan-status-text" style="font-size:0.75rem; color:#94a3b8; margin-top:6px; text-align:center;">Clique para buscar pontos em 3km</div>
             
             <div class="card-info" style="margin-top:10px;">
                 <div class="card-icon"><i class="fa-solid fa-gauge-high"></i></div>
@@ -410,21 +416,21 @@
         let lugaresCadastrados = {};
         let lugarAtualParceiro = null;
         let camadasLugaresMapa = [];
-        let camadaRadares = L.layerGroup(), camadaSemaforos = L.layerGroup(), camadaIncidentes = L.layerGroup();
+        let camadaRadares = L.layerGroup(), camadaSemaforos = L.layerGroup(), camadaIncidentes = L.layerGroup(), camadaPOIs = L.layerGroup();
         let listaRadaresProximos = [];
         let listaIncidentesAtivos = [];
 
-        // 2. MAPA ESTILO WAZE REALTIME (CartoDB Voyager)
+        // 2. MAPA HD ULTRA
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
         
-        // Camada Base
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-            attribution: '© OpenStreetMap / CartoDB Voyager', maxZoom: 19
+            attribution: '© OpenStreetMap / CartoDB Voyager HD', maxZoom: 19
         }).addTo(map);
 
         camadaRadares.addTo(map);
         camadaSemaforos.addTo(map);
         camadaIncidentes.addTo(map);
+        camadaPOIs.addTo(map);
 
         // Bateria
         if ('getBattery' in navigator) {
@@ -432,6 +438,10 @@
                 bateriaNivel = Math.round(b.level * 100);
                 b.addEventListener('levelchange', () => { bateriaNivel = Math.round(b.level * 100); });
             });
+        }
+
+        function fecharBannerNotificacao(idBanner) {
+            document.getElementById(idBanner).style.display = 'none';
         }
 
         // Login
@@ -480,7 +490,7 @@
             document.getElementById('login-perfil').value = localStorage.getItem('life_perfil') || 'pessoa1';
         }
 
-        // 3. MÓDULO DE REPORTAR INCIDENTES DE TRÂNSITO (ESTILO WAZE)
+        // 3. INCIDENTES E REPORTAR
         function reportarAlertaTrânsito() {
             if (!minhaUltimaPos) { alert("Aguardando sinal do GPS..."); return; }
 
@@ -497,17 +507,12 @@
             const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
             db.ref('incidentes').push({
-                tipo: item.nome,
-                icone: item.icone,
-                cor: item.cor,
-                lat: minhaUltimaPos[0],
-                lng: minhaUltimaPos[1],
-                usuario: meuUsuario,
-                hora: hora,
-                timestamp: Date.now()
+                tipo: item.nome, icone: item.icone, cor: item.cor,
+                lat: minhaUltimaPos[0], lng: minhaUltimaPos[1],
+                usuario: meuUsuario, hora: hora, timestamp: Date.now()
             });
 
-            alert(`Alerta de "${item.nome}" publicado no mapa para todos!`);
+            alert(`Alerta de "${item.nome}" publicado no mapa!`);
         }
 
         function carregarIncidentesTrânsito() {
@@ -531,17 +536,17 @@
             });
         }
 
-        // CONSULTAR RADARES E SEMÁFOROS (OVERPASS API MULTI-SERVIDOR)
+        // RADARES, SEMÁFOROS E LOJAS (OVERPASS MULTI-SERVER)
         async function carregarRadaresECameras() {
-            if (!minhaUltimaPos) { alert("Aguardando sinal do GPS para escanear radares..."); return; }
+            if (!minhaUltimaPos) { alert("Aguardando sinal do GPS..."); return; }
 
             const btnScan = document.getElementById('btn-scan-radar');
             const statusText = document.getElementById('scan-status-text');
             if (btnScan) btnScan.classList.add('loading');
-            if (statusText) statusText.innerText = "Buscando radares na região...";
+            if (statusText) statusText.innerText = "Buscando radares e lojas...";
 
             const lat = minhaUltimaPos[0], lng = minhaUltimaPos[1];
-            const overpassQuery = `[out:json][timeout:15];(node["highway"="speed_camera"](around:3000,${lat},${lng});node["highway"="traffic_signals"](around:2000,${lat},${lng}););out body;`;
+            const overpassQuery = `[out:json][timeout:15];(node["highway"="speed_camera"](around:2500,${lat},${lng});node["highway"="traffic_signals"](around:1800,${lat},${lng});node["amenity"~"fuel|restaurant|fast_food|pharmacy"](around:1200,${lat},${lng}););out body;`;
 
             const endpoints = [
                 'https://overpass-api.de/api/interpreter',
@@ -557,7 +562,7 @@
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
                     });
                     if (res.ok) { data = await res.json(); if (data && data.elements) break; }
-                } catch (e) { console.warn('Tentando servidor espelho...'); }
+                } catch (e) { console.warn('Tentando espelho...'); }
             }
 
             if (btnScan) btnScan.classList.remove('loading');
@@ -565,8 +570,9 @@
             if (data && data.elements) {
                 camadaRadares.clearLayers();
                 camadaSemaforos.clearLayers();
+                camadaPOIs.clearLayers();
                 listaRadaresProximos = [];
-                let qtdRadares = 0, qtdSemaforos = 0;
+                let qtdRadares = 0, qtdSemaforos = 0, qtdPois = 0;
 
                 data.elements.forEach(item => {
                     if (item.tags && item.tags.highway === 'speed_camera') {
@@ -577,30 +583,45 @@
                             html: `<div class="radar-icon-map"><i class="fa-solid fa-camera"></i></div>`,
                             iconSize: [34, 34], iconAnchor: [17, 17]
                         });
-                        L.marker([item.lat, item.lon], { icon: radarIcon }).addTo(camadaRadares)
-                         .bindPopup("<b>Radar de Velocidade</b><br>Fiscalização Ativa!");
+                        L.marker([item.lat, item.lon], { icon: radarIcon }).addTo(camadaRadares).bindPopup("<b>Radar de Velocidade</b>");
                     } else if (item.tags && item.tags.highway === 'traffic_signals') {
                         qtdSemaforos++;
                         desenharSemaforoNoMapa(item.lat, item.lon);
+                    } else if (item.tags && item.tags.amenity) {
+                        qtdPois++;
+                        desenharPoiNoMapa(item.lat, item.lon, item.tags.amenity, item.tags.name);
                     }
                 });
 
-                if (statusText) statusText.innerText = `Encontrados: ${qtdRadares} radares e ${qtdSemaforos} semáforos.`;
-            } else {
-                if (statusText) statusText.innerText = "Nenhum radar cadastrado no OpenStreetMap nesta área.";
+                if (statusText) statusText.innerText = `Encontrados: ${qtdRadares} radares, ${qtdSemaforos} semáforos e ${qtdPois} lojas.`;
             }
         }
 
-        // SEMÁFOROS
+        // DESENHAR LOJAS / POIs
+        function desenharPoiNoMapa(lat, lng, tipo, nome) {
+            let icone = 'fa-store', cor = '#38bdf8';
+            if (tipo === 'fuel') { icone = 'fa-gas-pump'; cor = '#f59e0b'; }
+            else if (tipo === 'restaurant' || tipo === 'fast_food') { icone = 'fa-utensils'; cor = '#ef4444'; }
+            else if (tipo === 'pharmacy') { icone = 'fa-prescription-bottle-medical'; cor = '#10b981'; }
+
+            const poiIcon = L.divIcon({
+                className: 'custom-poi',
+                html: `<div class="poi-icon-map" style="background:${cor};"><i class="fa-solid ${icone}"></i></div>`,
+                iconSize: [30, 30], iconAnchor: [15, 15]
+            });
+            L.marker([lat, lng], { icon: poiIcon }).addTo(camadaPOIs).bindPopup(`<b>${nome || 'Ponto Comercial'}</b>`);
+        }
+
+        // SEMÁFOROS FUTURISTAS
         let semaforosMapa = [];
         function desenharSemaforoNoMapa(lat, lng) {
             const semIcon = L.divIcon({
                 className: 'custom-sem',
-                html: `<div class="traffic-light-icon" id="sem-${lat.toString().replace('.','')}">
-                        <i class="fa-solid fa-circle" style="color:#34a853; font-size:0.6rem;"></i>
-                        <span style="font-size:0.6rem;" class="timer-val">15s</span>
+                html: `<div class="traffic-light-modern" id="sem-${lat.toString().replace('.','')}">
+                        <div class="sem-led active" style="color:#34a853; background:#34a853;"></div>
+                        <div class="sem-timer">15s</div>
                        </div>`,
-                iconSize: [36, 36], iconAnchor: [18, 18]
+                iconSize: [32, 44], iconAnchor: [16, 22]
             });
             L.marker([lat, lng], { icon: semIcon }).addTo(camadaSemaforos);
             semaforosMapa.push({ lat, lng, tempoVerde: 20, tempoVermelho: 15, estadoAtual: 'VERDE', tempoRestante: 20, elementId: `sem-${lat.toString().replace('.','')}` });
@@ -617,7 +638,7 @@
                     const el = document.getElementById(s.elementId);
                     if (el) {
                         const cor = s.estadoAtual === 'VERDE' ? '#34a853' : '#ea4335';
-                        el.innerHTML = `<i class="fa-solid fa-circle" style="color:${cor}; font-size:0.6rem;"></i><span style="font-size:0.6rem;">${s.tempoRestante}s</span>`;
+                        el.innerHTML = `<div class="sem-led active" style="color:${cor}; background:${cor};"></div><div class="sem-timer">${s.tempoRestante}s</div>`;
                     }
                 });
             }, 1000);
@@ -632,7 +653,7 @@
 
             if (vKmh > limiteVelocidadeMax) {
                 speedBox.classList.add('overspeed');
-                alertText.innerText = `Atenção: Excesso de velocidade (${vKmh.toFixed(0)} km/h)!`;
+                alertText.innerText = `Excesso de velocidade (${vKmh.toFixed(0)} km/h)!`;
                 alertBanner.style.display = 'flex';
                 return;
             } else {
@@ -655,16 +676,12 @@
             } else if (radarProximo) {
                 alertText.innerText = "Radar de Velocidade a 250m!";
                 alertBanner.style.display = 'flex';
-            } else if (vKmh <= limiteVelocidadeMax) {
-                alertBanner.style.display = 'none';
             }
         }
 
-        // 4. LUGARES E GEOFENCING INTERATIVO
+        // 4. LUGARES E GEOFENCING
         function configurarCliqueNoMapa() {
-            map.on('click', (e) => {
-                salvarNovoLugarModal(e.latlng.lat, e.latlng.lng);
-            });
+            map.on('click', (e) => { salvarNovoLugarModal(e.latlng.lat, e.latlng.lng); });
         }
 
         function cadastrarLugarModoPrompt() {
@@ -707,15 +724,7 @@
                         color: '#6366f1', fillColor: '#6366f1', fillOpacity: 0.15, radius: place.raio || 100
                     }).addTo(map);
 
-                    placeMarker.bindPopup(`
-                        <div style="text-align:center; padding:5px; color:#fff;">
-                            <div style="font-weight:800; font-size:1rem; color:#a5b4fc;"><i class="fa-solid ${place.icone || 'fa-house'}"></i> ${place.nome}</div>
-                            <div style="font-size:0.75rem; color:#94a3b8; margin:5px 0;">Raio: <b>${place.raio || 100}m</b></div>
-                            <button onclick="alterarRaioLugar('${key}', ${place.raio || 100})" style="background:#6366f1; color:white; border:none; padding:5px 10px; border-radius:8px; font-weight:700; cursor:pointer;">Editar Raio</button>
-                            <button onclick="removerLugar('${key}')" style="background:#ef4444; color:white; border:none; padding:5px 10px; border-radius:8px; font-weight:700; cursor:pointer; margin-left:4px;">Excluir</button>
-                        </div>
-                    `);
-
+                    placeMarker.bindPopup(`<b>${place.nome}</b><br><button onclick="removerLugar('${key}')">Excluir</button>`);
                     camadasLugaresMapa.push(placeMarker, placeCircle);
 
                     const card = document.createElement('div');
@@ -725,31 +734,18 @@
                             <div style="font-weight:800; font-size:0.9rem;"><i class="fa-solid ${place.icone || 'fa-house'}" style="color:#6366f1;"></i> ${place.nome}</div>
                             <button style="background:none; border:none; color:var(--danger); cursor:pointer;" onclick="removerLugar('${key}')"><i class="fa-solid fa-trash"></i></button>
                         </div>
-                        <div style="font-size:0.75rem; color:#94a3b8; display:flex; justify-content:space-between; align-items:center;">
-                            <span>Raio: <b>${place.raio || 100} metros</b></span>
-                            <button onclick="alterarRaioLugar('${key}', ${place.raio || 100})" style="background:rgba(99, 102, 241, 0.2); border:1px solid #6366f1; color:white; padding:4px 8px; border-radius:8px; font-size:0.7rem; font-weight:700; cursor:pointer;">Ajustar Raio</button>
-                        </div>
                     `;
                     container.appendChild(card);
                 });
             });
         }
 
-        function alterarRaioLugar(key, raioAtual) {
-            const novo = prompt(`Ajuste o raio de alerta em metros (Atual: ${raioAtual}m):`, raioAtual);
-            if (!novo || isNaN(novo)) return;
-            db.ref('lugares/' + key).update({ raio: parseInt(novo) });
-        }
-
-        function removerLugar(key) {
-            if (confirm("Excluir este lugar?")) db.ref('lugares/' + key).remove();
-        }
+        function removerLugar(key) { if (confirm("Excluir este lugar?")) db.ref('lugares/' + key).remove(); }
 
         function checarLugaresParceiro(lat, lng) {
             let lugarDetectado = null;
             Object.values(lugaresCadastrados).forEach(place => {
-                const d = calcularDistancia(lat, lng, place.lat, place.lng);
-                if (d <= (place.raio || 100)) lugarDetectado = place.nome;
+                if (calcularDistancia(lat, lng, place.lat, place.lng) <= (place.raio || 100)) lugarDetectado = place.nome;
             });
 
             if (lugarDetectado !== lugarAtualParceiro) {
@@ -767,17 +763,26 @@
             const banner = document.getElementById('place-notification-banner');
             document.getElementById('place-notification-text').innerText = texto;
             banner.style.display = 'flex';
-            setTimeout(() => { banner.style.display = 'none'; }, 6000);
         }
 
-        // 5. GPS DE ALTA PRECISÃO (COM FILTRO ANTI-MOVIMENTO FALSO)
-        function criarMarcadorLife(urlFoto, modoIcone, bat, eParceiro = false) {
+        // 5. MARCADOR ADAPTATIVO DINÂMICO (Caminhando x Dirigindo x Círculo Parado)
+        function criarMarcadorLife(urlFoto, modoIcone, bat, eParceiro = false, velocidade = 0) {
             const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3388ff':'6366f1'}&color=fff`;
+            
+            let classeEstilo = 'stopped';
+            let iconeStatus = 'fa-location-dot';
+
+            if (velocidade > 30) {
+                classeEstilo = 'driving'; iconeStatus = 'fa-car';
+            } else if (velocidade > 3) {
+                classeEstilo = 'walking'; iconeStatus = 'fa-person-walking';
+            }
+
             return L.divIcon({
                 className: 'custom-icon-wrapper',
-                html: `<div class="life-marker ${eParceiro ? 'parceiro' : ''}" style="background-image: url('${img}');">
+                html: `<div class="life-marker ${eParceiro ? 'parceiro' : ''} ${classeEstilo}" style="background-image: url('${img}');">
                         <div class="battery-badge"><i class="fa-solid fa-battery-three-quarters"></i> ${bat}%</div>
-                        <div class="marker-badge"><i class="fa-solid ${modoIcone}"></i></div>
+                        <div class="marker-badge"><i class="fa-solid ${iconeStatus}"></i></div>
                        </div>`,
                 iconSize: [56, 56], iconAnchor: [28, 28]
             });
@@ -795,14 +800,11 @@
                 navigator.geolocation.watchPosition((pos) => {
                     const lat = pos.coords.latitude, lng = pos.coords.longitude, prec = pos.coords.accuracy;
 
-                    // FILTRO DE PRECISÃO: descarta leituras imprecisas (> 25m)
-                    if (prec > 25) return;
+                    // TRAVA DE PRECISÃO HIGH-PRECISION
+                    if (prec > 20) return;
 
-                    // TRAVA ANTI-RUÍDO: Só move o marcador se a distância percorrida for maior que 8 metros
                     if (minhaUltimaPos) {
-                        const distDeslocada = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng);
-                        if (distDeslocada < 8) {
-                            // Zerar velocidade se estiver estático
+                        if (calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng) < 6) {
                             document.getElementById('stat-speed').innerHTML = `0 <span style="font-size:0.7rem;">km/h</span>`;
                             document.getElementById('speed-val').innerText = '0';
                             return;
@@ -810,7 +812,7 @@
                     }
 
                     let v = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
-                    if (v < 3) v = 0; // Zerar ruidos de velocidade baixa quando parado
+                    if (v < 3) v = 0;
 
                     if (v > maxSpeedRecorded) {
                         maxSpeedRecorded = v;
@@ -820,25 +822,24 @@
                     minhaUltimaPos = [lat, lng];
                     verificarAlertasVelocidadeERadar(v);
 
-                    const modoIcone = v > 2 ? (v > 30 ? 'fa-car' : 'fa-motorcycle') : 'fa-person-walking';
                     document.getElementById('stat-speed').innerHTML = `${v.toFixed(0)} <span style="font-size:0.7rem;">km/h</span>`;
 
                     if (!meuMarcador) {
-                        meuMarcador = L.marker([lat, lng], { icon: criarMarcadorLife(fotoPerfilUrl, modoIcone, bateriaNivel) }).addTo(map);
+                        meuMarcador = L.marker([lat, lng], { icon: criarMarcadorLife(fotoPerfilUrl, '', bateriaNivel, false, v) }).addTo(map);
                         map.setView([lat, lng], 16);
                         carregarRadaresECameras();
                     } else {
                         meuMarcador.setLatLng([lat, lng]);
-                        meuMarcador.setIcon(criarMarcadorLife(fotoPerfilUrl, modoIcone, bateriaNivel));
+                        meuMarcador.setIcon(criarMarcadorLife(fotoPerfilUrl, '', bateriaNivel, false, v));
                     }
 
                     db.ref('casal/' + meuPerfil).set({
-                        lat: lat, lng: lng, speed: v, modoIcone: modoIcone,
+                        lat: lat, lng: lng, speed: v,
                         foto: fotoPerfilUrl, bateria: bateriaNivel, timestamp: Date.now()
                     });
 
                     atualizarDistancia();
-                }, (err) => console.error(err), { enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 });
+                }, (err) => console.error(err), { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
             }
         }
 
@@ -853,10 +854,10 @@
                 document.getElementById('stat-mode-text').innerText = lugarNome ? lugarNome : (d.speed > 2 ? 'Em Movimento' : 'Parado');
 
                 if (!marcadorParceiro) {
-                    marcadorParceiro = L.marker([d.lat, d.lng], { icon: criarMarcadorLife(d.foto, d.modoIcone || 'fa-person-walking', d.bateria || 100, true) }).addTo(map);
+                    marcadorParceiro = L.marker([d.lat, d.lng], { icon: criarMarcadorLife(d.foto, '', d.bateria || 100, true, d.speed || 0) }).addTo(map);
                 } else {
                     marcadorParceiro.setLatLng([d.lat, d.lng]);
-                    marcadorParceiro.setIcon(criarMarcadorLife(d.foto, d.modoIcone || 'fa-person-walking', d.bateria || 100, true));
+                    marcadorParceiro.setIcon(criarMarcadorLife(d.foto, '', d.bateria || 100, true, d.speed || 0));
                 }
                 atualizarDistancia();
             });
