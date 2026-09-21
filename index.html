@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCasal 360 - Waze Ultra Edition</title>
+    <title>LifeCasal 360 - Waze Realtime Edition</title>
 
     <!-- Meta Tags PWA / iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -125,7 +125,7 @@
         .life-marker {
             position: relative; width: 56px; height: 56px; border-radius: 50%;
             border: 3px solid var(--waze-blue); background-size: cover; background-position: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.4); transition: all 0.5s ease;
         }
         .life-marker.parceiro { border-color: #38bdf8; }
         .marker-badge {
@@ -139,7 +139,7 @@
             font-size: 0.65rem; font-weight: 700; border: 1px solid var(--border-light); display: flex; align-items: center; gap: 3px;
         }
 
-        /* MARCADORES DE LUGARES E RADARES */
+        /* MARCADORES DE LUGARES, RADARES E INCIDENTES */
         .place-map-icon {
             width: 42px; height: 42px; border-radius: 50%; background: #6366f1; color: white;
             border: 3px solid white; display: flex; align-items: center; justify-content: center;
@@ -150,6 +150,14 @@
             border: 2px solid white; display: flex; align-items: center; justify-content: center;
             font-size: 0.95rem; box-shadow: 0 0 12px rgba(234, 67, 53, 0.8);
         }
+        .incident-icon-map {
+            width: 38px; height: 38px; border-radius: 50%; color: white;
+            border: 2px solid white; display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            animation: bounceIncident 1s infinite alternate;
+        }
+        @keyframes bounceIncident { from { transform: translateY(0); } to { transform: translateY(-4px); } }
+
         .traffic-light-icon {
             width: 36px; height: 36px; border-radius: 12px; background: #000; color: white;
             border: 2px solid var(--border-light); display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -176,6 +184,7 @@
             display: flex; align-items: center; justify-content: center; font-size: 1.15rem; cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
         }
+        .btn-report { background: linear-gradient(135deg, #f59e0b, #d97706) !important; border: 2px solid #fff; }
         .btn-round.loading { animation: spin 1s infinite linear; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
@@ -219,7 +228,7 @@
         <div class="login-card">
             <div class="brand-icon"><i class="fa-solid fa-car-side"></i></div>
             <h2>LifeCasal 360</h2>
-            <p>Waze Ultra & Monitoramento em Tempo Real</p>
+            <p>Waze Realtime & Monitoramento Completo</p>
             
             <div class="input-group">
                 <label>Nome de Usuário</label>
@@ -260,7 +269,7 @@
         <i class="fa-solid fa-bell"></i> <span id="place-notification-text">Amor chegou em Casa</span>
     </div>
 
-    <!-- BANNER DE RADAR OU VELOCIDADE EXCESSIVA -->
+    <!-- BANNER DE RADAR OU INCIDENTE -->
     <div id="traffic-alert-banner">
         <i class="fa-solid fa-triangle-exclamation"></i> <span id="traffic-alert-text">Atenção: Radar à frente!</span>
     </div>
@@ -282,6 +291,7 @@
 
     <!-- CONTROLES FLUTUANTES -->
     <div class="controls-bar">
+        <button class="btn-round btn-report" onclick="reportarAlertaTrânsito()" title="Reportar Trânsito/Acidente"><i class="fa-solid fa-triangle-exclamation"></i></button>
         <button class="btn-round" id="btn-recenter" title="Minha Localização"><i class="fa-solid fa-crosshairs"></i></button>
         <button class="btn-round" id="btn-scan-radar" onclick="carregarRadaresECameras()" title="Escanear Radares"><i class="fa-solid fa-camera"></i></button>
         <button class="btn-round" id="btn-fit-all" title="Ver Ambos"><i class="fa-solid fa-users"></i></button>
@@ -400,17 +410,21 @@
         let lugaresCadastrados = {};
         let lugarAtualParceiro = null;
         let camadasLugaresMapa = [];
-        let camadaRadares = L.layerGroup(), camadaSemaforos = L.layerGroup();
+        let camadaRadares = L.layerGroup(), camadaSemaforos = L.layerGroup(), camadaIncidentes = L.layerGroup();
         let listaRadaresProximos = [];
+        let listaIncidentesAtivos = [];
 
-        // 2. MAPA ESTILO WAZE MODERNO (CartoDB Voyager HD)
+        // 2. MAPA ESTILO WAZE REALTIME (CartoDB Voyager)
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
+        
+        // Camada Base
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap / CartoDB Voyager', maxZoom: 19
         }).addTo(map);
 
         camadaRadares.addTo(map);
         camadaSemaforos.addTo(map);
+        camadaIncidentes.addTo(map);
 
         // Bateria
         if ('getBattery' in navigator) {
@@ -454,6 +468,7 @@
                 carregarLugares();
                 carregarFoto();
                 carregarParadas();
+                carregarIncidentesTrânsito();
                 configurarCliqueNoMapa();
                 iniciarCicloSemaforosRegressivos();
             });
@@ -465,25 +480,69 @@
             document.getElementById('login-perfil').value = localStorage.getItem('life_perfil') || 'pessoa1';
         }
 
-        // 3. CONSULTAR RADARES E SEMÁFOROS (OVERPASS API COM FALLBACK MULTI-SERVIDOR)
+        // 3. MÓDULO DE REPORTAR INCIDENTES DE TRÂNSITO (ESTILO WAZE)
+        function reportarAlertaTrânsito() {
+            if (!minhaUltimaPos) { alert("Aguardando sinal do GPS..."); return; }
+
+            const tipo = prompt("O que você deseja reportar neste local?\n1. Congestionamento 🚗\n2. Acidente 💥\n3. Polícia / Blitz 👮\n4. Obras na Pista 🚧\n5. Perigo na Via ⚠️", "1");
+            const mapaTipos = {
+                '1': { nome: 'Congestionamento', icone: 'fa-car-side', cor: '#f59e0b' },
+                '2': { nome: 'Acidente', icone: 'fa-car-burst', cor: '#ef4444' },
+                '3': { nome: 'Polícia / Blitz', icone: 'fa-shield-halved', cor: '#3b82f6' },
+                '4': { nome: 'Obras na Pista', icone: 'fa-person-digging', cor: '#d97706' },
+                '5': { nome: 'Perigo na Via', icone: 'fa-triangle-exclamation', cor: '#dc2626' }
+            };
+
+            const item = mapaTipos[tipo] || mapaTipos['1'];
+            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+            db.ref('incidentes').push({
+                tipo: item.nome,
+                icone: item.icone,
+                cor: item.cor,
+                lat: minhaUltimaPos[0],
+                lng: minhaUltimaPos[1],
+                usuario: meuUsuario,
+                hora: hora,
+                timestamp: Date.now()
+            });
+
+            alert(`Alerta de "${item.nome}" publicado no mapa para todos!`);
+        }
+
+        function carregarIncidentesTrânsito() {
+            db.ref('incidentes').on('value', (snap) => {
+                camadaIncidentes.clearLayers();
+                listaIncidentesAtivos = [];
+
+                snap.forEach((child) => {
+                    const inc = child.val();
+                    listaIncidentesAtivos.push(inc);
+
+                    const incIcon = L.divIcon({
+                        className: 'custom-incident',
+                        html: `<div class="incident-icon-map" style="background:${inc.cor};"><i class="fa-solid ${inc.icone}"></i></div>`,
+                        iconSize: [38, 38], iconAnchor: [19, 19]
+                    });
+
+                    L.marker([inc.lat, inc.lng], { icon: incIcon }).addTo(camadaIncidentes)
+                     .bindPopup(`<b>${inc.tipo}</b><br>Reportado por: <b>${inc.usuario}</b> às ${inc.hora}`);
+                });
+            });
+        }
+
+        // CONSULTAR RADARES E SEMÁFOROS (OVERPASS API MULTI-SERVIDOR)
         async function carregarRadaresECameras() {
-            if (!minhaUltimaPos) {
-                alert("Aguardando sinal do GPS para escanear radares da área...");
-                return;
-            }
+            if (!minhaUltimaPos) { alert("Aguardando sinal do GPS para escanear radares..."); return; }
 
             const btnScan = document.getElementById('btn-scan-radar');
             const statusText = document.getElementById('scan-status-text');
             if (btnScan) btnScan.classList.add('loading');
-            if (statusText) statusText.innerText = "Procurando radares na região...";
+            if (statusText) statusText.innerText = "Buscando radares na região...";
 
-            const lat = minhaUltimaPos[0];
-            const lng = minhaUltimaPos[1];
-
-            // Busca elementos em um raio de 3000 metros
+            const lat = minhaUltimaPos[0], lng = minhaUltimaPos[1];
             const overpassQuery = `[out:json][timeout:15];(node["highway"="speed_camera"](around:3000,${lat},${lng});node["highway"="traffic_signals"](around:2000,${lat},${lng}););out body;`;
 
-            // Servidores espelhos para evitar travamentos
             const endpoints = [
                 'https://overpass-api.de/api/interpreter',
                 'https://overpass.khtml.org/api/interpreter',
@@ -494,17 +553,11 @@
             for (let url of endpoints) {
                 try {
                     const res = await fetch(url, {
-                        method: 'POST',
-                        body: 'data=' + encodeURIComponent(overpassQuery),
+                        method: 'POST', body: 'data=' + encodeURIComponent(overpassQuery),
                         headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
                     });
-                    if (res.ok) {
-                        data = await res.json();
-                        if (data && data.elements) break;
-                    }
-                } catch (e) {
-                    console.warn('Tentando servidor espelho Overpass...');
-                }
+                    if (res.ok) { data = await res.json(); if (data && data.elements) break; }
+                } catch (e) { console.warn('Tentando servidor espelho...'); }
             }
 
             if (btnScan) btnScan.classList.remove('loading');
@@ -538,7 +591,7 @@
             }
         }
 
-        // SEMÁFOROS INTELIGENTES TEMPORIZADOS
+        // SEMÁFOROS
         let semaforosMapa = [];
         function desenharSemaforoNoMapa(lat, lng) {
             const semIcon = L.divIcon({
@@ -586,15 +639,20 @@
                 speedBox.classList.remove('overspeed');
             }
 
-            let radarProximo = false;
+            let radarProximo = false, incidenteProximo = null;
             if (minhaUltimaPos) {
                 listaRadaresProximos.forEach(r => {
-                    const d = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], r.lat, r.lng);
-                    if (d < 250) radarProximo = true;
+                    if (calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], r.lat, r.lng) < 250) radarProximo = true;
+                });
+                listaIncidentesAtivos.forEach(inc => {
+                    if (calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], inc.lat, inc.lng) < 300) incidenteProximo = inc.tipo;
                 });
             }
 
-            if (radarProximo) {
+            if (incidenteProximo) {
+                alertText.innerText = `Atenção: ${incidenteProximo} a 300m!`;
+                alertBanner.style.display = 'flex';
+            } else if (radarProximo) {
                 alertText.innerText = "Radar de Velocidade a 250m!";
                 alertBanner.style.display = 'flex';
             } else if (vKmh <= limiteVelocidadeMax) {
@@ -712,7 +770,7 @@
             setTimeout(() => { banner.style.display = 'none'; }, 6000);
         }
 
-        // 5. GPS E TELEMETRIA
+        // 5. GPS DE ALTA PRECISÃO (COM FILTRO ANTI-MOVIMENTO FALSO)
         function criarMarcadorLife(urlFoto, modoIcone, bat, eParceiro = false) {
             const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3388ff':'6366f1'}&color=fff`;
             return L.divIcon({
@@ -736,9 +794,24 @@
             if ("geolocation" in navigator) {
                 navigator.geolocation.watchPosition((pos) => {
                     const lat = pos.coords.latitude, lng = pos.coords.longitude, prec = pos.coords.accuracy;
-                    if (prec > 35) return;
+
+                    // FILTRO DE PRECISÃO: descarta leituras imprecisas (> 25m)
+                    if (prec > 25) return;
+
+                    // TRAVA ANTI-RUÍDO: Só move o marcador se a distância percorrida for maior que 8 metros
+                    if (minhaUltimaPos) {
+                        const distDeslocada = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng);
+                        if (distDeslocada < 8) {
+                            // Zerar velocidade se estiver estático
+                            document.getElementById('stat-speed').innerHTML = `0 <span style="font-size:0.7rem;">km/h</span>`;
+                            document.getElementById('speed-val').innerText = '0';
+                            return;
+                        }
+                    }
 
                     let v = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
+                    if (v < 3) v = 0; // Zerar ruidos de velocidade baixa quando parado
+
                     if (v > maxSpeedRecorded) {
                         maxSpeedRecorded = v;
                         document.getElementById('drive-max-speed').innerText = `${v.toFixed(0)} km/h registrada`;
@@ -765,7 +838,7 @@
                     });
 
                     atualizarDistancia();
-                }, (err) => console.error(err), { enableHighAccuracy: true });
+                }, (err) => console.error(err), { enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 });
             }
         }
 
