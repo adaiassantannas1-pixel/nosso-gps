@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCasal 360 - Waze Navigation & Realtime Edition</title>
+    <title>LifeCasal 360 - Dynamic Navigation & Realtime Edition</title>
 
     <!-- Meta Tags PWA / iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -33,7 +33,7 @@
 
         /* TELA DE LOGIN */
         #login-screen {
-            position: fixed; inset: 0; z-index: 9999; background: radial-gradient(circle at top right, #3b82f6, #0f172a);
+            position: fixed; inset: 0; z-index: 99999; background: radial-gradient(circle at top right, #3b82f6, #0f172a);
             display: flex; align-items: center; justify-content: center; padding: 20px;
         }
         .login-card {
@@ -64,37 +64,39 @@
         /* MAPA PRO HD */
         #map { width: 100%; height: 100%; flex: 1; z-index: 1; filter: contrast(105%) brightness(98%); }
 
-        /* LUPA E SEARCHBAR ESTILO WAZE */
+        /* LUPA E SEARCHBAR FIXA VISÍVEL */
         .search-container {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; width: 92%; max-width: 500px; display: flex; flex-direction: column; gap: 5px;
+            z-index: 2000; width: 92%; max-width: 500px; display: flex; flex-direction: column; gap: 5px;
         }
         .search-box {
-            background: var(--card-bg); backdrop-filter: blur(14px); border-radius: 30px;
-            border: 1px solid var(--border-light); padding: 6px 16px; display: flex;
-            align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(16px); border-radius: 30px;
+            border: 2px solid var(--waze-blue); padding: 8px 18px; display: flex;
+            align-items: center; gap: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.6);
         }
         .search-box input {
             flex: 1; background: none; border: none; outline: none; color: white;
-            font-size: 0.9rem; font-weight: 600; padding: 6px 0;
+            font-size: 0.95rem; font-weight: 700;
         }
         .search-results {
             background: rgba(15, 23, 42, 0.98); border-radius: 18px; border: 1px solid var(--border-light);
-            max-height: 220px; overflow-y: auto; display: none; flex-direction: column; backdrop-filter: blur(16px);
+            max-height: 240px; overflow-y: auto; display: none; flex-direction: column; backdrop-filter: blur(16px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
         }
         .search-item {
             padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem;
             cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s;
         }
-        .search-item:hover { background: rgba(51, 136, 255, 0.2); }
+        .search-item:hover { background: rgba(51, 136, 255, 0.25); }
 
         /* HUD SUPERIOR DE HEADER */
         .glass-header {
             position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
-            z-index: 999; background: var(--card-bg); backdrop-filter: blur(14px);
+            z-index: 1000; background: var(--card-bg); backdrop-filter: blur(14px);
             padding: 8px 16px; border-radius: 40px; border: 1px solid var(--border-light);
             display: flex; align-items: center; justify-content: space-between; gap: 12px;
             width: 92%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
         }
         .header-profile { display: flex; align-items: center; gap: 10px; }
         .header-avatar {
@@ -108,7 +110,41 @@
         }
         @keyframes pulse-sos { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* BANNERS DE ALERTAS COM BOTÃO OK */
+        /* HUD SOBREPOSIÇÃO MODO NAVEGAÇÃO FULLSCREEN */
+        #nav-hud-overlay {
+            position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
+            z-index: 2500; width: 92%; max-width: 500px; display: none; flex-direction: column; gap: 10px;
+        }
+        .nav-turn-card {
+            background: linear-gradient(135deg, #1e293b, #0f172a); border: 2px solid var(--waze-blue);
+            border-radius: 24px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.8); backdrop-filter: blur(16px);
+        }
+        .nav-turn-icon {
+            width: 52px; height: 52px; border-radius: 16px; background: var(--waze-blue);
+            display: flex; align-items: center; justify-content: center; font-size: 1.8rem; color: white;
+            box-shadow: 0 4px 15px rgba(51, 136, 255, 0.4);
+        }
+        .nav-turn-text { flex: 1; margin-left: 15px; }
+        .nav-turn-dist { font-size: 1.3rem; font-weight: 900; color: #38bdf8; }
+        .nav-turn-instruction { font-size: 0.85rem; font-weight: 700; color: #f8fafc; margin-top: 2px; }
+
+        .nav-bottom-bar {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            z-index: 2500; width: 92%; max-width: 500px; display: none; align-items: center; justify-content: space-between;
+            background: rgba(15, 23, 42, 0.95); border: 1px solid var(--border-light); padding: 12px 20px;
+            border-radius: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(16px);
+        }
+        .nav-eta-box { display: flex; flex-direction: column; }
+        .nav-eta-time { font-family: 'Orbitron', sans-serif; font-size: 1.2rem; font-weight: 900; color: var(--waze-green); }
+        .nav-eta-sub { font-size: 0.7rem; font-weight: 700; color: #94a3b8; }
+        .btn-cancel-nav {
+            background: linear-gradient(135deg, var(--waze-red), #dc2626); color: white; border: none;
+            padding: 10px 20px; border-radius: 20px; font-weight: 800; font-size: 0.85rem; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(234, 67, 53, 0.4);
+        }
+
+        /* BANNERS DE ALERTAS */
         .alert-banner-hud {
             position: absolute; top: 135px; left: 50%; transform: translateX(-50%);
             z-index: 1001; color: white; padding: 10px 16px; border-radius: 30px;
@@ -197,6 +233,7 @@
             padding: 12px 20px; border-radius: 24px; border: 1px solid var(--border-light);
             display: flex; justify-content: space-around; align-items: center;
             width: 92%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.3s ease;
         }
         .hud-item { text-align: center; }
         .hud-label { font-size: 0.65rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-top: 2px; }
@@ -277,17 +314,17 @@
     </div>
 
     <!-- LUPA DE PESQUISA SUPERIOR (NOMINATIM / OSMR) -->
-    <div class="search-container">
+    <div class="search-container" id="main-search-container">
         <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass" style="color:var(--waze-blue);"></i>
-            <input type="text" id="input-search" placeholder="Buscar local, endereço ou destino..." onkeyup="if(event.key==='Enter') pesquisarEndereco()">
-            <i class="fa-solid fa-microphone" style="cursor:pointer; color:#94a3b8;" onclick="iniciarReconhecimentoVozBusca()" title="Buscar por voz"></i>
+            <i class="fa-solid fa-magnifying-glass" style="color:var(--waze-blue); font-size:1.1rem;"></i>
+            <input type="text" id="input-search" placeholder="Para onde vamos hoje?" onkeyup="if(event.key==='Enter') pesquisarEndereco()">
+            <i class="fa-solid fa-microphone" style="cursor:pointer; color:#94a3b8; font-size:1.1rem;" onclick="iniciarReconhecimentoVozBusca()" title="Buscar por voz"></i>
         </div>
         <div class="search-results" id="search-results-list"></div>
     </div>
 
-    <!-- HUD SUPERIOR -->
-    <div class="glass-header">
+    <!-- HUD SUPERIOR PADRÃO -->
+    <div class="glass-header" id="main-header">
         <div class="header-profile">
             <div class="header-avatar" id="header-avatar-img"></div>
             <div>
@@ -300,7 +337,27 @@
         <button class="btn-sos-header" onclick="dispararSOS()">SOS 🚨</button>
     </div>
 
-    <!-- NOTIFICAÇÃO DE CHEGADA / LUGARES COM BOTÃO OK -->
+    <!-- OVERLAY HUD FULLSCREEN DO MODO NAVEGAÇÃO WAZE -->
+    <div id="nav-hud-overlay">
+        <div class="nav-turn-card">
+            <div class="nav-turn-icon" id="nav-turn-icon-el"><i class="fa-solid fa-arrow-up"></i></div>
+            <div class="nav-turn-text">
+                <div class="nav-turn-dist" id="nav-turn-dist-el">200 m</div>
+                <div class="nav-turn-instruction" id="nav-turn-text-el">Siga em frente na via</div>
+            </div>
+            <i class="fa-solid fa-volume-high" id="btn-voice-toggle" style="cursor:pointer; font-size:1.3rem; color:var(--waze-blue);" onclick="alternarVozGps()"></i>
+        </div>
+    </div>
+
+    <div class="nav-bottom-bar" id="nav-bottom-bar">
+        <div class="nav-eta-box">
+            <div class="nav-eta-time" id="nav-eta-time-val">-- min</div>
+            <div class="nav-eta-sub" id="nav-eta-dist-val">-- km • Chegada estimada</div>
+        </div>
+        <button class="btn-cancel-nav" onclick="cancelarRota()">Sair da Rota</button>
+    </div>
+
+    <!-- NOTIFICAÇÕES E BANNERS -->
     <div id="place-notification-banner" class="alert-banner-hud">
         <div style="display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-bell"></i> <span id="place-notification-text">Amor chegou em Casa</span>
@@ -308,7 +365,6 @@
         <button class="btn-close-banner" onclick="fecharBannerNotificacao('place-notification-banner')">OK</button>
     </div>
 
-    <!-- BANNER DE RADAR OU INCIDENTE COM BOTÃO OK -->
     <div id="traffic-alert-banner" class="alert-banner-hud">
         <div style="display:flex; align-items:center; gap:8px;">
             <i class="fa-solid fa-triangle-exclamation"></i> <span id="traffic-alert-text">Atenção: Radar à frente!</span>
@@ -328,7 +384,7 @@
         <div class="speed-unit">KM/H</div>
     </div>
 
-    <!-- MAPA WAZE -->
+    <!-- MAPA PRINCIPAL -->
     <div id="map"></div>
 
     <!-- CONTROLES FLUTUANTES -->
@@ -341,7 +397,7 @@
     </div>
 
     <!-- HUD BOTTOM LIFE360 -->
-    <div class="hud-bottom">
+    <div class="hud-bottom" id="main-hud-bottom">
         <div class="hud-item">
             <div class="hud-value" id="stat-speed">0 <span style="font-size:0.7rem;">km/h</span></div>
             <div class="hud-label">Velocidade</div>
@@ -392,7 +448,7 @@
             </div>
         </div>
 
-        <!-- ABA DE NAVEGAÇÃO CURVA A CURVA COM VOZ -->
+        <!-- ABA DE NAVEGAÇÃO -->
         <div class="tab-content" id="tab-rota">
             <div style="font-size:0.85rem; font-weight:800; color:#38bdf8;">NAVEGAÇÃO EM TEMPO REAL COM VOZ 🔊</div>
             <div id="route-info-card" class="route-card" style="display:none;">
@@ -409,7 +465,7 @@
             </div>
         </div>
 
-        <!-- ABA LUGARES (GEOFENCING) -->
+        <!-- ABA LUGARES -->
         <div class="tab-content" id="tab-lugares">
             <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1;">💡 Clique em qualquer ponto do mapa para marcar um novo lugar!</div>
             <button class="btn-primary" onclick="cadastrarLugarModoPrompt()"><i class="fa-solid fa-location-dot"></i> Salvar Minha Posição Atual</button>
@@ -417,7 +473,7 @@
             <div id="places-container" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>
 
-        <!-- ABA HISTÓRICO DE PARADAS -->
+        <!-- ABA PARADAS -->
         <div class="tab-content" id="tab-paradas">
             <div style="font-size:0.8rem; font-weight:700; color:#94a3b8;">HISTÓRICO DE ENDEREÇOS E PARADAS</div>
             <div id="stops-container" style="display:flex; flex-direction:column; gap:12px;"></div>
@@ -474,8 +530,10 @@
         let listaRadaresProximos = [];
         let listaIncidentesAtivos = [];
         let instrucaoVozAnterior = '';
+        let vozAtiva = true;
+        let modoNavegacaoAtivo = false;
 
-        // MAPA HD ULTRA
+        // MAPA PRINCIPAL
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
         
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
@@ -547,7 +605,7 @@
             document.getElementById('login-perfil').value = localStorage.getItem('life_perfil') || 'pessoa1';
         }
 
-        // BARRA DE PESQUISA E AUTOCOMPLETE (NOMINATIM)
+        // BUSCA DE ENDEREÇOS (NOMINATIM API)
         async function pesquisarEndereco() {
             const query = document.getElementById('input-search').value.trim();
             const resultsList = document.getElementById('search-results-list');
@@ -593,7 +651,7 @@
             };
         }
 
-        // ROTEAMENTO EM TEMPO REAL E NAVEGAÇÃO POR VOZ (OSRM)
+        // MODO NAVEGAÇÃO FULLSCREEN WAZE (OSRM ROUTING)
         async function traçarRotaParaDestino(destLat, destLng, destNome) {
             if (!minhaUltimaPos) { alert("Aguardando sinal GPS..."); return; }
 
@@ -609,42 +667,68 @@
                     camadaRotaPolyline.clearLayers();
 
                     const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
-                    const polyline = L.polyline(coords, { color: '#38bdf8', weight: 6, opacity: 0.9 }).addTo(camadaRotaPolyline);
-                    map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+                    const polyline = L.polyline(coords, { color: '#38bdf8', weight: 7, opacity: 0.95 }).addTo(camadaRotaPolyline);
+                    map.fitBounds(polyline.getBounds(), { padding: [60, 60] });
 
-                    // Desenhar Linha de Trânsito Dinâmica
                     desenharLinhasDeTrânsitoDinamicas(coords);
 
-                    // Preencher Card de Navegação
-                    document.getElementById('route-time').innerText = `${Math.round(route.duration / 60)} min`;
-                    document.getElementById('route-distance').innerText = `${(route.distance / 1000).toFixed(1)} km`;
+                    // ATIVAR MODO NAVEGAÇÃO NA TELA
+                    modoNavegacaoAtivo = true;
+                    document.getElementById('main-search-container').style.display = 'none';
+                    document.getElementById('main-header').style.display = 'none';
+                    document.getElementById('main-hud-bottom').style.display = 'none';
+
+                    document.getElementById('nav-hud-overlay').style.display = 'flex';
+                    document.getElementById('nav-bottom-bar').style.display = 'flex';
+
+                    // ATUALIZAR HUD DE ETAS
+                    const tempoMin = Math.round(route.duration / 60);
+                    const distKm = (route.distance / 1000).toFixed(1);
+                    document.getElementById('nav-eta-time-val').innerText = `${tempoMin} min`;
+                    document.getElementById('nav-eta-dist-val').innerText = `${distKm} km • ${destNome}`;
+
+                    // PRIMEIRA INSTRUÇÃO DE NAVEGAÇÃO
+                    const firstStep = route.legs[0].steps[0];
+                    if (firstStep) {
+                        document.getElementById('nav-turn-dist-el').innerText = `${Math.round(firstStep.distance)} m`;
+                        document.getElementById('nav-turn-text-el').innerText = firstStep.maneuver.instruction || `Siga em frente na via`;
+                        falarInstruçãoVoz(firstStep.maneuver.instruction || `Iniciando rota para ${destNome}`);
+                    }
+
+                    // PREENCHER TAMBÉM ABA DO PAINEL LATERAL
+                    document.getElementById('route-time').innerText = `${tempoMin} min`;
+                    document.getElementById('route-distance').innerText = `${distKm} km`;
                     document.getElementById('route-destination-name').innerText = destNome;
                     document.getElementById('route-info-card').style.display = 'flex';
 
-                    // Gerar Lista de Instruções
                     const container = document.getElementById('instructions-container');
                     container.innerHTML = '';
-                    
-                    route.legs[0].steps.forEach((step, idx) => {
+                    route.legs[0].steps.forEach((step) => {
                         const div = document.createElement('div');
                         div.style.cssText = 'background:rgba(30,41,59,0.7); padding:10px; border-radius:12px; font-size:0.8rem; display:flex; align-items:center; gap:10px; border:1px solid var(--border-light);';
                         div.innerHTML = `<i class="fa-solid fa-arrow-turn-up" style="color:var(--waze-blue); font-size:1.1rem;"></i> <div><b>${step.maneuver.instruction || step.name || 'Siga em frente'}</b><br><span style="color:#94a3b8; font-size:0.7rem;">${Math.round(step.distance)} metros</span></div>`;
                         container.appendChild(div);
-
-                        if (idx === 0) falarInstruçãoVoz(step.maneuver.instruction || `Siga em frente na ${step.name}`);
                     });
-
-                    // Abrir Aba de Navegação
-                    trocarAba('tab-rota', document.querySelectorAll('.tab-btn')[1]);
-                    document.getElementById('sidebar').classList.add('open');
                 }
             } catch (e) {
                 alert("Erro ao calcular rota!");
             }
         }
 
+        function alternarVozGps() {
+            vozAtiva = !vozAtiva;
+            const btn = document.getElementById('btn-voice-toggle');
+            if (vozAtiva) {
+                btn.className = "fa-solid fa-volume-high";
+                btn.style.color = "var(--waze-blue)";
+            } else {
+                btn.className = "fa-solid fa-volume-xmark";
+                btn.style.color = "var(--waze-red)";
+            }
+        }
+
         function falarInstruçãoVoz(texto) {
-            if (!('speechSynthesis' in window) || texto === instrucaoVozAnterior) return;
+            if (!vozAtiva || !('speechSynthesis' in window) || texto === instrucaoVozAnterior) return;
             instrucaoVozAnterior = texto;
             const utterance = new SpeechSynthesisUtterance(texto);
             utterance.lang = 'pt-BR';
@@ -652,31 +736,38 @@
         }
 
         function cancelarRota() {
+            modoNavegacaoAtivo = false;
             camadaRotaPolyline.clearLayers();
             camadaTrânsitoLinhas.clearLayers();
+
+            document.getElementById('nav-hud-overlay').style.display = 'none';
+            document.getElementById('nav-bottom-bar').style.display = 'none';
+
+            document.getElementById('main-search-container').style.display = 'flex';
+            document.getElementById('main-header').style.display = 'flex';
+            document.getElementById('main-hud-bottom').style.display = 'flex';
+
             document.getElementById('route-info-card').style.display = 'none';
             document.getElementById('instructions-container').innerHTML = `<div style="font-size:0.8rem; color:#64748b; text-align:center; padding:15px;">Pesquise um local na lupa superior para iniciar a rota.</div>`;
+
+            if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 16);
         }
 
-        // DESENHAR LINHAS COLORIDAS DE TRÂNSITO (VERDE / LARANJA / VERMELHO)
+        // TRÂNSITO DINÂMICO NAS LINHAS
         function desenharLinhasDeTrânsitoDinamicas(coords) {
             camadaTrânsitoLinhas.clearLayers();
             for (let i = 0; i < coords.length - 1; i++) {
-                let corTrânsito = '#34a853'; // Verde (Livre)
-                
-                // Checar se há incidente próximo do segmento
+                let corTrânsito = '#34a853';
                 listaIncidentesAtivos.forEach(inc => {
-                    const d = calcularDistancia(coords[i][0], coords[i][1], inc.lat, inc.lng);
-                    if (d < 200) {
+                    if (calcularDistancia(coords[i][0], coords[i][1], inc.lat, inc.lng) < 200) {
                         corTrânsito = (inc.tipo === 'Congestionamento' || inc.tipo === 'Acidente') ? '#ea4335' : '#fbbc04';
                     }
                 });
-
                 L.polyline([coords[i], coords[i+1]], { color: corTrânsito, weight: 8, opacity: 0.85 }).addTo(camadaTrânsitoLinhas);
             }
         }
 
-        // INCIDENTES, VOTAÇÃO E LIMPEZA
+        // INCIDENTES E REPORTAR
         function reportarAlertaTrânsito() {
             if (!minhaUltimaPos) { alert("Aguardando sinal do GPS..."); return; }
 
@@ -751,7 +842,7 @@
             });
         }
 
-        // CORREÇÃO DO BOTÃO DA CÂMERA (OVERPASS API COM POST BODY FORM-DATA)
+        // RADARES, SEMÁFOROS E LOJAS (OVERPASS API)
         async function carregarRadaresECameras() {
             if (!minhaUltimaPos) { alert("Aguardando sinal do GPS..."); return; }
 
@@ -1052,6 +1143,10 @@
                     } else {
                         meuMarcador.setLatLng([lat, lng]);
                         meuMarcador.setIcon(criarMarcadorLife(fotoPerfilUrl, '', bateriaNivel, false, v));
+                    }
+
+                    if (modoNavegacaoAtivo) {
+                        map.panTo([lat, lng]);
                     }
 
                     db.ref('casal/' + meuPerfil).set({
