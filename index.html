@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCasal 360 - Pro Waze Edition</title>
+    <title>LifeCasal 360 - Waze Navigation & Realtime Edition</title>
 
     <!-- Meta Tags PWA / iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -24,7 +24,7 @@
             --primary: #6366f1;
             --danger: #ef4444;
             --bg-dark: #0f172a;
-            --card-bg: rgba(15, 23, 42, 0.92);
+            --card-bg: rgba(15, 23, 42, 0.94);
             --border-light: rgba(255, 255, 255, 0.18);
         }
 
@@ -64,10 +64,34 @@
         /* MAPA PRO HD */
         #map { width: 100%; height: 100%; flex: 1; z-index: 1; filter: contrast(105%) brightness(98%); }
 
-        /* HUD SUPERIOR */
-        .glass-header {
+        /* LUPA E SEARCHBAR ESTILO WAZE */
+        .search-container {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
-            z-index: 1000; background: var(--card-bg); backdrop-filter: blur(14px);
+            z-index: 1000; width: 92%; max-width: 500px; display: flex; flex-direction: column; gap: 5px;
+        }
+        .search-box {
+            background: var(--card-bg); backdrop-filter: blur(14px); border-radius: 30px;
+            border: 1px solid var(--border-light); padding: 6px 16px; display: flex;
+            align-items: center; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .search-box input {
+            flex: 1; background: none; border: none; outline: none; color: white;
+            font-size: 0.9rem; font-weight: 600; padding: 6px 0;
+        }
+        .search-results {
+            background: rgba(15, 23, 42, 0.98); border-radius: 18px; border: 1px solid var(--border-light);
+            max-height: 220px; overflow-y: auto; display: none; flex-direction: column; backdrop-filter: blur(16px);
+        }
+        .search-item {
+            padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 0.85rem;
+            cursor: pointer; display: flex; align-items: center; gap: 10px; transition: background 0.2s;
+        }
+        .search-item:hover { background: rgba(51, 136, 255, 0.2); }
+
+        /* HUD SUPERIOR DE HEADER */
+        .glass-header {
+            position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
+            z-index: 999; background: var(--card-bg); backdrop-filter: blur(14px);
             padding: 8px 16px; border-radius: 40px; border: 1px solid var(--border-light);
             display: flex; align-items: center; justify-content: space-between; gap: 12px;
             width: 92%; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
@@ -84,9 +108,9 @@
         }
         @keyframes pulse-sos { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* BANNERS DE ALERTAS COM BOTÃO OK DE FECHAR */
+        /* BANNERS DE ALERTAS COM BOTÃO OK */
         .alert-banner-hud {
-            position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 135px; left: 50%; transform: translateX(-50%);
             z-index: 1001; color: white; padding: 10px 16px; border-radius: 30px;
             display: none; align-items: center; gap: 12px; font-weight: 800; font-size: 0.85rem;
             box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 2px solid #fff;
@@ -103,7 +127,7 @@
         .btn-close-banner:active { transform: scale(0.92); background: #fff; color: #000; }
 
         #sos-banner {
-            position: absolute; top: 75px; left: 50%; transform: translateX(-50%);
+            position: absolute; top: 135px; left: 50%; transform: translateX(-50%);
             z-index: 1001; background: var(--danger); color: white; padding: 10px 20px; border-radius: 30px;
             display: none; align-items: center; gap: 15px; font-weight: 800; font-size: 0.85rem;
             box-shadow: 0 10px 30px rgba(239, 68, 68, 0.6); border: 2px solid #fff;
@@ -187,6 +211,8 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
         }
         .btn-report { background: linear-gradient(135deg, #f59e0b, #d97706) !important; border: 2px solid #fff; }
+        .btn-round.loading { animation: spin 1s infinite linear; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* PAINEL LATERAL MULTI-ABAS */
         .sidebar {
@@ -199,13 +225,13 @@
         .sidebar.open { right: 0 !important; }
 
         .tab-menu { display: flex; gap: 4px; background: rgba(30, 41, 59, 0.8); padding: 4px; border-radius: 14px; border: 1px solid var(--border-light); }
-        .tab-btn { flex: 1; padding: 8px 2px; border: none; background: none; color: #94a3b8; font-weight: 700; font-size: 0.68rem; border-radius: 10px; cursor: pointer; }
+        .tab-btn { flex: 1; padding: 8px 2px; border: none; background: none; color: #94a3b8; font-weight: 700; font-size: 0.65rem; border-radius: 10px; cursor: pointer; }
         .tab-btn.active { background: var(--waze-blue); color: #fff; }
 
         .tab-content { display: none; flex: 1; flex-direction: column; gap: 12px; overflow-y: auto; }
         .tab-content.active { display: flex; }
 
-        .place-card { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-light); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 10px; }
+        .place-card, .route-card { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-light); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 10px; }
         .stop-card { background: rgba(30, 41, 59, 0.6); border: 1px solid var(--border-light); padding: 14px; border-radius: 16px; display: flex; flex-direction: column; gap: 6px; }
         .card-info { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: 16px; font-size: 0.85rem; display: flex; align-items: center; gap: 12px; }
         .card-icon { width: 42px; height: 42px; border-radius: 14px; background: rgba(99, 102, 241, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
@@ -248,6 +274,16 @@
             <button class="btn-primary" onclick="autenticarUsuario()">Entrar no Sistema</button>
             <div id="login-error" style="color:var(--waze-red); font-size:0.8rem; margin-top:12px; font-weight:600;"></div>
         </div>
+    </div>
+
+    <!-- LUPA DE PESQUISA SUPERIOR (NOMINATIM / OSMR) -->
+    <div class="search-container">
+        <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass" style="color:var(--waze-blue);"></i>
+            <input type="text" id="input-search" placeholder="Buscar local, endereço ou destino..." onkeyup="if(event.key==='Enter') pesquisarEndereco()">
+            <i class="fa-solid fa-microphone" style="cursor:pointer; color:#94a3b8;" onclick="iniciarReconhecimentoVozBusca()" title="Buscar por voz"></i>
+        </div>
+        <div class="search-results" id="search-results-list"></div>
     </div>
 
     <!-- HUD SUPERIOR -->
@@ -331,6 +367,7 @@
 
         <div class="tab-menu">
             <button class="tab-btn active" onclick="trocarAba('tab-waze', this)">Waze 🚗</button>
+            <button class="tab-btn" onclick="trocarAba('tab-rota', this)">Navegação 🗺️</button>
             <button class="tab-btn" onclick="trocarAba('tab-lugares', this)">Lugares 🏠</button>
             <button class="tab-btn" onclick="trocarAba('tab-paradas', this)">Paradas 📍</button>
             <button class="tab-btn" onclick="trocarAba('tab-chat', this)">Chat 💬</button>
@@ -343,7 +380,7 @@
                 <label>Limite Max. de Velocidade (KM/H)</label>
                 <input type="number" id="input-max-speed" value="60" onchange="limiteVelocidadeMax = parseInt(this.value)">
             </div>
-            <button class="btn-primary" onclick="carregarRadaresECameras()"><i class="fa-solid fa-camera"></i> Escanear Radares e Lojas Próximas</button>
+            <button class="btn-primary" id="btn-scan-action" onclick="carregarRadaresECameras()"><i class="fa-solid fa-camera"></i> Escanear Radares e Lojas Próximas</button>
             <div id="scan-status-text" style="font-size:0.75rem; color:#94a3b8; margin-top:6px; text-align:center;">Clique para buscar pontos em 3km</div>
             
             <div class="card-info" style="margin-top:10px;">
@@ -355,7 +392,24 @@
             </div>
         </div>
 
-        <!-- ABA 2: LUGARES (GEOFENCING) -->
+        <!-- ABA DE NAVEGAÇÃO CURVA A CURVA COM VOZ -->
+        <div class="tab-content" id="tab-rota">
+            <div style="font-size:0.85rem; font-weight:800; color:#38bdf8;">NAVEGAÇÃO EM TEMPO REAL COM VOZ 🔊</div>
+            <div id="route-info-card" class="route-card" style="display:none;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="font-weight:900; font-size:1.1rem; color:var(--waze-green);" id="route-time">-- min</div>
+                    <div style="font-weight:800; font-size:0.9rem; color:#cbd5e1;" id="route-distance">-- km</div>
+                </div>
+                <div style="font-size:0.8rem; color:#94a3b8;" id="route-destination-name">Destino selecionado</div>
+                <button class="btn-primary" style="background:var(--waze-red);" onclick="cancelarRota()">Cancelar Rota</button>
+            </div>
+            <div style="font-size:0.75rem; font-weight:700; color:#94a3b8; margin-top:5px;">INSTRUÇÕES CURVA A CURVA</div>
+            <div id="instructions-container" style="display:flex; flex-direction:column; gap:8px;">
+                <div style="font-size:0.8rem; color:#64748b; text-align:center; padding:15px;">Pesquise um local na lupa superior para iniciar a rota ativada por voz.</div>
+            </div>
+        </div>
+
+        <!-- ABA LUGARES (GEOFENCING) -->
         <div class="tab-content" id="tab-lugares">
             <div style="font-size:0.75rem; font-weight:700; color:#cbd5e1;">💡 Clique em qualquer ponto do mapa para marcar um novo lugar!</div>
             <button class="btn-primary" onclick="cadastrarLugarModoPrompt()"><i class="fa-solid fa-location-dot"></i> Salvar Minha Posição Atual</button>
@@ -363,13 +417,13 @@
             <div id="places-container" style="display:flex; flex-direction:column; gap:10px;"></div>
         </div>
 
-        <!-- ABA 3: HISTÓRICO DE PARADAS -->
+        <!-- ABA HISTÓRICO DE PARADAS -->
         <div class="tab-content" id="tab-paradas">
             <div style="font-size:0.8rem; font-weight:700; color:#94a3b8;">HISTÓRICO DE ENDEREÇOS E PARADAS</div>
             <div id="stops-container" style="display:flex; flex-direction:column; gap:12px;"></div>
         </div>
 
-        <!-- ABA 4: CHAT -->
+        <!-- ABA CHAT -->
         <div class="tab-content" id="tab-chat">
             <div class="chat-messages" id="chat-container"></div>
             <div class="chat-input-box">
@@ -378,7 +432,7 @@
             </div>
         </div>
 
-        <!-- ABA 5: PERFIL -->
+        <!-- ABA PERFIL -->
         <div class="tab-content" id="tab-config">
             <div style="display:flex; flex-direction:column; align-items:center; gap:10px; background:rgba(30,41,59,0.5); padding:15px; border-radius:18px;">
                 <div id="profile-preview" style="width:80px; height:80px; border-radius:50%; border:3px solid var(--waze-blue); background-size:cover; background-position:center;"></div>
@@ -416,17 +470,20 @@
         let lugaresCadastrados = {};
         let lugarAtualParceiro = null;
         let camadasLugaresMapa = [];
-        let camadaRadares = L.layerGroup(), camadaSemaforos = L.layerGroup(), camadaIncidentes = L.layerGroup(), camadaPOIs = L.layerGroup();
+        let camadaRadares = L.layerGroup(), camadaSemaforos = L.layerGroup(), camadaIncidentes = L.layerGroup(), camadaPOIs = L.layerGroup(), camadaTrânsitoLinhas = L.layerGroup(), camadaRotaPolyline = L.layerGroup();
         let listaRadaresProximos = [];
         let listaIncidentesAtivos = [];
+        let instrucaoVozAnterior = '';
 
-        // 2. MAPA HD ULTRA
+        // MAPA HD ULTRA
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
         
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap / CartoDB Voyager HD', maxZoom: 19
         }).addTo(map);
 
+        camadaTrânsitoLinhas.addTo(map);
+        camadaRotaPolyline.addTo(map);
         camadaRadares.addTo(map);
         camadaSemaforos.addTo(map);
         camadaIncidentes.addTo(map);
@@ -490,7 +547,136 @@
             document.getElementById('login-perfil').value = localStorage.getItem('life_perfil') || 'pessoa1';
         }
 
-        // 3. INCIDENTES E REPORTAR
+        // BARRA DE PESQUISA E AUTOCOMPLETE (NOMINATIM)
+        async function pesquisarEndereco() {
+            const query = document.getElementById('input-search').value.trim();
+            const resultsList = document.getElementById('search-results-list');
+            if (!query) { resultsList.style.display = 'none'; return; }
+
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=5`);
+                const data = await res.json();
+
+                resultsList.innerHTML = '';
+                if (data && data.length > 0) {
+                    resultsList.style.display = 'flex';
+                    data.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'search-item';
+                        div.innerHTML = `<i class="fa-solid fa-location-dot" style="color:var(--waze-blue);"></i> <div><b>${item.display_name.split(',')[0]}</b><br><span style="font-size:0.7rem; color:#94a3b8;">${item.display_name}</span></div>`;
+                        div.onclick = () => {
+                            resultsList.style.display = 'none';
+                            traçarRotaParaDestino(item.lat, item.lon, item.display_name.split(',')[0]);
+                        };
+                        resultsList.appendChild(div);
+                    });
+                } else {
+                    resultsList.style.display = 'none';
+                }
+            } catch (e) {
+                console.error("Erro na busca", e);
+            }
+        }
+
+        function iniciarReconhecimentoVozBusca() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert("Navegador não suporta busca por voz."); return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'pt-BR';
+            recognition.start();
+            recognition.onresult = (event) => {
+                const texto = event.results[0][0].transcript;
+                document.getElementById('input-search').value = texto;
+                pesquisarEndereco();
+            };
+        }
+
+        // ROTEAMENTO EM TEMPO REAL E NAVEGAÇÃO POR VOZ (OSRM)
+        async function traçarRotaParaDestino(destLat, destLng, destNome) {
+            if (!minhaUltimaPos) { alert("Aguardando sinal GPS..."); return; }
+
+            const origin = `${minhaUltimaPos[1]},${minhaUltimaPos[0]}`;
+            const destination = `${destLng},${destLat}`;
+
+            try {
+                const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${origin};${destination}?overview=full&geometries=geojson&steps=true`);
+                const data = await res.json();
+
+                if (data.routes && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    camadaRotaPolyline.clearLayers();
+
+                    const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+                    const polyline = L.polyline(coords, { color: '#38bdf8', weight: 6, opacity: 0.9 }).addTo(camadaRotaPolyline);
+                    map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+
+                    // Desenhar Linha de Trânsito Dinâmica
+                    desenharLinhasDeTrânsitoDinamicas(coords);
+
+                    // Preencher Card de Navegação
+                    document.getElementById('route-time').innerText = `${Math.round(route.duration / 60)} min`;
+                    document.getElementById('route-distance').innerText = `${(route.distance / 1000).toFixed(1)} km`;
+                    document.getElementById('route-destination-name').innerText = destNome;
+                    document.getElementById('route-info-card').style.display = 'flex';
+
+                    // Gerar Lista de Instruções
+                    const container = document.getElementById('instructions-container');
+                    container.innerHTML = '';
+                    
+                    route.legs[0].steps.forEach((step, idx) => {
+                        const div = document.createElement('div');
+                        div.style.cssText = 'background:rgba(30,41,59,0.7); padding:10px; border-radius:12px; font-size:0.8rem; display:flex; align-items:center; gap:10px; border:1px solid var(--border-light);';
+                        div.innerHTML = `<i class="fa-solid fa-arrow-turn-up" style="color:var(--waze-blue); font-size:1.1rem;"></i> <div><b>${step.maneuver.instruction || step.name || 'Siga em frente'}</b><br><span style="color:#94a3b8; font-size:0.7rem;">${Math.round(step.distance)} metros</span></div>`;
+                        container.appendChild(div);
+
+                        if (idx === 0) falarInstruçãoVoz(step.maneuver.instruction || `Siga em frente na ${step.name}`);
+                    });
+
+                    // Abrir Aba de Navegação
+                    trocarAba('tab-rota', document.querySelectorAll('.tab-btn')[1]);
+                    document.getElementById('sidebar').classList.add('open');
+                }
+            } catch (e) {
+                alert("Erro ao calcular rota!");
+            }
+        }
+
+        function falarInstruçãoVoz(texto) {
+            if (!('speechSynthesis' in window) || texto === instrucaoVozAnterior) return;
+            instrucaoVozAnterior = texto;
+            const utterance = new SpeechSynthesisUtterance(texto);
+            utterance.lang = 'pt-BR';
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function cancelarRota() {
+            camadaRotaPolyline.clearLayers();
+            camadaTrânsitoLinhas.clearLayers();
+            document.getElementById('route-info-card').style.display = 'none';
+            document.getElementById('instructions-container').innerHTML = `<div style="font-size:0.8rem; color:#64748b; text-align:center; padding:15px;">Pesquise um local na lupa superior para iniciar a rota.</div>`;
+        }
+
+        // DESENHAR LINHAS COLORIDAS DE TRÂNSITO (VERDE / LARANJA / VERMELHO)
+        function desenharLinhasDeTrânsitoDinamicas(coords) {
+            camadaTrânsitoLinhas.clearLayers();
+            for (let i = 0; i < coords.length - 1; i++) {
+                let corTrânsito = '#34a853'; // Verde (Livre)
+                
+                // Checar se há incidente próximo do segmento
+                listaIncidentesAtivos.forEach(inc => {
+                    const d = calcularDistancia(coords[i][0], coords[i][1], inc.lat, inc.lng);
+                    if (d < 200) {
+                        corTrânsito = (inc.tipo === 'Congestionamento' || inc.tipo === 'Acidente') ? '#ea4335' : '#fbbc04';
+                    }
+                });
+
+                L.polyline([coords[i], coords[i+1]], { color: corTrânsito, weight: 8, opacity: 0.85 }).addTo(camadaTrânsitoLinhas);
+            }
+        }
+
+        // INCIDENTES, VOTAÇÃO E LIMPEZA
         function reportarAlertaTrânsito() {
             if (!minhaUltimaPos) { alert("Aguardando sinal do GPS..."); return; }
 
@@ -509,7 +695,8 @@
             db.ref('incidentes').push({
                 tipo: item.nome, icone: item.icone, cor: item.cor,
                 lat: minhaUltimaPos[0], lng: minhaUltimaPos[1],
-                usuario: meuUsuario, hora: hora, timestamp: Date.now()
+                usuario: meuUsuario, hora: hora, timestamp: Date.now(),
+                votosSim: 1, votosNao: 0
             });
 
             alert(`Alerta de "${item.nome}" publicado no mapa!`);
@@ -522,6 +709,7 @@
 
                 snap.forEach((child) => {
                     const inc = child.val();
+                    const key = child.key;
                     listaIncidentesAtivos.push(inc);
 
                     const incIcon = L.divIcon({
@@ -530,13 +718,40 @@
                         iconSize: [38, 38], iconAnchor: [19, 19]
                     });
 
-                    L.marker([inc.lat, inc.lng], { icon: incIcon }).addTo(camadaIncidentes)
-                     .bindPopup(`<b>${inc.tipo}</b><br>Reportado por: <b>${inc.usuario}</b> às ${inc.hora}`);
+                    const popupHtml = `
+                        <div style="text-align:center; padding:4px;">
+                            <b>${inc.tipo}</b><br><span style="font-size:0.75rem; color:#cbd5e1;">Reportado por ${inc.usuario} às ${inc.hora}</span><br>
+                            <div style="margin-top:8px; display:flex; gap:6px; justify-content:center;">
+                                <button onclick="votarIncidente('${key}', 'sim')" style="background:#34a853; border:none; color:white; padding:4px 8px; border-radius:6px; font-weight:800; cursor:pointer;">Ainda lá (👍 ${inc.votosSim || 0})</button>
+                                <button onclick="votarIncidente('${key}', 'nao')" style="background:#ea4335; border:none; color:white; padding:4px 8px; border-radius:6px; font-weight:800; cursor:pointer;">Não lá (👎 ${inc.votosNao || 0})</button>
+                            </div>
+                        </div>
+                    `;
+
+                    L.marker([inc.lat, inc.lng], { icon: incIcon }).addTo(camadaIncidentes).bindPopup(popupHtml);
                 });
             });
         }
 
-        // RADARES, SEMÁFOROS E LOJAS (OVERPASS MULTI-SERVER)
+        function votarIncidente(key, tipoVoto) {
+            db.ref('incidentes/' + key).once('value', (snap) => {
+                const inc = snap.val();
+                if (!inc) return;
+
+                if (tipoVoto === 'sim') {
+                    db.ref('incidentes/' + key).update({ votosSim: (inc.votosSim || 0) + 1 });
+                } else {
+                    const novosNao = (inc.votosNao || 0) + 1;
+                    if (novosNao >= 2) {
+                        db.ref('incidentes/' + key).remove();
+                    } else {
+                        db.ref('incidentes/' + key).update({ votosNao: novosNao });
+                    }
+                }
+            });
+        }
+
+        // CORREÇÃO DO BOTÃO DA CÂMERA (OVERPASS API COM POST BODY FORM-DATA)
         async function carregarRadaresECameras() {
             if (!minhaUltimaPos) { alert("Aguardando sinal do GPS..."); return; }
 
@@ -557,12 +772,17 @@
             let data = null;
             for (let url of endpoints) {
                 try {
-                    const res = await fetch(url, {
-                        method: 'POST', body: 'data=' + encodeURIComponent(overpassQuery),
-                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-                    });
-                    if (res.ok) { data = await res.json(); if (data && data.elements) break; }
-                } catch (e) { console.warn('Tentando espelho...'); }
+                    const bodyParams = new URLSearchParams();
+                    bodyParams.append('data', overpassQuery);
+
+                    const res = await fetch(url, { method: 'POST', body: bodyParams });
+                    if (res.ok) {
+                        data = await res.json();
+                        if (data && data.elements) break;
+                    }
+                } catch (e) {
+                    console.warn('Tentando servidor espelho Overpass...');
+                }
             }
 
             if (btnScan) btnScan.classList.remove('loading');
@@ -594,10 +814,12 @@
                 });
 
                 if (statusText) statusText.innerText = `Encontrados: ${qtdRadares} radares, ${qtdSemaforos} semáforos e ${qtdPois} lojas.`;
+            } else {
+                if (statusText) statusText.innerText = "Nenhum ponto registrado nesta área.";
             }
         }
 
-        // DESENHAR LOJAS / POIs
+        // LOJAS E POIs
         function desenharPoiNoMapa(lat, lng, tipo, nome) {
             let icone = 'fa-store', cor = '#38bdf8';
             if (tipo === 'fuel') { icone = 'fa-gas-pump'; cor = '#f59e0b'; }
@@ -679,7 +901,7 @@
             }
         }
 
-        // 4. LUGARES E GEOFENCING
+        // LUGARES E GEOFENCING
         function configurarCliqueNoMapa() {
             map.on('click', (e) => { salvarNovoLugarModal(e.latlng.lat, e.latlng.lng); });
         }
@@ -765,7 +987,7 @@
             banner.style.display = 'flex';
         }
 
-        // 5. MARCADOR ADAPTATIVO DINÂMICO (Caminhando x Dirigindo x Círculo Parado)
+        // MARCADOR ADAPTATIVO DINÂMICO
         function criarMarcadorLife(urlFoto, modoIcone, bat, eParceiro = false, velocidade = 0) {
             const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3388ff':'6366f1'}&color=fff`;
             
@@ -800,7 +1022,6 @@
                 navigator.geolocation.watchPosition((pos) => {
                     const lat = pos.coords.latitude, lng = pos.coords.longitude, prec = pos.coords.accuracy;
 
-                    // TRAVA DE PRECISÃO HIGH-PRECISION
                     if (prec > 20) return;
 
                     if (minhaUltimaPos) {
@@ -863,7 +1084,7 @@
             });
         }
 
-        // 6. CHAT
+        // CHAT
         function enviarMensagem() {
             const input = document.getElementById('chat-input');
             const texto = input.value.trim();
@@ -890,7 +1111,7 @@
             });
         }
 
-        // 7. SOS
+        // SOS
         let audioCtx = null, sirenOsc = null;
         function tocarSirene() {
             if (sirenOsc) return;
