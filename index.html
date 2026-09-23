@@ -533,6 +533,11 @@
         let vozAtiva = true;
         let modoNavegacaoAtivo = false;
 
+        // DADOS DA ROTA E RECÁLCULO AUTOMÁTICO
+        let destinoAtual = null;
+        let rotaCoordsAtuais = [];
+        let ultimaChecagemRecalculo = 0;
+
         // MAPA PRINCIPAL
         const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
         
@@ -652,8 +657,10 @@
         }
 
         // MODO NAVEGAÇÃO FULLSCREEN WAZE (OSRM ROUTING)
-        async function traçarRotaParaDestino(destLat, destLng, destNome) {
+        async function traçarRotaParaDestino(destLat, destLng, destNome, ehRecalculo = false) {
             if (!minhaUltimaPos) { alert("Aguardando sinal GPS..."); return; }
+
+            destinoAtual = { lat: parseFloat(destLat), lng: parseFloat(destLng), nome: destNome };
 
             const origin = `${minhaUltimaPos[1]},${minhaUltimaPos[0]}`;
             const destination = `${destLng},${destLat}`;
@@ -666,13 +673,15 @@
                     const route = data.routes[0];
                     camadaRotaPolyline.clearLayers();
 
-                    const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
-                    const polyline = L.polyline(coords, { color: '#38bdf8', weight: 7, opacity: 0.95 }).addTo(camadaRotaPolyline);
-                    map.fitBounds(polyline.getBounds(), { padding: [60, 60] });
+                    rotaCoordsAtuais = route.geometry.coordinates.map(c => [c[1], c[0]]);
+                    const polyline = L.polyline(rotaCoordsAtuais, { color: '#38bdf8', weight: 8, opacity: 0.95 }).addTo(camadaRotaPolyline);
+                    
+                    if (!ehRecalculo) {
+                        map.fitBounds(polyline.getBounds(), { padding: [60, 60] });
+                    }
 
-                    desenharLinhasDeTrânsitoDinamicas(coords);
+                    desenharLinhasDeTrânsitoDinamicas(rotaCoordsAtuais);
 
-                    // ATIVAR MODO NAVEGAÇÃO NA TELA
                     modoNavegacaoAtivo = true;
                     document.getElementById('main-search-container').style.display = 'none';
                     document.getElementById('main-header').style.display = 'none';
@@ -681,21 +690,23 @@
                     document.getElementById('nav-hud-overlay').style.display = 'flex';
                     document.getElementById('nav-bottom-bar').style.display = 'flex';
 
-                    // ATUALIZAR HUD DE ETAS
                     const tempoMin = Math.round(route.duration / 60);
                     const distKm = (route.distance / 1000).toFixed(1);
                     document.getElementById('nav-eta-time-val').innerText = `${tempoMin} min`;
                     document.getElementById('nav-eta-dist-val').innerText = `${distKm} km • ${destNome}`;
 
-                    // PRIMEIRA INSTRUÇÃO DE NAVEGAÇÃO
                     const firstStep = route.legs[0].steps[0];
                     if (firstStep) {
                         document.getElementById('nav-turn-dist-el').innerText = `${Math.round(firstStep.distance)} m`;
                         document.getElementById('nav-turn-text-el').innerText = firstStep.maneuver.instruction || `Siga em frente na via`;
-                        falarInstruçãoVoz(firstStep.maneuver.instruction || `Iniciando rota para ${destNome}`);
+                        
+                        if (ehRecalculo) {
+                            falarInstruçãoVoz("Rota recalculada para o melhor caminho.");
+                        } else {
+                            falarInstruçãoVoz(firstStep.maneuver.instruction || `Iniciando rota para ${destNome}`);
+                        }
                     }
 
-                    // PREENCHER TAMBÉM ABA DO PAINEL LATERAL
                     document.getElementById('route-time').innerText = `${tempoMin} min`;
                     document.getElementById('route-distance').innerText = `${distKm} km`;
                     document.getElementById('route-destination-name').innerText = destNome;
@@ -711,7 +722,27 @@
                     });
                 }
             } catch (e) {
-                alert("Erro ao calcular rota!");
+                console.error("Erro ao calcular rota!", e);
+            }
+        }
+
+        // VERIFICAÇÃO E RECÁLCULO AUTOMÁTICO SE SAIR DA ROTA (OFF-ROUTE DETECTOR)
+        function verificarDesvioERecalcular(lat, lng) {
+            if (!modoNavegacaoAtivo || !destinoAtual || rotaCoordsAtuais.length === 0) return;
+
+            const agora = Date.now();
+            if (agora - ultimaChecagemRecalculo < 4000) return; // Checa a cada 4 segundos
+            ultimaChecagemRecalculo = agora;
+
+            let menorDistancia = Infinity;
+            rotaCoordsAtuais.forEach(coord => {
+                const d = calcularDistancia(lat, lng, coord[0], coord[1]);
+                if (d < menorDistancia) menorDistancia = d;
+            });
+
+            // Se estiver a mais de 35 metros da linha da rota atual, recalcula automaticamente
+            if (menorDistancia > 35) {
+                traçarRotaParaDestino(destinoAtual.lat, destinoAtual.lng, destinoAtual.nome, true);
             }
         }
 
@@ -737,6 +768,8 @@
 
         function cancelarRota() {
             modoNavegacaoAtivo = false;
+            destinoAtual = null;
+            rotaCoordsAtuais = [];
             camadaRotaPolyline.clearLayers();
             camadaTrânsitoLinhas.clearLayers();
 
@@ -757,7 +790,7 @@
         function desenharLinhasDeTrânsitoDinamicas(coords) {
             camadaTrânsitoLinhas.clearLayers();
             for (let i = 0; i < coords.length - 1; i++) {
-                let corTrânsito = '#34a853';
+                let corTrânsito = '#34a853'; // Verde livre
                 listaIncidentesAtivos.forEach(inc => {
                     if (calcularDistancia(coords[i][0], coords[i][1], inc.lat, inc.lng) < 200) {
                         corTrânsito = (inc.tipo === 'Congestionamento' || inc.tipo === 'Acidente') ? '#ea4335' : '#fbbc04';
@@ -992,9 +1025,12 @@
             }
         }
 
-        // LUGARES E GEOFENCING
+        // LUGARES E GEOFENCING (DESATIVADO NO MODO NAVEGAÇÃO)
         function configurarCliqueNoMapa() {
-            map.on('click', (e) => { salvarNovoLugarModal(e.latlng.lat, e.latlng.lng); });
+            map.on('click', (e) => { 
+                if (modoNavegacaoAtivo) return; // Não abre modal no modo navegação
+                salvarNovoLugarModal(e.latlng.lat, e.latlng.lng); 
+            });
         }
 
         function cadastrarLugarModoPrompt() {
@@ -1108,15 +1144,16 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
+        // GPS DE ALTA PRECISÃO (FILTRO KALMAN SOFT & AUTO-REROUTE)
         function iniciarRastreamentoGPS() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.watchPosition((pos) => {
                     const lat = pos.coords.latitude, lng = pos.coords.longitude, prec = pos.coords.accuracy;
 
-                    if (prec > 20) return;
+                    if (prec > 25) return; // Ignora oscilações fracas de GPS
 
                     if (minhaUltimaPos) {
-                        if (calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng) < 6) {
+                        if (calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng) < 4) {
                             document.getElementById('stat-speed').innerHTML = `0 <span style="font-size:0.7rem;">km/h</span>`;
                             document.getElementById('speed-val').innerText = '0';
                             return;
@@ -1133,6 +1170,7 @@
 
                     minhaUltimaPos = [lat, lng];
                     verificarAlertasVelocidadeERadar(v);
+                    verificarDesvioERecalcular(lat, lng); // Checa desvio de rota em tempo real
 
                     document.getElementById('stat-speed').innerHTML = `${v.toFixed(0)} <span style="font-size:0.7rem;">km/h</span>`;
 
@@ -1155,7 +1193,7 @@
                     });
 
                     atualizarDistancia();
-                }, (err) => console.error(err), { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 });
+                }, (err) => console.error(err), { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 });
             }
         }
 
