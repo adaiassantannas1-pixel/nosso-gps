@@ -62,7 +62,7 @@
         }
 
         /* MAPA PRO HD */
-        #map { width: 100%; height: 100%; flex: 1; z-index: 1; filter: contrast(105%) brightness(98%); }
+        #map { width: 100%; height: 100%; flex: 1; z-index: 1; filter: contrast(108%) brightness(96%); }
 
         /* LUPA E SEARCHBAR FIXA VISÍVEL */
         .search-container {
@@ -110,7 +110,7 @@
         }
         @keyframes pulse-sos { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
-        /* HUD SOBREPOSIÇÃO MODO NAVEGAÇÃO FULLSCREEN */
+        /* HUD SOBREPOSIÇÃO MODO NAVEGAÇÃO FULLSCREEN WAZE */
         #nav-hud-overlay {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
             z-index: 2500; width: 92%; max-width: 500px; display: none; flex-direction: column; gap: 10px;
@@ -191,7 +191,7 @@
         .life-marker {
             position: relative; width: 56px; height: 56px; border-radius: 50%;
             border: 3px solid var(--waze-blue); background-size: cover; background-position: center;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.5); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.5); transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1);
         }
         .life-marker.parceiro { border-color: #38bdf8; }
         .life-marker.stopped { border-radius: 50%; box-shadow: 0 0 0 8px rgba(99, 102, 241, 0.3); }
@@ -538,8 +538,8 @@
         let rotaCoordsAtuais = [];
         let ultimaChecagemRecalculo = 0;
 
-        // MAPA PRINCIPAL
-        const map = L.map('map', { zoomControl: false }).setView([-14.2350, -51.9253], 4);
+        // MAPA PRINCIPAL COM TILESET PRO HD NEON
+        const map = L.map('map', { zoomControl: false, fadeAnimation: true, zoomAnimation: true }).setView([-14.2350, -51.9253], 4);
         
         L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             attribution: '© OpenStreetMap / CartoDB Voyager HD', maxZoom: 19
@@ -656,7 +656,17 @@
             };
         }
 
-        // MODO NAVEGAÇÃO FULLSCREEN WAZE (OSRM ROUTING)
+        // MAAPEAMENTO DE ÍCONES DE MANOBRAS E CURVAS
+        function obterIconeManobra(instruction, type) {
+            const txt = (instruction || type || '').toLowerCase();
+            if (txt.includes('esquerda') || txt.includes('left')) return 'fa-arrow-turn-down'; // ou fa-arrow-left
+            if (txt.includes('direita') || txt.includes('right')) return 'fa-arrow-turn-up';
+            if (txt.includes('rotatória') || txt.includes('roundabout')) return 'fa-rotate-right';
+            if (txt.includes('retorno') || txt.includes('u-turn')) return 'fa-arrow-rotate-left';
+            return 'fa-arrow-up';
+        }
+
+        // MODO NAVEGAÇÃO FULLSCREEN WAZE (OSRM ROUTING PRO)
         async function traçarRotaParaDestino(destLat, destLng, destNome, ehRecalculo = false) {
             if (!minhaUltimaPos) { alert("Aguardando sinal GPS..."); return; }
 
@@ -674,10 +684,13 @@
                     camadaRotaPolyline.clearLayers();
 
                     rotaCoordsAtuais = route.geometry.coordinates.map(c => [c[1], c[0]]);
+
+                    // Rota com Sombra HD
+                    L.polyline(rotaCoordsAtuais, { color: '#0f172a', weight: 12, opacity: 0.5 }).addTo(camadaRotaPolyline);
                     const polyline = L.polyline(rotaCoordsAtuais, { color: '#38bdf8', weight: 8, opacity: 0.95 }).addTo(camadaRotaPolyline);
                     
                     if (!ehRecalculo) {
-                        map.fitBounds(polyline.getBounds(), { padding: [60, 60] });
+                        map.flyTo(minhaUltimaPos, 18, { animate: true, duration: 1.2 });
                     }
 
                     desenharLinhasDeTrânsitoDinamicas(rotaCoordsAtuais);
@@ -697,6 +710,8 @@
 
                     const firstStep = route.legs[0].steps[0];
                     if (firstStep) {
+                        const iconeCls = obterIconeManobra(firstStep.maneuver.instruction, firstStep.maneuver.type);
+                        document.getElementById('nav-turn-icon-el').innerHTML = `<i class="fa-solid ${iconeCls}"></i>`;
                         document.getElementById('nav-turn-dist-el').innerText = `${Math.round(firstStep.distance)} m`;
                         document.getElementById('nav-turn-text-el').innerText = firstStep.maneuver.instruction || `Siga em frente na via`;
                         
@@ -715,9 +730,10 @@
                     const container = document.getElementById('instructions-container');
                     container.innerHTML = '';
                     route.legs[0].steps.forEach((step) => {
+                        const iconeStep = obterIconeManobra(step.maneuver.instruction, step.maneuver.type);
                         const div = document.createElement('div');
                         div.style.cssText = 'background:rgba(30,41,59,0.7); padding:10px; border-radius:12px; font-size:0.8rem; display:flex; align-items:center; gap:10px; border:1px solid var(--border-light);';
-                        div.innerHTML = `<i class="fa-solid fa-arrow-turn-up" style="color:var(--waze-blue); font-size:1.1rem;"></i> <div><b>${step.maneuver.instruction || step.name || 'Siga em frente'}</b><br><span style="color:#94a3b8; font-size:0.7rem;">${Math.round(step.distance)} metros</span></div>`;
+                        div.innerHTML = `<i class="fa-solid ${iconeStep}" style="color:var(--waze-blue); font-size:1.1rem;"></i> <div><b>${step.maneuver.instruction || step.name || 'Siga em frente'}</b><br><span style="color:#94a3b8; font-size:0.7rem;">${Math.round(step.distance)} metros</span></div>`;
                         container.appendChild(div);
                     });
                 }
@@ -731,7 +747,7 @@
             if (!modoNavegacaoAtivo || !destinoAtual || rotaCoordsAtuais.length === 0) return;
 
             const agora = Date.now();
-            if (agora - ultimaChecagemRecalculo < 4000) return; // Checa a cada 4 segundos
+            if (agora - ultimaChecagemRecalculo < 3500) return; // Checa a cada 3.5s
             ultimaChecagemRecalculo = agora;
 
             let menorDistancia = Infinity;
@@ -740,8 +756,8 @@
                 if (d < menorDistancia) menorDistancia = d;
             });
 
-            // Se estiver a mais de 35 metros da linha da rota atual, recalcula automaticamente
-            if (menorDistancia > 35) {
+            // Se estiver a mais de 30 metros da rota, recalcula
+            if (menorDistancia > 30) {
                 traçarRotaParaDestino(destinoAtual.lat, destinoAtual.lng, destinoAtual.nome, true);
             }
         }
@@ -761,8 +777,11 @@
         function falarInstruçãoVoz(texto) {
             if (!vozAtiva || !('speechSynthesis' in window) || texto === instrucaoVozAnterior) return;
             instrucaoVozAnterior = texto;
+            
+            window.speechSynthesis.cancel(); // Cancela falas antigas pendentes para fluidez
             const utterance = new SpeechSynthesisUtterance(texto);
             utterance.lang = 'pt-BR';
+            utterance.rate = 1.05;
             window.speechSynthesis.speak(utterance);
         }
 
@@ -1144,16 +1163,16 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // GPS DE ALTA PRECISÃO (FILTRO KALMAN SOFT & AUTO-REROUTE)
+        // GPS DE ALTA PRECISÃO E CÂMERA SEGUIDORA SUAVE
         function iniciarRastreamentoGPS() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.watchPosition((pos) => {
                     const lat = pos.coords.latitude, lng = pos.coords.longitude, prec = pos.coords.accuracy;
 
-                    if (prec > 25) return; // Ignora oscilações fracas de GPS
+                    if (prec > 30) return; // Filtro de precisão de sinal
 
                     if (minhaUltimaPos) {
-                        if (calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng) < 4) {
+                        if (calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng) < 3) {
                             document.getElementById('stat-speed').innerHTML = `0 <span style="font-size:0.7rem;">km/h</span>`;
                             document.getElementById('speed-val').innerText = '0';
                             return;
@@ -1170,7 +1189,7 @@
 
                     minhaUltimaPos = [lat, lng];
                     verificarAlertasVelocidadeERadar(v);
-                    verificarDesvioERecalcular(lat, lng); // Checa desvio de rota em tempo real
+                    verificarDesvioERecalcular(lat, lng);
 
                     document.getElementById('stat-speed').innerHTML = `${v.toFixed(0)} <span style="font-size:0.7rem;">km/h</span>`;
 
@@ -1183,8 +1202,9 @@
                         meuMarcador.setIcon(criarMarcadorLife(fotoPerfilUrl, '', bateriaNivel, false, v));
                     }
 
+                    // Câmera Seguidora Inteligente HD (Head-Up Camera)
                     if (modoNavegacaoAtivo) {
-                        map.panTo([lat, lng]);
+                        map.panTo([lat, lng], { animate: true, duration: 0.8 });
                     }
 
                     db.ref('casal/' + meuPerfil).set({
@@ -1193,7 +1213,7 @@
                     });
 
                     atualizarDistancia();
-                }, (err) => console.error(err), { enableHighAccuracy: true, timeout: 7000, maximumAge: 0 });
+                }, (err) => console.error(err), { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 });
             }
         }
 
@@ -1319,7 +1339,7 @@
             }
         }
 
-        document.getElementById('btn-recenter').onclick = () => { if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 16); };
+        document.getElementById('btn-recenter').onclick = () => { if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 17); };
         document.getElementById('btn-fit-all').onclick = () => {
             if (minhaUltimaPos && parceiroUltimaPos) {
                 map.fitBounds(L.latLngBounds([minhaUltimaPos, parceiroUltimaPos]), { padding: [50, 50] });
