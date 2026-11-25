@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>LifeCasal 360 - Dynamic Navigation & Realtime Edition</title>
+    <title>LifeCasal 360 - Dynamic Navigation & Zello PTT Pro</title>
 
     <!-- Meta Tags PWA / iOS Web App -->
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -21,6 +21,7 @@
             --waze-yellow: #fbbc04;
             --waze-red: #ea4335;
             --waze-green: #34a853;
+            --zello-orange: #f97316;
             --primary: #6366f1;
             --danger: #ef4444;
             --bg-dark: #0f172a;
@@ -60,6 +61,7 @@
             color: white; font-weight: 800; font-size: 1rem; cursor: pointer; transition: 0.2s; margin-top: 10px;
             box-shadow: 0 4px 15px rgba(51, 136, 255, 0.4);
         }
+        .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
 
         /* MAPA PRO HD */
         #map { width: 100%; height: 100%; flex: 1; z-index: 1; filter: contrast(108%) brightness(96%); }
@@ -110,6 +112,106 @@
         }
         @keyframes pulse-sos { 0% { transform: scale(1); } 70% { transform: scale(1.05); } 100% { transform: scale(1); } }
 
+        /* BOTÃO FLUTUANTE ARRASTÁVEL ESTILO ZELLO WALKIE-TALKIE */
+        #zello-floating-widget {
+            position: fixed;
+            bottom: 195px;
+            left: 20px;
+            z-index: 2800;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 5px;
+            touch-action: none;
+            user-select: none;
+        }
+        .zello-ptt-btn {
+            width: 78px;
+            height: 78px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #334155, #0f172a);
+            border: 4px solid var(--zello-orange);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 12px 28px rgba(0,0,0,0.75), inset 0 2px 6px rgba(255,255,255,0.2);
+            transition: transform 0.15s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+        }
+        .zello-ptt-btn i { font-size: 1.55rem; color: var(--zello-orange); transition: color 0.2s; }
+        .zello-ptt-btn span { font-size: 0.55rem; font-weight: 900; letter-spacing: 0.4px; margin-top: 3px; text-transform: uppercase; color: #cbd5e1; }
+
+        /* Estado Transmitindo (Falando) */
+        .zello-ptt-btn.transmitting {
+            transform: scale(1.1);
+            border-color: var(--waze-red);
+            background: radial-gradient(circle, #991b1b, #450a0a);
+            box-shadow: 0 0 0 12px rgba(234, 67, 53, 0.35), 0 12px 30px rgba(234, 67, 53, 0.8);
+            animation: zello-pulse-tx 0.9s infinite;
+        }
+        .zello-ptt-btn.transmitting i, .zello-ptt-btn.transmitting span { color: #fff; }
+
+        /* Estado Recebendo (Ouvindo parceiro) */
+        .zello-ptt-btn.receiving {
+            border-color: var(--waze-green);
+            background: radial-gradient(circle, #166534, #052e16);
+            box-shadow: 0 0 0 12px rgba(52, 168, 83, 0.35), 0 12px 30px rgba(52, 168, 83, 0.8);
+            animation: zello-pulse-rx 0.8s infinite;
+        }
+        .zello-ptt-btn.receiving i, .zello-ptt-btn.receiving span { color: #fff; }
+
+        @keyframes zello-pulse-tx {
+            0% { box-shadow: 0 0 0 0 rgba(234, 67, 53, 0.7); }
+            70% { box-shadow: 0 0 0 18px rgba(234, 67, 53, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(234, 67, 53, 0); }
+        }
+        @keyframes zello-pulse-rx {
+            0% { box-shadow: 0 0 0 0 rgba(52, 168, 83, 0.7); }
+            70% { box-shadow: 0 0 0 18px rgba(52, 168, 83, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(52, 168, 83, 0); }
+        }
+
+        .zello-status-pill {
+            background: rgba(15, 23, 42, 0.92);
+            border: 1px solid var(--border-light);
+            padding: 3px 9px;
+            border-radius: 12px;
+            font-size: 0.62rem;
+            font-weight: 800;
+            color: #e2e8f0;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .zello-mode-chip {
+            background: rgba(30, 41, 59, 0.95);
+            border: 1px solid var(--zello-orange);
+            color: #fdba74;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.58rem;
+            font-weight: 800;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .zello-mode-chip.tap-active {
+            background: var(--zello-orange);
+            color: #fff;
+        }
+        .zello-drag-handle {
+            font-size: 0.62rem;
+            color: #94a3b8;
+            cursor: grab;
+            padding: 2px 8px;
+            background: rgba(15, 23, 42, 0.8);
+            border-radius: 8px;
+        }
+
         /* HUD SOBREPOSIÇÃO MODO NAVEGAÇÃO FULLSCREEN WAZE */
         #nav-hud-overlay {
             position: absolute; top: 15px; left: 50%; transform: translateX(-50%);
@@ -152,15 +254,13 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.6); border: 2px solid #fff;
             backdrop-filter: blur(10px); width: 90%; max-width: 440px; justify-content: space-between;
         }
-        #traffic-alert-banner { background: rgba(234, 67, 53, 0.95); animation: slideDown 0.3s ease; }
-        #place-notification-banner { background: rgba(51, 136, 255, 0.95); animation: slideDown 0.3s ease; }
+        #traffic-alert-banner { background: rgba(234, 67, 53, 0.95); }
+        #place-notification-banner { background: rgba(51, 136, 255, 0.95); }
 
         .btn-close-banner {
             background: rgba(255, 255, 255, 0.25); border: 1px solid #fff; color: white;
             padding: 4px 12px; border-radius: 20px; font-weight: 900; font-size: 0.75rem; cursor: pointer;
-            transition: 0.2s;
         }
-        .btn-close-banner:active { transform: scale(0.92); background: #fff; color: #000; }
 
         #sos-banner {
             position: absolute; top: 135px; left: 50%; transform: translateX(-50%);
@@ -248,12 +348,13 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: all 0.2s;
         }
         .btn-report { background: linear-gradient(135deg, #f59e0b, #d97706) !important; border: 2px solid #fff; }
+        .btn-zello-toggle.active-radio { background: linear-gradient(135deg, #f97316, #ea580c) !important; border: 2px solid #fff; }
         .btn-round.loading { animation: spin 1s infinite linear; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* PAINEL LATERAL MULTI-ABAS */
         .sidebar {
-            position: fixed; top: 0; right: -420px; width: 380px; height: 100%;
+            position: fixed; top: 0; right: -420px; width: 380px; max-width: 95vw; height: 100%;
             background: rgba(15, 23, 42, 0.97); backdrop-filter: blur(20px); z-index: 3000;
             border-left: 1px solid var(--border-light); padding: 20px;
             transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; gap: 15px;
@@ -273,14 +374,15 @@
         .card-info { background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.05); padding: 14px; border-radius: 16px; font-size: 0.85rem; display: flex; align-items: center; gap: 12px; }
         .card-icon { width: 42px; height: 42px; border-radius: 14px; background: rgba(99, 102, 241, 0.15); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
 
-        /* CHAT estilo WHATSAPP */
+        /* CHAT estilo WHATSAPP + ÁUDIO ZELLO */
         .chat-messages { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding: 5px; }
-        .msg-bubble { max-width: 82%; padding: 10px 14px; border-radius: 16px; font-size: 0.85rem; line-height: 1.35; position: relative; }
-        .msg-bubble .sender-name { font-size: 0.7rem; font-weight: 800; margin-bottom: 3px; color: #93c5fd; }
+        .msg-bubble { max-width: 86%; padding: 10px 14px; border-radius: 16px; font-size: 0.85rem; line-height: 1.35; position: relative; }
+        .msg-bubble .sender-name { font-size: 0.7rem; font-weight: 800; margin-bottom: 4px; color: #93c5fd; display: flex; align-items: center; gap: 6px; }
         .msg-bubble .meta { font-size: 0.65rem; opacity: 0.75; text-align: right; margin-top: 4px; }
         .msg-bubble.me { background: #2563eb; align-self: flex-end; border-bottom-right-radius: 4px; }
         .msg-bubble.other { background: rgba(30, 41, 59, 0.95); align-self: flex-start; border-bottom-left-radius: 4px; border: 1px solid var(--border-light); }
-        .chat-input-box { display: flex; gap: 8px; }
+        .msg-audio-player { width: 215px; max-width: 100%; height: 34px; margin-top: 4px; border-radius: 20px; filter: invert(0.92) hue-rotate(180deg); }
+        .chat-input-box { display: flex; gap: 8px; align-items: center; }
         .chat-input-box input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-light); background: rgba(15, 23, 42, 0.8); color: white; outline: none; }
     </style>
 </head>
@@ -291,11 +393,11 @@
         <div class="login-card">
             <div class="brand-icon"><i class="fa-solid fa-car-side"></i></div>
             <h2>LifeCasal 360</h2>
-            <p>Waze Pro Realtime Edition</p>
+            <p>Waze Pro & Rádio Zello Realtime</p>
             
             <div class="input-group">
                 <label>Nome de Usuário</label>
-                <input type="text" id="login-user" placeholder="Ex: Lucas">
+                <input type="text" id="login-user" placeholder="Ex: Adaias">
             </div>
             <div class="input-group">
                 <label>Senha</label>
@@ -308,9 +410,25 @@
                     <option value="pessoa2">Pessoa 2 💙</option>
                 </select>
             </div>
-            <button class="btn-primary" onclick="autenticarUsuario()">Entrar no Sistema</button>
+            <button class="btn-primary" id="btn-login-submit" onclick="autenticarUsuario()">Entrar no Sistema</button>
             <div id="login-error" style="color:var(--waze-red); font-size:0.8rem; margin-top:12px; font-weight:600;"></div>
         </div>
+    </div>
+
+    <!-- BOTÃO FLUTUANTE ARRASTÁVEL ZELLO PTT -->
+    <div id="zello-floating-widget">
+        <div class="zello-drag-handle" id="zello-drag-handle" title="Arraste para mover o rádio"><i class="fa-solid fa-grip"></i> Rádio</div>
+        <button class="zello-ptt-btn" id="btn-zello-ptt">
+            <i class="fa-solid fa-walkie-talkie"></i>
+            <span id="zello-btn-label">TOCAR</span>
+        </button>
+        <div class="zello-status-pill" id="zello-status-pill">
+            <i class="fa-solid fa-circle" id="zello-led-dot" style="color:var(--waze-green); font-size:0.45rem;"></i>
+            <span id="zello-status-text">Canal Livre</span>
+        </div>
+        <button class="zello-mode-chip tap-active" id="btn-zello-mode" onclick="alternarModoZello()" title="Alternar entre Toque Único e Segurar">
+            Modo: Toque
+        </button>
     </div>
 
     <!-- LUPA DE PESQUISA SUPERIOR (NOMINATIM / OSMR) -->
@@ -389,6 +507,7 @@
 
     <!-- CONTROLES FLUTUANTES -->
     <div class="controls-bar">
+        <button class="btn-round btn-zello-toggle active-radio" id="btn-toggle-zello" onclick="alternarVisibilidadeZello()" title="Mostrar/Ocultar Rádio Zello"><i class="fa-solid fa-walkie-talkie"></i></button>
         <button class="btn-round btn-report" onclick="reportarAlertaTrânsito()" title="Reportar Trânsito/Acidente"><i class="fa-solid fa-triangle-exclamation"></i></button>
         <button class="btn-round" id="btn-recenter" title="Minha Localização"><i class="fa-solid fa-crosshairs"></i></button>
         <button class="btn-round" id="btn-scan-radar" onclick="carregarRadaresECameras()" title="Escanear Radares e Lojas"><i class="fa-solid fa-camera"></i></button>
@@ -423,7 +542,7 @@
 
         <div class="tab-menu">
             <button class="tab-btn active" onclick="trocarAba('tab-waze', this)">Waze 🚗</button>
-            <button class="tab-btn" onclick="trocarAba('tab-rota', this)">Navegação 🗺️</button>
+            <button class="tab-btn" onclick="trocarAba('tab-rota', this)">Rota 🗺️</button>
             <button class="tab-btn" onclick="trocarAba('tab-lugares', this)">Lugares 🏠</button>
             <button class="tab-btn" onclick="trocarAba('tab-paradas', this)">Paradas 📍</button>
             <button class="tab-btn" onclick="trocarAba('tab-chat', this)">Chat 💬</button>
@@ -434,7 +553,7 @@
         <div class="tab-content active" id="tab-waze">
             <div class="input-group">
                 <label>Limite Max. de Velocidade (KM/H)</label>
-                <input type="number" id="input-max-speed" value="60" onchange="limiteVelocidadeMax = parseInt(this.value)">
+                <input type="number" id="input-max-speed" value="60" onchange="limiteVelocidadeMax = parseInt(this.value) || 60">
             </div>
             <button class="btn-primary" id="btn-scan-action" onclick="carregarRadaresECameras()"><i class="fa-solid fa-camera"></i> Escanear Radares e Lojas Próximas</button>
             <div id="scan-status-text" style="font-size:0.75rem; color:#94a3b8; margin-top:6px; text-align:center;">Clique para buscar pontos em 3km</div>
@@ -444,6 +563,15 @@
                 <div>
                     <div style="font-weight:700;">Velocidade Máxima Hoje</div>
                     <div id="drive-max-speed" style="color:#94a3b8; font-size:0.8rem;">0 km/h registrada</div>
+                </div>
+            </div>
+
+            <div class="card-info">
+                <div class="card-icon" style="color:var(--zello-orange); background:rgba(249, 115, 22, 0.15);"><i class="fa-solid fa-walkie-talkie"></i></div>
+                <div style="flex:1;">
+                    <div style="font-weight:700;">Rádio Zello PTT</div>
+                    <div style="color:#94a3b8; font-size:0.75rem;">Modo Toque Único ativo: toque para falar, toque de novo para enviar. Todos os áudios ficam salvos no Chat!</div>
+                    <button class="btn-primary" style="padding:8px; font-size:0.75rem; margin-top:6px; background:var(--zello-orange);" onclick="ativarAudioReceptor()">🔊 Testar / Liberar Áudio</button>
                 </div>
             </div>
         </div>
@@ -479,8 +607,12 @@
             <div id="stops-container" style="display:flex; flex-direction:column; gap:12px;"></div>
         </div>
 
-        <!-- ABA CHAT -->
+        <!-- ABA CHAT + HISTÓRICO DE ÁUDIOS ZELLO -->
         <div class="tab-content" id="tab-chat">
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:#94a3b8; padding:0 4px;">
+                <span><i class="fa-solid fa-walkie-talkie" style="color:var(--zello-orange);"></i> Texto & Histórico de Voz</span>
+                <span id="offline-queue-badge" style="display:none; color:#fbbf24; font-weight:800;"></span>
+            </div>
             <div class="chat-messages" id="chat-container"></div>
             <div class="chat-input-box">
                 <input type="text" id="chat-input" placeholder="Mensagem..." onkeydown="if(event.key==='Enter') enviarMensagem()">
@@ -552,7 +684,354 @@
         camadaIncidentes.addTo(map);
         camadaPOIs.addTo(map);
 
-        // Bateria
+        // =========================================================================
+        // SISTEMA DE RÁDIO WALKIE-TALKIE ZELLO (TOQUE ÚNICO / SEGURAR + HISTÓRICO)
+        // =========================================================================
+        let zelloStream = null;
+        let zelloRecorder = null;
+        let zelloChunks = [];
+        let zelloTransmitindo = false;
+        let zelloUltimoAudioId = null;
+        let zelloAudioQueue = [];
+        let zelloReproduzindo = false;
+        let zelloVisivel = true;
+        let zelloModoToqueUnico = true; // Padrão: Toque único (1 toque inicia, 1 toque envia)
+        let zelloInicioGravacao = 0;
+        let zelloTimerInterval = null;
+
+        // Desbloqueia áudio no primeiro toque em qualquer lugar da página
+        document.addEventListener('pointerdown', () => {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume().catch(() => {});
+        }, { once: true });
+
+        function tocarBipeZello(tipo) {
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                const now = audioCtx.currentTime;
+                gain.gain.setValueAtTime(0.18, now);
+
+                if (tipo === 'start') {
+                    osc.frequency.setValueAtTime(880, now);
+                    osc.frequency.setValueAtTime(1180, now + 0.06);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+                    osc.start(now);
+                    osc.stop(now + 0.14);
+                } else if (tipo === 'end') {
+                    osc.frequency.setValueAtTime(1046, now);
+                    osc.frequency.setValueAtTime(784, now + 0.07);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.16);
+                    osc.start(now);
+                    osc.stop(now + 0.16);
+                } else if (tipo === 'incoming') {
+                    osc.frequency.setValueAtTime(660, now);
+                    osc.frequency.setValueAtTime(990, now + 0.08);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+                    osc.start(now);
+                    osc.stop(now + 0.18);
+                }
+            } catch (e) {}
+        }
+
+        function ativarAudioReceptor() {
+            tocarBipeZello('start');
+            alert("Áudio do Rádio Zello liberado! Você ouvirá as transmissões automaticamente.");
+        }
+
+        function alternarVisibilidadeZello() {
+            const widget = document.getElementById('zello-floating-widget');
+            const btn = document.getElementById('btn-toggle-zello');
+            zelloVisivel = !zelloVisivel;
+            widget.style.display = zelloVisivel ? 'flex' : 'none';
+            if (zelloVisivel) btn.classList.add('active-radio');
+            else btn.classList.remove('active-radio');
+        }
+
+        function alternarModoZello() {
+            if (zelloTransmitindo) pararTransmissaoZello();
+            zelloModoToqueUnico = !zelloModoToqueUnico;
+            const modeBtn = document.getElementById('btn-zello-mode');
+            const label = document.getElementById('zello-btn-label');
+
+            if (zelloModoToqueUnico) {
+                modeBtn.innerText = "Modo: Toque";
+                modeBtn.classList.add('tap-active');
+                label.innerText = "TOCAR";
+            } else {
+                modeBtn.innerText = "Modo: Segurar";
+                modeBtn.classList.remove('tap-active');
+                label.innerText = "SEGURE";
+            }
+        }
+
+        // Vincula eventos do botão PTT conforme o modo ativo (Toque Único vs Segurar)
+        (function configurarBotaoZello() {
+            const btn = document.getElementById('btn-zello-ptt');
+
+            btn.addEventListener('click', (e) => {
+                if (!zelloModoToqueUnico) return;
+                e.preventDefault();
+                if (!zelloTransmitindo) {
+                    iniciarTransmissaoZello(e);
+                } else {
+                    pararTransmissaoZello(e);
+                }
+            });
+
+            btn.addEventListener('mousedown', (e) => {
+                if (zelloModoToqueUnico) return;
+                iniciarTransmissaoZello(e);
+            });
+            btn.addEventListener('mouseup', (e) => {
+                if (zelloModoToqueUnico) return;
+                pararTransmissaoZello(e);
+            });
+            btn.addEventListener('mouseleave', (e) => {
+                if (zelloModoToqueUnico) return;
+                pararTransmissaoZello(e);
+            });
+
+            btn.addEventListener('touchstart', (e) => {
+                if (zelloModoToqueUnico) return;
+                iniciarTransmissaoZello(e);
+            }, { passive: false });
+            btn.addEventListener('touchend', (e) => {
+                if (zelloModoToqueUnico) return;
+                pararTransmissaoZello(e);
+            }, { passive: false });
+        })();
+
+        async function iniciarTransmissaoZello(e) {
+            if (e) e.preventDefault();
+            if (zelloTransmitindo) return;
+
+            try {
+                if (!zelloStream || !zelloStream.active) {
+                    zelloStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+                }
+
+                zelloTransmitindo = true;
+                zelloChunks = [];
+                zelloInicioGravacao = Date.now();
+
+                const btn = document.getElementById('btn-zello-ptt');
+                const label = document.getElementById('zello-btn-label');
+                const statusTxt = document.getElementById('zello-status-text');
+                const ledDot = document.getElementById('zello-led-dot');
+
+                btn.classList.add('transmitting');
+                ledDot.style.color = 'var(--waze-red)';
+                label.innerText = zelloModoToqueUnico ? "ENVIAR 0s" : "FALANDO 0s";
+                statusTxt.innerText = "Transmitindo ao vivo...";
+                tocarBipeZello('start');
+
+                clearInterval(zelloTimerInterval);
+                zelloTimerInterval = setInterval(() => {
+                    if (!zelloTransmitindo) return;
+                    const segs = Math.floor((Date.now() - zelloInicioGravacao) / 1000);
+                    label.innerText = zelloModoToqueUnico ? `ENVIAR ${segs}s` : `FALANDO ${segs}s`;
+                    if (segs >= 30) pararTransmissaoZello(); // Limite automático de 30s para manter o banco rápido
+                }, 500);
+
+                db.ref('radio_status/' + meuPerfil).set({ falante: meuUsuario, falando: true, timestamp: Date.now() });
+
+                const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : '';
+                zelloRecorder = mimeType ? new MediaRecorder(zelloStream, { mimeType, audioBitsPerSecond: 20000 }) : new MediaRecorder(zelloStream);
+
+                zelloRecorder.ondataavailable = (ev) => {
+                    if (ev.data && ev.data.size > 0) zelloChunks.push(ev.data);
+                };
+
+                zelloRecorder.onstop = () => {
+                    const duracaoSeg = Math.max(1, Math.round((Date.now() - zelloInicioGravacao) / 1000));
+                    const blob = new Blob(zelloChunks, { type: zelloRecorder.mimeType || 'audio/webm' });
+                    if (blob.size < 350) return;
+
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                        const base64Audio = reader.result;
+                        const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        const agora = Date.now();
+
+                        // 1. Envia no canal PTT ao vivo (para tocar na hora no celular do parceiro)
+                        db.ref('radio_ptt').push({
+                            emissor: meuUsuario,
+                            perfil: meuPerfil,
+                            audio: base64Audio,
+                            duracao: duracaoSeg,
+                            timestamp: agora
+                        });
+
+                        // 2. Salva no histórico permanente da aba Chat
+                        db.ref('chat').push({
+                            tipo: 'audio',
+                            emissor: meuUsuario,
+                            perfil: meuPerfil,
+                            audio: base64Audio,
+                            duracao: duracaoSeg,
+                            hora: hora,
+                            timestamp: agora
+                        });
+                    };
+                    reader.readAsDataURL(blob);
+                };
+
+                zelloRecorder.start();
+            } catch (err) {
+                zelloTransmitindo = false;
+                clearInterval(zelloTimerInterval);
+                alert("Permita o acesso ao microfone no navegador para usar o Rádio Zello!");
+            }
+        }
+
+        function pararTransmissaoZello(e) {
+            if (e) e.preventDefault();
+            if (!zelloTransmitindo) return;
+
+            zelloTransmitindo = false;
+            clearInterval(zelloTimerInterval);
+
+            const btn = document.getElementById('btn-zello-ptt');
+            const label = document.getElementById('zello-btn-label');
+            const statusTxt = document.getElementById('zello-status-text');
+            const ledDot = document.getElementById('zello-led-dot');
+
+            btn.classList.remove('transmitting');
+            ledDot.style.color = 'var(--waze-green)';
+            label.innerText = zelloModoToqueUnico ? "TOCAR" : "SEGURE";
+            statusTxt.innerText = "Canal Livre";
+            tocarBipeZello('end');
+
+            db.ref('radio_status/' + meuPerfil).set({ falante: meuUsuario, falando: false, timestamp: Date.now() });
+
+            if (zelloRecorder && zelloRecorder.state !== 'inactive') {
+                zelloRecorder.stop();
+            }
+        }
+
+        function escutarRadioZello() {
+            const inicioSessao = Date.now();
+
+            db.ref('radio_status/' + parceiroPerfil).on('value', (snap) => {
+                const st = snap.val();
+                const btn = document.getElementById('btn-zello-ptt');
+                const statusTxt = document.getElementById('zello-status-text');
+                const ledDot = document.getElementById('zello-led-dot');
+
+                if (st && st.falando && (Date.now() - st.timestamp < 32000)) {
+                    btn.classList.add('receiving');
+                    ledDot.style.color = '#4ade80';
+                    statusTxt.innerText = `${st.falante || 'Amor'} falando...`;
+                } else if (!zelloTransmitindo && !zelloReproduzindo) {
+                    btn.classList.remove('receiving');
+                    ledDot.style.color = 'var(--waze-green)';
+                    statusTxt.innerText = "Canal Livre";
+                }
+            });
+
+            db.ref('radio_ptt').limitToLast(5).on('child_added', (snap) => {
+                const msg = snap.val();
+                const key = snap.key;
+                if (!msg || !msg.audio) return;
+                if (msg.perfil === meuPerfil) return;
+                if (msg.timestamp < inicioSessao - 3000) return;
+                if (key === zelloUltimoAudioId) return;
+
+                zelloUltimoAudioId = key;
+                zelloAudioQueue.push(msg);
+                processarFilaAudioZello();
+
+                // Limpa apenas a fila temporária PTT (o histórico permanece salvo em /chat)
+                setTimeout(() => { db.ref('radio_ptt/' + key).remove().catch(() => {}); }, 60000);
+            });
+        }
+
+        function processarFilaAudioZello() {
+            if (zelloReproduzindo || zelloAudioQueue.length === 0) return;
+
+            zelloReproduzindo = true;
+            const item = zelloAudioQueue.shift();
+            const btn = document.getElementById('btn-zello-ptt');
+            const statusTxt = document.getElementById('zello-status-text');
+
+            btn.classList.add('receiving');
+            statusTxt.innerText = `🔊 ${item.emissor || 'Amor'}`;
+            tocarBipeZello('incoming');
+
+            const audioPlayer = new Audio(item.audio);
+            audioPlayer.onended = () => {
+                zelloReproduzindo = false;
+                if (zelloAudioQueue.length === 0 && !zelloTransmitindo) {
+                    btn.classList.remove('receiving');
+                    statusTxt.innerText = "Canal Livre";
+                    tocarBipeZello('end');
+                } else {
+                    processarFilaAudioZello();
+                }
+            };
+            audioPlayer.onerror = () => {
+                zelloReproduzindo = false;
+                btn.classList.remove('receiving');
+                statusTxt.innerText = "Canal Livre";
+            };
+            audioPlayer.play().catch(() => {
+                zelloReproduzindo = false;
+                btn.classList.remove('receiving');
+                statusTxt.innerText = "Ouça no Chat 💬";
+            });
+        }
+
+        // Torna o widget Zello arrastável pela tela (Toque e Mouse)
+        (function tornarZelloArrastavel() {
+            const widget = document.getElementById('zello-floating-widget');
+            const handle = document.getElementById('zello-drag-handle');
+            let arrastando = false, offsetX = 0, offsetY = 0;
+
+            const iniciarArraste = (clientX, clientY) => {
+                arrastando = true;
+                const rect = widget.getBoundingClientRect();
+                offsetX = clientX - rect.left;
+                offsetY = clientY - rect.top;
+                widget.style.bottom = 'auto';
+                widget.style.right = 'auto';
+            };
+
+            const moverArraste = (clientX, clientY) => {
+                if (!arrastando) return;
+                const maxX = window.innerWidth - widget.offsetWidth;
+                const maxY = window.innerHeight - widget.offsetHeight;
+                const x = Math.max(5, Math.min(clientX - offsetX, maxX - 5));
+                const y = Math.max(5, Math.min(clientY - offsetY, maxY - 5));
+                widget.style.left = x + 'px';
+                widget.style.top = y + 'px';
+            };
+
+            handle.addEventListener('mousedown', (e) => iniciarArraste(e.clientX, e.clientY));
+            window.addEventListener('mousemove', (e) => moverArraste(e.clientX, e.clientY));
+            window.addEventListener('mouseup', () => { arrastando = false; });
+
+            handle.addEventListener('touchstart', (e) => {
+                const t = e.touches[0];
+                iniciarArraste(t.clientX, t.clientY);
+            }, { passive: true });
+            window.addEventListener('touchmove', (e) => {
+                if (!arrastando) return;
+                const t = e.touches[0];
+                moverArraste(t.clientX, t.clientY);
+            }, { passive: true });
+            window.addEventListener('touchend', () => { arrastando = false; });
+        })();
+
+        // =========================================================================
+        // Bateria & Monitoramento de Conexão
+        // =========================================================================
         if ('getBattery' in navigator) {
             navigator.getBattery().then(b => {
                 bateriaNivel = Math.round(b.level * 100);
@@ -560,29 +1039,50 @@
             });
         }
 
+        function atualizarStatusRedeUI() {
+            const el = document.getElementById('status-rede');
+            if (!el) return;
+            if (navigator.onLine) {
+                el.style.color = 'var(--waze-green)';
+                el.innerHTML = `<i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> Conectado`;
+                sincronizarFilaChatOffline();
+            } else {
+                el.style.color = 'var(--waze-yellow)';
+                el.innerHTML = `<i class="fa-solid fa-circle" style="font-size:0.5rem;"></i> Sem Internet (Offline)`;
+            }
+        }
+        window.addEventListener('online', atualizarStatusRedeUI);
+        window.addEventListener('offline', atualizarStatusRedeUI);
+
         function fecharBannerNotificacao(idBanner) {
             document.getElementById(idBanner).style.display = 'none';
         }
 
-        // Login
+        // Login Blindado
         function autenticarUsuario() {
             const user = document.getElementById('login-user').value.trim();
             const pass = document.getElementById('login-pass').value.trim();
+            const errorBox = document.getElementById('login-error');
+            const btnLogin = document.getElementById('btn-login-submit');
+
             meuPerfil = document.getElementById('login-perfil').value;
             parceiroPerfil = meuPerfil === 'pessoa1' ? 'pessoa2' : 'pessoa1';
 
             if (!user || !pass) {
-                document.getElementById('login-error').innerText = "Informe usuário e senha!";
+                errorBox.innerText = "Informe usuário e senha!";
                 return;
             }
 
-            db.ref('usuarios/' + user).once('value', (snap) => {
-                const d = snap.val();
-                if (d && d.senha !== pass) {
-                    document.getElementById('login-error').innerText = "Senha incorreta!";
-                    return;
-                }
-                if (!d) db.ref('usuarios/' + user).set({ senha: pass, perfil: meuPerfil });
+            errorBox.innerText = "";
+            btnLogin.disabled = true;
+            btnLogin.innerText = "Conectando...";
+
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+            let loginConcluido = false;
+            const finalizarAcesso = () => {
+                if (loginConcluido) return;
+                loginConcluido = true;
 
                 meuUsuario = user;
                 localStorage.setItem('life_user', user);
@@ -590,18 +1090,48 @@
 
                 document.getElementById('label-usuario').innerText = `${user} (${meuPerfil === 'pessoa1' ? '💖' : '💙'})`;
                 document.getElementById('login-screen').style.display = 'none';
+                btnLogin.disabled = false;
+                btnLogin.innerText = "Entrar no Sistema";
 
+                setTimeout(() => { map.invalidateSize(); }, 250);
+
+                atualizarStatusRedeUI();
                 iniciarRastreamentoGPS();
                 escutarParceiro();
                 escutarSOS();
                 escutarChat();
+                escutarRadioZello();
                 carregarLugares();
                 carregarFoto();
                 carregarParadas();
                 carregarIncidentesTrânsito();
                 configurarCliqueNoMapa();
                 iniciarCicloSemaforosRegressivos();
-            });
+            };
+
+            const timeoutLogin = setTimeout(() => {
+                if (!loginConcluido) finalizarAcesso();
+            }, 4000);
+
+            db.ref('usuarios/' + user).once('value')
+                .then((snap) => {
+                    clearTimeout(timeoutLogin);
+                    const d = snap.val();
+                    if (d && d.senha !== pass) {
+                        errorBox.innerText = "Senha incorreta!";
+                        btnLogin.disabled = false;
+                        btnLogin.innerText = "Entrar no Sistema";
+                        return;
+                    }
+                    if (!d) {
+                        db.ref('usuarios/' + user).set({ senha: pass, perfil: meuPerfil }).catch(() => {});
+                    }
+                    finalizarAcesso();
+                })
+                .catch(() => {
+                    clearTimeout(timeoutLogin);
+                    finalizarAcesso();
+                });
         }
 
         function fazerLogout() { localStorage.clear(); location.reload(); }
@@ -656,17 +1186,15 @@
             };
         }
 
-        // MAAPEAMENTO DE ÍCONES DE MANOBRAS E CURVAS
         function obterIconeManobra(instruction, type) {
             const txt = (instruction || type || '').toLowerCase();
-            if (txt.includes('esquerda') || txt.includes('left')) return 'fa-arrow-turn-down'; // ou fa-arrow-left
+            if (txt.includes('esquerda') || txt.includes('left')) return 'fa-arrow-turn-down';
             if (txt.includes('direita') || txt.includes('right')) return 'fa-arrow-turn-up';
             if (txt.includes('rotatória') || txt.includes('roundabout')) return 'fa-rotate-right';
             if (txt.includes('retorno') || txt.includes('u-turn')) return 'fa-arrow-rotate-left';
             return 'fa-arrow-up';
         }
 
-        // MODO NAVEGAÇÃO FULLSCREEN WAZE (OSRM ROUTING PRO)
         async function traçarRotaParaDestino(destLat, destLng, destNome, ehRecalculo = false) {
             if (!minhaUltimaPos) { alert("Aguardando sinal GPS..."); return; }
 
@@ -685,9 +1213,8 @@
 
                     rotaCoordsAtuais = route.geometry.coordinates.map(c => [c[1], c[0]]);
 
-                    // Rota com Sombra HD
                     L.polyline(rotaCoordsAtuais, { color: '#0f172a', weight: 12, opacity: 0.5 }).addTo(camadaRotaPolyline);
-                    const polyline = L.polyline(rotaCoordsAtuais, { color: '#38bdf8', weight: 8, opacity: 0.95 }).addTo(camadaRotaPolyline);
+                    L.polyline(rotaCoordsAtuais, { color: '#38bdf8', weight: 8, opacity: 0.95 }).addTo(camadaRotaPolyline);
                     
                     if (!ehRecalculo) {
                         map.flyTo(minhaUltimaPos, 18, { animate: true, duration: 1.2 });
@@ -742,12 +1269,11 @@
             }
         }
 
-        // VERIFICAÇÃO E RECÁLCULO AUTOMÁTICO SE SAIR DA ROTA (OFF-ROUTE DETECTOR)
         function verificarDesvioERecalcular(lat, lng) {
             if (!modoNavegacaoAtivo || !destinoAtual || rotaCoordsAtuais.length === 0) return;
 
             const agora = Date.now();
-            if (agora - ultimaChecagemRecalculo < 3500) return; // Checa a cada 3.5s
+            if (agora - ultimaChecagemRecalculo < 3500) return;
             ultimaChecagemRecalculo = agora;
 
             let menorDistancia = Infinity;
@@ -756,7 +1282,6 @@
                 if (d < menorDistancia) menorDistancia = d;
             });
 
-            // Se estiver a mais de 30 metros da rota, recalcula
             if (menorDistancia > 30) {
                 traçarRotaParaDestino(destinoAtual.lat, destinoAtual.lng, destinoAtual.nome, true);
             }
@@ -778,7 +1303,7 @@
             if (!vozAtiva || !('speechSynthesis' in window) || texto === instrucaoVozAnterior) return;
             instrucaoVozAnterior = texto;
             
-            window.speechSynthesis.cancel(); // Cancela falas antigas pendentes para fluidez
+            window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(texto);
             utterance.lang = 'pt-BR';
             utterance.rate = 1.05;
@@ -805,11 +1330,10 @@
             if (minhaUltimaPos) map.flyTo(minhaUltimaPos, 16);
         }
 
-        // TRÂNSITO DINÂMICO NAS LINHAS
         function desenharLinhasDeTrânsitoDinamicas(coords) {
             camadaTrânsitoLinhas.clearLayers();
             for (let i = 0; i < coords.length - 1; i++) {
-                let corTrânsito = '#34a853'; // Verde livre
+                let corTrânsito = '#34a853';
                 listaIncidentesAtivos.forEach(inc => {
                     if (calcularDistancia(coords[i][0], coords[i][1], inc.lat, inc.lng) < 200) {
                         corTrânsito = (inc.tipo === 'Congestionamento' || inc.tipo === 'Acidente') ? '#ea4335' : '#fbbc04';
@@ -819,7 +1343,6 @@
             }
         }
 
-        // INCIDENTES E REPORTAR
         function reportarAlertaTrânsito() {
             if (!minhaUltimaPos) { alert("Aguardando sinal do GPS..."); return; }
 
@@ -857,13 +1380,13 @@
 
                     const incIcon = L.divIcon({
                         className: 'custom-incident',
-                        html: `<div class="incident-icon-map" style="background:${inc.cor};"><i class="fa-solid ${inc.icone}"></i></div>`,
+                        html: `<div class="incident-icon-map" style="background:${inc.cor}; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid #fff;"><i class="fa-solid ${inc.icone}"></i></div>`,
                         iconSize: [38, 38], iconAnchor: [19, 19]
                     });
 
                     const popupHtml = `
                         <div style="text-align:center; padding:4px;">
-                            <b>${inc.tipo}</b><br><span style="font-size:0.75rem; color:#cbd5e1;">Reportado por ${inc.usuario} às ${inc.hora}</span><br>
+                            <b>${inc.tipo}</b><br><span style="font-size:0.75rem; color:#475569;">Reportado por ${inc.usuario} às ${inc.hora}</span><br>
                             <div style="margin-top:8px; display:flex; gap:6px; justify-content:center;">
                                 <button onclick="votarIncidente('${key}', 'sim')" style="background:#34a853; border:none; color:white; padding:4px 8px; border-radius:6px; font-weight:800; cursor:pointer;">Ainda lá (👍 ${inc.votosSim || 0})</button>
                                 <button onclick="votarIncidente('${key}', 'nao')" style="background:#ea4335; border:none; color:white; padding:4px 8px; border-radius:6px; font-weight:800; cursor:pointer;">Não lá (👎 ${inc.votosNao || 0})</button>
@@ -894,7 +1417,6 @@
             });
         }
 
-        // RADARES, SEMÁFOROS E LOJAS (OVERPASS API)
         async function carregarRadaresECameras() {
             if (!minhaUltimaPos) { alert("Aguardando sinal do GPS..."); return; }
 
@@ -923,9 +1445,7 @@
                         data = await res.json();
                         if (data && data.elements) break;
                     }
-                } catch (e) {
-                    console.warn('Tentando servidor espelho Overpass...');
-                }
+                } catch (e) {}
             }
 
             if (btnScan) btnScan.classList.remove('loading');
@@ -935,6 +1455,7 @@
                 camadaSemaforos.clearLayers();
                 camadaPOIs.clearLayers();
                 listaRadaresProximos = [];
+                semaforosMapa = [];
                 let qtdRadares = 0, qtdSemaforos = 0, qtdPois = 0;
 
                 data.elements.forEach(item => {
@@ -943,7 +1464,7 @@
                         listaRadaresProximos.push({ lat: item.lat, lng: item.lon });
                         const radarIcon = L.divIcon({
                             className: 'custom-radar',
-                            html: `<div class="radar-icon-map"><i class="fa-solid fa-camera"></i></div>`,
+                            html: `<div style="width:32px; height:32px; border-radius:50%; background:#ef4444; color:#fff; border:2px solid #fff; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-camera"></i></div>`,
                             iconSize: [34, 34], iconAnchor: [17, 17]
                         });
                         L.marker([item.lat, item.lon], { icon: radarIcon }).addTo(camadaRadares).bindPopup("<b>Radar de Velocidade</b>");
@@ -962,7 +1483,6 @@
             }
         }
 
-        // LOJAS E POIs
         function desenharPoiNoMapa(lat, lng, tipo, nome) {
             let icone = 'fa-store', cor = '#38bdf8';
             if (tipo === 'fuel') { icone = 'fa-gas-pump'; cor = '#f59e0b'; }
@@ -977,19 +1497,19 @@
             L.marker([lat, lng], { icon: poiIcon }).addTo(camadaPOIs).bindPopup(`<b>${nome || 'Ponto Comercial'}</b>`);
         }
 
-        // SEMÁFOROS FUTURISTAS
         let semaforosMapa = [];
         function desenharSemaforoNoMapa(lat, lng) {
+            const semId = `sem-${lat.toString().replace('.','')}-${lng.toString().replace('.','')}`;
             const semIcon = L.divIcon({
                 className: 'custom-sem',
-                html: `<div class="traffic-light-modern" id="sem-${lat.toString().replace('.','')}">
+                html: `<div class="traffic-light-modern" id="${semId}">
                         <div class="sem-led active" style="color:#34a853; background:#34a853;"></div>
                         <div class="sem-timer">15s</div>
                        </div>`,
                 iconSize: [32, 44], iconAnchor: [16, 22]
             });
             L.marker([lat, lng], { icon: semIcon }).addTo(camadaSemaforos);
-            semaforosMapa.push({ lat, lng, tempoVerde: 20, tempoVermelho: 15, estadoAtual: 'VERDE', tempoRestante: 20, elementId: `sem-${lat.toString().replace('.','')}` });
+            semaforosMapa.push({ lat, lng, tempoVerde: 20, tempoVermelho: 15, estadoAtual: 'VERDE', tempoRestante: 20, elementId: semId });
         }
 
         function iniciarCicloSemaforosRegressivos() {
@@ -1044,10 +1564,9 @@
             }
         }
 
-        // LUGARES E GEOFENCING (DESATIVADO NO MODO NAVEGAÇÃO)
         function configurarCliqueNoMapa() {
             map.on('click', (e) => { 
-                if (modoNavegacaoAtivo) return; // Não abre modal no modo navegação
+                if (modoNavegacaoAtivo) return;
                 salvarNovoLugarModal(e.latlng.lat, e.latlng.lng); 
             });
         }
@@ -1083,7 +1602,7 @@
 
                     const placeIcon = L.divIcon({
                         className: 'custom-place-icon',
-                        html: `<div class="place-map-icon"><i class="fa-solid ${place.icone || 'fa-house'}"></i></div>`,
+                        html: `<div style="width:36px; height:36px; border-radius:50%; background:#6366f1; color:#fff; border:2px solid #fff; display:flex; align-items:center; justify-content:center;"><i class="fa-solid ${place.icone || 'fa-house'}"></i></div>`,
                         iconSize: [42, 42], iconAnchor: [21, 21]
                     });
 
@@ -1133,7 +1652,6 @@
             banner.style.display = 'flex';
         }
 
-        // MARCADOR ADAPTATIVO DINÂMICO
         function criarMarcadorLife(urlFoto, modoIcone, bat, eParceiro = false, velocidade = 0) {
             const img = urlFoto || `https://ui-avatars.com/api/?name=${eParceiro?'Amor':'Voce'}&background=${eParceiro?'3388ff':'6366f1'}&color=fff`;
             
@@ -1163,24 +1681,25 @@
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
         }
 
-        // GPS DE ALTA PRECISÃO E CÂMERA SEGUIDORA SUAVE
         function iniciarRastreamentoGPS() {
             if ("geolocation" in navigator) {
                 navigator.geolocation.watchPosition((pos) => {
                     const lat = pos.coords.latitude, lng = pos.coords.longitude, prec = pos.coords.accuracy;
 
-                    if (prec > 30) return; // Filtro de precisão de sinal
-
-                    if (minhaUltimaPos) {
-                        if (calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng) < 3) {
-                            document.getElementById('stat-speed').innerHTML = `0 <span style="font-size:0.7rem;">km/h</span>`;
-                            document.getElementById('speed-val').innerText = '0';
-                            return;
-                        }
-                    }
+                    if (prec > 35) return;
 
                     let v = pos.coords.speed ? (pos.coords.speed * 3.6) : 0;
                     if (v < 3) v = 0;
+
+                    if (minhaUltimaPos) {
+                        const distMovida = calcularDistancia(minhaUltimaPos[0], minhaUltimaPos[1], lat, lng);
+                        if (distMovida < 3 && v === 0) {
+                            document.getElementById('stat-speed').innerHTML = `0 <span style="font-size:0.7rem;">km/h</span>`;
+                            document.getElementById('speed-val').innerText = '0';
+                            document.getElementById('speedometer-box').classList.remove('overspeed');
+                            return;
+                        }
+                    }
 
                     if (v > maxSpeedRecorded) {
                         maxSpeedRecorded = v;
@@ -1202,7 +1721,6 @@
                         meuMarcador.setIcon(criarMarcadorLife(fotoPerfilUrl, '', bateriaNivel, false, v));
                     }
 
-                    // Câmera Seguidora Inteligente HD (Head-Up Camera)
                     if (modoNavegacaoAtivo) {
                         map.panTo([lat, lng], { animate: true, duration: 0.8 });
                     }
@@ -1237,19 +1755,54 @@
             });
         }
 
-        // CHAT
+        // =========================================================================
+        // CHAT COM FILA OFFLINE + HISTÓRICO DE ÁUDIOS ZELLO
+        // =========================================================================
         function enviarMensagem() {
             const input = document.getElementById('chat-input');
             const texto = input.value.trim();
             if (!texto) return;
 
             const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            db.ref('chat').push({ emissor: meuUsuario, perfil: meuPerfil, mensagem: texto, hora: hora, timestamp: Date.now() });
+            const payload = { tipo: 'texto', emissor: meuUsuario, perfil: meuPerfil, mensagem: texto, hora: hora, timestamp: Date.now() };
             input.value = '';
+
+            if (!navigator.onLine) {
+                const fila = JSON.parse(localStorage.getItem('life_chat_offline_queue') || '[]');
+                fila.push(payload);
+                localStorage.setItem('life_chat_offline_queue', JSON.stringify(fila));
+                atualizarBadgeOffline();
+                return;
+            }
+
+            db.ref('chat').push(payload);
+        }
+
+        function sincronizarFilaChatOffline() {
+            const fila = JSON.parse(localStorage.getItem('life_chat_offline_queue') || '[]');
+            if (fila.length === 0) {
+                atualizarBadgeOffline();
+                return;
+            }
+            fila.forEach(item => db.ref('chat').push(item));
+            localStorage.removeItem('life_chat_offline_queue');
+            atualizarBadgeOffline();
+        }
+
+        function atualizarBadgeOffline() {
+            const fila = JSON.parse(localStorage.getItem('life_chat_offline_queue') || '[]');
+            const badge = document.getElementById('offline-queue-badge');
+            if (!badge) return;
+            if (fila.length > 0) {
+                badge.style.display = 'inline';
+                badge.innerText = `${fila.length} na fila offline`;
+            } else {
+                badge.style.display = 'none';
+            }
         }
 
         function escutarChat() {
-            db.ref('chat').limitToLast(30).on('value', (snap) => {
+            db.ref('chat').limitToLast(40).on('value', (snap) => {
                 const container = document.getElementById('chat-container');
                 container.innerHTML = '';
                 snap.forEach((child) => {
@@ -1257,7 +1810,23 @@
                     const isMe = m.perfil === meuPerfil;
                     const bubble = document.createElement('div');
                     bubble.className = `msg-bubble ${isMe ? 'me' : 'other'}`;
-                    bubble.innerHTML = `<div class="sender-name">${isMe ? 'Você' : m.emissor}</div><div>${m.mensagem}</div><div class="meta">${m.hora}</div>`;
+
+                    if (m.tipo === 'audio' && m.audio) {
+                        bubble.innerHTML = `
+                            <div class="sender-name">
+                                <i class="fa-solid fa-walkie-talkie" style="color:var(--zello-orange);"></i>
+                                ${isMe ? 'Você' : m.emissor} (${m.duracao || 1}s)
+                            </div>
+                            <audio class="msg-audio-player" controls preload="none" src="${m.audio}"></audio>
+                            <div class="meta">${m.hora || ''}</div>
+                        `;
+                    } else {
+                        bubble.innerHTML = `
+                            <div class="sender-name">${isMe ? 'Você' : m.emissor}</div>
+                            <div>${m.mensagem || ''}</div>
+                            <div class="meta">${m.hora || ''}</div>
+                        `;
+                    }
                     container.appendChild(bubble);
                 });
                 container.scrollTop = container.scrollHeight;
@@ -1288,12 +1857,15 @@
             });
         }
 
-        // AUXILIARES
         function trocarAba(abaId, btn) {
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
             btn.classList.add('active');
             document.getElementById(abaId).classList.add('active');
+            if (abaId === 'tab-chat') {
+                const container = document.getElementById('chat-container');
+                container.scrollTop = container.scrollHeight;
+            }
         }
 
         function carregarFoto() {
